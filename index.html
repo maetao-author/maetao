@@ -519,7 +519,7 @@ footer::before{content:'';display:block;height:10px;max-width:260px;margin:0 aut
 .lid{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:left center;transition:transform 1s cubic-bezier(.2,.9,.25,1)}
 .lid .cover{position:absolute;inset:0;width:100%;backface-visibility:hidden}
 .lid .incover{position:absolute;inset:0;border-radius:16px 6px 6px 16px;background:linear-gradient(90deg,#f3e3df,#fbf1ee);transform:rotateY(180deg);backface-visibility:hidden;box-shadow:inset -6px 0 10px -6px rgba(0,0,0,.15)}
-@media (hover:hover){.bcard .b3wrap:hover .lid{transform:rotateY(-118deg)}}
+.bcard .b3wrap.open .lid{transform:rotateY(-118deg)}
 .spine{background:var(--sp);color:var(--spt);display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;padding:14px 0 12px;box-sizing:border-box;border-radius:4px;overflow:hidden;position:relative}
 .spine::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.14),rgba(255,255,255,.22) 30%,rgba(255,255,255,0) 55%,rgba(0,0,0,.12));pointer-events:none}
 .spine .st{writing-mode:vertical-rl;font-family:var(--serif);font-style:italic;font-size:15px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:68%}
@@ -554,7 +554,12 @@ footer::before{content:'';display:block;height:10px;max-width:260px;margin:0 aut
 .solo{grid-column:1/-1;display:grid;grid-template-columns:300px minmax(0,1fr);gap:44px;align-items:center;padding:42px}
 .solo .b3wrap,.solo .b3d{width:210px}.solo .b3wrap{margin:0 auto}
 @media (hover:hover){.solo .b3wrap:hover .b3d{transform:rotateY(14deg) translateY(-4px)}}
-@media (hover:hover){.solo .b3wrap:hover .lid{transform:rotateY(-118deg)}}
+.solo .b3wrap.open .lid{transform:rotateY(-118deg)}
+.b3wrap{cursor:pointer}
+.b3front .page .ptxt{font-size:13px;line-height:22px;max-height:calc(100% - 64px);overflow:hidden;-webkit-mask:linear-gradient(#000 70%,transparent);mask:linear-gradient(#000 70%,transparent)}
+.b3front .page .ptxt p{margin:0;text-indent:1.2em}.b3front .page .ptxt p:first-child{text-indent:0}
+.b3front .page .pmore{position:absolute;left:20px;bottom:12px;border:0;background:none;padding:0;font-family:var(--hand);font-size:18px;font-weight:700;color:#c66a77;cursor:pointer}
+.b3hint{display:block;text-align:center;margin-top:12px;font-family:var(--hand);font-size:19px;color:var(--deeprose)}
 .solo .pane{margin:14px 0 18px;max-width:560px}
 .brewing{grid-column:1/-1;border:2px dashed rgba(198,168,167,.6);background:transparent;box-shadow:none;display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding:22px 26px}
 .brewing .ghost-spine{width:40px;height:90px;border-radius:5px;border:2px dashed rgba(198,106,119,.5);display:grid;place-items:center;color:var(--deeprose);font-size:18px}
@@ -1084,7 +1089,7 @@ function renderHero(){
     $('#quiz').remove();
     document.querySelector('.herocta .btn.dark').textContent = 'see my book →';
     const h = document.querySelector('#books .h2'); h.innerHTML = 'my <em>debut</em>';
-    h.parentElement.querySelector('.lab').textContent = 'the book'; h.parentElement.querySelector('.sub').textContent = 'My first book! Hover the cover to peek inside, read a sample, or grab your copy.';
+    h.parentElement.querySelector('.lab').textContent = 'the book'; h.parentElement.querySelector('.sub').textContent = 'My first book! Tap the cover to peek inside, read a sample, or grab your copy.';
     document.querySelectorAll('.facts .tag')[1].textContent = '✎ writing book two';
   }
   document.querySelectorAll('.js-name').forEach(e => e.textContent = S.name);
@@ -1104,7 +1109,16 @@ function spineHTML(b, cls = '', extra = ''){
   if (imgSrc(b.spine)) return `<div class="spine img ${cls}" style="--sp:${c}">${extra}<img src="${esc(imgSrc(b.spine))}" alt=""></div>`;
   return `<div class="spine ${cls}" style="--sp:${c};--spt:${lum(c) < .6 ? '#fffaf6' : '#3a2b2f'}">${extra}<span class="st">${esc(b.title)}</span><i>♡</i><span class="sa">${esc(S.name)}</span></div>`;
 }
-const book3d = b => `<div class="b3wrap"><div class="b3d">${spineHTML(b, 'b3spine')}<div class="b3front"><div class="page"><b>chapter one</b>${esc(firstLine(b))}</div><div class="lid">${cover(b)}<div class="incover"></div></div></div></div></div>`;
+const samplePeek = b => String(b.sample || '').slice(0, 900).split(/\n\s*\n/).map(p => `<p>${esc(p.trim())}</p>`).join('');
+const book3d = b => `<div class="b3wrap" onclick="peekBook(event, this, '${b.id}')"><div class="b3d">${spineHTML(b, 'b3spine')}<div class="b3front"><div class="page"><b>chapter one</b><div class="ptxt">${samplePeek(b)}</div><button class="pmore" data-more>keep reading →</button></div><div class="lid">${cover(b).replace(/onclick="[^"]*"/, '')}<div class="incover"></div></div></div></div></div>`;
+/* click the book to open it and peek at chapter one; click again to close */
+function peekBook(e, w, id){
+  // 3D layers confuse the browser's hit-testing, so check the button's position directly
+  const more = w.querySelector('[data-more]'), r = more.getBoundingClientRect();
+  if (w.classList.contains('open') && e.clientX >= r.left - 6 && e.clientX <= r.right + 6 && e.clientY >= r.top - 6 && e.clientY <= r.bottom + 6) { e.stopPropagation(); return openBook(id, 'sample'); }
+  w.classList.toggle('open');
+  const h = w.parentElement.querySelector('.b3hint'); if (h) h.textContent = w.classList.contains('open') ? 'tap again to close it ♡' : 'tap the book to peek inside ♡';
+}
 let bookView = localStorage.getItem('mt.bookView') || 'covers';
 
 /* books */
@@ -1135,7 +1149,7 @@ function setFilter(g){ filter = g; renderBooks(); }
 function renderSolo(b){
   const first = b.formats?.[0];
   $('#bookGrid').innerHTML = `<div class="card solo rv in">
-    <div>${book3d(b)}</div>
+    <div>${book3d(b)}<span class="b3hint">tap the book to peek inside ♡</span></div>
     <div>
       <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag hot">♡ debut novel</span>${statusTag(b.status)}${seriesLabel(b) ? `<span class="tag">${esc(seriesLabel(b))}</span>` : ''}<span class="tag">${esc(b.genre)}</span></div>
       ${imgSrc(b.badge) ? `<img class="sbadge" src="${esc(imgSrc(b.badge))}" alt="${esc(seriesLabel(b))}">` : ''}
