@@ -1,0 +1,16 @@
+# Turning on the community board (about 10 minutes, free)
+
+Until you do this, the community tab, signing notes and early reader applications run in **preview mode**: they work, but everything is saved only in the browser you're using.
+
+1. Go to **console.firebase.google.com** → **Add project** (any name, e.g. `maetao-site`). You can turn Google Analytics off.
+2. On the project home page click the **</>** (Web) icon → give it a nickname → **Register app**. Copy the four values `apiKey`, `authDomain`, `projectId`, `appId` into `community.firebase` in the settings block at the top of `index.html`.
+3. **Build → Firestore Database → Create database** (pick the location closest to your readers, start in *production mode*).
+4. Open the **Rules** tab, delete what's there, paste everything from `firestore.rules`, change `your-email@gmail.com` to your own Google email (lowercase), then **Publish**.
+5. **Build → Authentication → Get started → Sign-in method**: turn on **Anonymous** and **Google**.
+6. **Authentication → Settings → Authorized domains**: add your website's domain (e.g. `maetao.com` or `maetao.netlify.app`).
+7. In `index.html`, set `ownerEmail` to the same Google email.
+8. Upload the site. Open the **community** tab, scroll to "house rules" and click **are you Mae? sign in**. Sign in with Google and you'll see the "♡ author" badge, pin / delete / idea-status buttons, and **mae's desk** with signing notes and early reader applications.
+
+Readers never need an email or password. They pick an @, emoji and colour, and that profile stays with their browser.
+
+**Moderating:** as Mae you can delete any post or reply, pin posts, and mark ideas as *thinking about it*, *planned* or *done*.
