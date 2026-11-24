@@ -513,13 +513,13 @@ footer::before{content:'';display:block;height:10px;max-width:260px;margin:0 aut
 /* 3D books with spines */
 .b3wrap{perspective:1300px;width:170px;margin-left:14px}
 .b3d{position:relative;width:170px;aspect-ratio:var(--ar,2/3);transform-style:preserve-3d;transform:rotateY(36deg);transition:transform .9s cubic-bezier(.2,.9,.25,1)}
-.bcard:hover .b3d{transform:rotateY(14deg) translateY(-4px)}
+@media (hover:hover){.bcard .b3wrap:hover .b3d{transform:rotateY(14deg) translateY(-4px)}}
 .b3front{position:absolute;inset:0;transform:translateZ(30px);transform-style:preserve-3d}
 .b3front .page{transform:translateZ(-1px)}
 .lid{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:left center;transition:transform 1s cubic-bezier(.2,.9,.25,1)}
 .lid .cover{position:absolute;inset:0;width:100%;backface-visibility:hidden}
 .lid .incover{position:absolute;inset:0;border-radius:16px 6px 6px 16px;background:linear-gradient(90deg,#f3e3df,#fbf1ee);transform:rotateY(180deg);backface-visibility:hidden;box-shadow:inset -6px 0 10px -6px rgba(0,0,0,.15)}
-.bcard:hover .lid{transform:rotateY(-118deg)}
+@media (hover:hover){.bcard .b3wrap:hover .lid{transform:rotateY(-118deg)}}
 .spine{background:var(--sp);color:var(--spt);display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;padding:14px 0 12px;box-sizing:border-box;border-radius:4px;overflow:hidden;position:relative}
 .spine::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.14),rgba(255,255,255,.22) 30%,rgba(255,255,255,0) 55%,rgba(0,0,0,.12));pointer-events:none}
 .spine .st{writing-mode:vertical-rl;font-family:var(--serif);font-style:italic;font-size:15px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:68%}
@@ -553,8 +553,8 @@ footer::before{content:'';display:block;height:10px;max-width:260px;margin:0 aut
 /* debut: one-book layout */
 .solo{grid-column:1/-1;display:grid;grid-template-columns:300px minmax(0,1fr);gap:44px;align-items:center;padding:42px}
 .solo .b3wrap,.solo .b3d{width:210px}.solo .b3wrap{margin:0 auto}
-.solo:hover .b3d{transform:rotateY(14deg) translateY(-4px)}
-.solo:hover .lid{transform:rotateY(-118deg)}
+@media (hover:hover){.solo .b3wrap:hover .b3d{transform:rotateY(14deg) translateY(-4px)}}
+@media (hover:hover){.solo .b3wrap:hover .lid{transform:rotateY(-118deg)}}
 .solo .pane{margin:14px 0 18px;max-width:560px}
 .brewing{grid-column:1/-1;border:2px dashed rgba(198,168,167,.6);background:transparent;box-shadow:none;display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding:22px 26px}
 .brewing .ghost-spine{width:40px;height:90px;border-radius:5px;border:2px dashed rgba(198,106,119,.5);display:grid;place-items:center;color:var(--deeprose);font-size:18px}
