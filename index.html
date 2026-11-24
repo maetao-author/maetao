@@ -52,9 +52,9 @@ window.MAE_SITE = {
   books: [   // your debut! add more books later by copying the { ... } block, and the site grows with you
     {
       id: "debut",
-      title: "Your Debut Novel Title",
+      title: "Call It a Let",
       series: "",                    // e.g. "Series name, book 1" if it starts a series. Blank = standalone
-      genre: "romance",
+      genre: "tennis romance",
       year: "2026",
       status: "pre-order",           // "out now", "pre-order" or "coming soon"
       release: "2026-12-14",         // release day: the home tab counts down to it. Delete this line once it's out
@@ -63,10 +63,10 @@ window.MAE_SITE = {
       back: "",                      // optional back cover image (shown when the book turns on the shelf)
       palette: ["#f0c1c7", "#d98f97", "#7d8270"],
       spineColor: "",                // optional, e.g. "#7d8270". Blank = uses the last palette colour
-      hook: "One line that makes a reader need this book.",
-      blurb: "Paste the back-cover blurb here. Two or three short paragraphs work best.\n\nKeep the stakes clear and end on a question.",
+      hook: "Ten years ago he dumped her on live TV. Now they have to win Olympic gold together.",
+      blurb: "At seventeen, Stephen Lior stood in front of the cameras and said the words that ended their partnership: \"I'm done carrying her.\"\n\nTen years later, Avery Auclair is world No. 7, and she's built her whole career on hating him. So when the federation pairs them for Olympic mixed doubles in Los Angeles, she should say no.\n\nShe doesn't.\n\nOne season. One hotel room. One wall of pillows that isn't going to hold. And one question Avery has never been able to answer: what was Stephen looking at in the three seconds before he broke her heart?\n\nA steamy second-chance tennis romance about rivals, replays, and the point you get to play again.",
       dedication: "for every reader who needed a soft place to land ♡",   // shown inside the cover when a reader opens the book on the shelf
-      sample: "Paste the first page or a favourite excerpt here so readers can get a taste before buying.",
+      sample: "I still watch it.\n\nI've never told a reporter, a therapist, or my coach. But on bad nights, when a match slips or my ranking drops or I'm lying in a hotel room in a city I'll never see in daylight, I open my phone and watch the worst thirty seconds of my life.\n\nBuenos Aires, 2018. The Youth Olympic Games. A press tent with bad lighting and a blue backdrop that's coming unstuck at one corner. Stephen Lior is seventeen, all elbows and jaw, wearing a silver medal he's already stopped looking at. Someone off camera asks about the future of the partnership.\n\nHe says, \"I'm done carrying her. I'm playing for me now.\"\n\nEverybody remembers that part. 4.1 million people, at last count. I check.\n\nWhat nobody remembers, because nobody watches it as many times as I do, is the three seconds before. Right before he leans into the mic, he turns his head toward the edge of the frame, toward something or someone standing just out of shot. And his face does a thing I've never been able to name.\n\nSo that's my confession. Ten years, and I still don't know what he was looking at.\n\nThe second confession is worse.\n\nThis morning, at 6:12, Graham Lior called me on a number I didn't know he had. He told me the federation wants me and his son for Olympic mixed doubles in Los Angeles.\n\nI didn't hang up.\n\nI didn't say no.\n\nI said, \"What would I have to do?\"",
       formats: [                     // the first one is the main "buy" button
         { label: "eBook", price: "$4.99", link: "" },
         { label: "Signed paperback", price: "$18", link: "" }
@@ -1109,7 +1109,7 @@ function renderBooks(){
     const first = b.formats?.[0];
     return `<article class="card bcard rv in ${filter !== 'all' && b.genre !== filter ? 'hide' : ''}">
       <div class="cwrap">${book3d(b)}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${statusTag(b.status)}<span class="tag">${esc(seriesLabel(b))}</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${statusTag(b.status)}${seriesLabel(b) ? `<span class="tag">${esc(seriesLabel(b))}</span>` : ''}<span class="tag">${esc(b.genre)}</span></div>
       <h3>${esc(b.title)}</h3>
       <p>${esc(b.hook)}</p>
       <div class="row">
@@ -1167,7 +1167,7 @@ function openBook(id, tab = 'about'){
       <div class="mgrid">
         <div>${cover(b)}</div>
         <div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">${statusTag(b.status)}<span class="tag">${esc(seriesLabel(b))}</span><span class="tag">${esc(b.year)}</span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">${statusTag(b.status)}${seriesLabel(b) ? `<span class="tag">${esc(seriesLabel(b))}</span>` : ''}<span class="tag">${esc(b.genre)}</span><span class="tag">${esc(b.year)}</span></div>
           <h2 class="h2" style="font-size:36px;margin-top:10px">${esc(b.title)}</h2>
           <div class="hand">${esc(b.hook)}</div>
           <div class="seg" id="mseg">
