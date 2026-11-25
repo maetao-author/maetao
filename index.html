@@ -38,7 +38,8 @@ window.MAE_SITE = {
   contactEmail: "",                 // e.g. "hello@maetao.com"
   contactFormEndpoint: "",          // e.g. "https://formspree.io/f/abcdwxyz"
   newsletter: {
-    action: "",                     // e.g. "https://buttondown.com/api/emails/embed-subscribe/maetao"
+    mailerlite: "",                 // your MailerLite form link, e.g. "https://assets.mailerlite.com/jsonp/123456/forms/987654/subscribe"
+    action: "",                     // only for other providers, e.g. "https://buttondown.com/api/emails/embed-subscribe/maetao"
     emailField: "email",            // Mailchimp uses "EMAIL", most others use "email"
     perk: "a free short story + first look at new chapters"
   },
@@ -46,8 +47,9 @@ window.MAE_SITE = {
     instagram: "", tiktok: "", threads: "", goodreads: "", amazon: "", youtube: ""
   },
   bio: [
-    "Mae Tao writes novels about the quiet, brave moments that change a life. [Replace this with your bio, in your own voice.]",
-    "When not writing, Mae can be found [somewhere you love], [a hobby], and [a small detail readers will remember]."
+    "Mae Tao lives in Cebu and has wanted to write for as long as she can remember. She got her start writing fanfiction on Wattpad, Tumblr and Archive of Our Own (no, she will not be sharing her usernames), was told writing wouldn't get her anywhere, believed it for a while, and then wrote a whole novel anyway.",
+    "She found her way back to writing in college, by way of a tennis court. Her grandparents taught her to play, and they're the most competitive people she knows. She hasn't picked up a racket in a while, which she blames on high school, college and high expectations, in that order.",
+    "Call It a Let is her debut novel and Book One of the Deuce Series."
   ],
   books: [   // your debut! add more books later by copying the { ... } block, and the site grows with you
     {
@@ -1311,7 +1313,14 @@ function addCal(e){
 const isUnlocked = () => localStorage.getItem('mt.unlocked') === '1';
 function subscribe(email, fromEl){
   if (fromEl) { const r = fromEl.getBoundingClientRect(); petals(r.left + r.width / 2, r.top); }
-  if (S.newsletter.action) {
+  const ml = String(S.newsletter.mailerlite || '').trim();
+  if (/^https:\/\/assets\.mailerlite\.com\/jsonp\/\d+\/forms\/\d+\/subscribe$/.test(ml)) {
+    // MailerLite: send the email straight to your list, no new tab
+    const body = new FormData(); body.append('fields[email]', email); body.append('ml-submit', '1'); body.append('anticsrf', 'true');
+    fetch(ml, { method: 'POST', body })
+      .then(r => r.json()).then(d => toast(d && d.success === false ? 'hmm, that email didn\'t work. Mind checking it? ♡' : 'you\'re on the list ♡ check your inbox to confirm'))
+      .catch(() => fetch(ml, { method: 'POST', body, mode: 'no-cors' }).then(() => toast('you\'re on the list ♡ check your inbox to confirm'), () => toast('couldn\'t reach the newsletter, please try again')));
+  } else if (S.newsletter.action) {
     const f = document.createElement('form');
     f.method = 'post'; f.action = S.newsletter.action; f.target = '_blank'; f.style.display = 'none';
     const i = document.createElement('input'); i.name = S.newsletter.emailField || 'email'; i.value = email; f.appendChild(i);
