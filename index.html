@@ -38,7 +38,8 @@ window.MAE_SITE = {
   contactEmail: "",                 // e.g. "hello@maetao.com"
   contactFormEndpoint: "",          // e.g. "https://formspree.io/f/abcdwxyz"
   newsletter: {
-    brevo: "",                      // your Brevo form link, e.g. "https://abc123.sibforms.com/serve/MUIFAxyz..."
+    appsScript: "",                 // your Google Apps Script web app link, e.g. "https://script.google.com/macros/s/AKfy.../exec"
+    brevo: "",                      // or your Brevo form link, e.g. "https://abc123.sibforms.com/serve/MUIFAxyz..."
     mailerlite: "",                 // or your MailerLite form link, e.g. "https://assets.mailerlite.com/jsonp/123456/forms/987654/subscribe"
     action: "",                     // only for other providers, e.g. "https://buttondown.com/api/emails/embed-subscribe/maetao"
     emailField: "email",            // Mailchimp uses "EMAIL", most others use "email"
@@ -1314,8 +1315,12 @@ function addCal(e){
 const isUnlocked = () => localStorage.getItem('mt.unlocked') === '1';
 function subscribe(email, fromEl){
   if (fromEl) { const r = fromEl.getBoundingClientRect(); petals(r.left + r.width / 2, r.top); }
-  const ml = String(S.newsletter.mailerlite || '').trim(), bv = String(S.newsletter.brevo || '').trim();
-  if (/^https:\/\/[a-z0-9-]+\.sibforms\.com\/serve\/[A-Za-z0-9_-]+$/.test(bv)) {
+  const ml = String(S.newsletter.mailerlite || '').trim(), bv = String(S.newsletter.brevo || '').trim(), gs = String(S.newsletter.appsScript || '').trim();
+  if (/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(gs)) {
+    // your own Google Sheet: the Apps Script saves the email
+    fetch(gs, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ email }) })
+      .then(() => toast('you\'re on the list ♡ the secret shelf is open'), () => toast('couldn\'t reach the newsletter, please try again'));
+  } else if (/^https:\/\/[a-z0-9-]+\.sibforms\.com\/serve\/[A-Za-z0-9_-]+$/.test(bv)) {
     // Brevo: send the email straight to your list, no new tab
     const body = new FormData(); body.append('EMAIL', email); body.append('email_address_check', ''); body.append('locale', 'en');
     fetch(bv + '?isAjax=1', { method: 'POST', body, mode: 'no-cors' })
