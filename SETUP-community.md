@@ -47,7 +47,7 @@ The key is already in `giphyKey`. To use a different one: **developers.giphy.com
 ## Chat room, music and bookshelf
 
 - **Chat room:** one live room for everyone. "here now" shows who has the chat open right now.
-- **Music:** each CD plays the full song through YouTube's own player (it has to stay visible, so it sits in the corner). Some videos start with an ad; that's the video owner's choice. Change songs in the `music` block: `title`, `artist`, and a `youtube` link. The cover comes from Apple Music; if a phone can't reach Apple, the YouTube picture is used instead. Songs readers find with search play 30-second previews.
+- **Music:** the CD rack has one shelf (playlist) per book. Each CD plays a 30-second preview from Apple Music, and "full song" opens it in Apple Music. Edit the `music.shelves` block: `book` (the book's id), `title`, and the songs (`title`, `artist`, and `album` if Apple Music picks the wrong version). Songs readers find with search go on their own "your picks" shelf.
 - **My bookshelf:** each reader adds the books they own (edition and whether it's signed). Set `pages` on each book so the spine is the right thickness.
 - **New purchases dropping onto the shelf automatically:** a store webhook can add a row to `user_library` with the secret key (from a small server or a Supabase Edge Function) and it slides onto that reader's shelf live. Readers are anonymous, so the store purchase needs to be matched to a reader somehow (for example a code they paste). Tell Claude which store you use and it can set this up.
 
