@@ -17,15 +17,28 @@ service cloud.firestore {
     function prof() { return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data; }
     function text(t, max) { return t is string && t.size() > 0 && t.size() <= max; }
     function reserved(h) { return h in ['mae', 'maetao', 'mae_tao', 'mae.tao', 'admin', 'official', 'moderator']; }
-    // a GIPHY GIF id (optional on posts and replies)
-    function okGif(d) { return !('gif' in d) || (d.gif is string && d.gif.matches('^[A-Za-z0-9]{4,40}$')); }
+    // a GIPHY GIF or sticker id (optional on posts, replies and chat)
+    function gifOk(v) { return v is string && v.matches('^[A-Za-z0-9]{4,40}$'); }
+    function okGif(d) { return (!('gif' in d) || gifOk(d.gif)) && (!('sticker' in d) || gifOk(d.sticker)); }
+    // a shared song card in the chat (an iTunes preview)
+    function okSong(d) {
+      return !('song' in d) || (d.song is map && d.song.keys().hasOnly(['id', 't', 'a', 'art', 'p'])
+        && d.song.id is string && d.song.id.matches('^[0-9]{1,15}$')
+        && d.song.t is string && d.song.t.size() <= 120 && d.song.a is string && d.song.a.size() <= 120
+        && d.song.art is string && d.song.art.matches('^https://is[0-9]-ssl[.]mzstatic[.]com/.{1,400}$')
+        && d.song.p is string && d.song.p.matches('^https://audio-ssl[.]itunes[.]apple[.]com/.{1,500}$'));
+    }
     // a photo id must point at a photo the same person is saving in the same write
     function okPhoto(d) {
       return !('photo' in d) || (d.photo is string && d.photo.matches('^[A-Za-z0-9]{6,40}$')
         && getAfter(/databases/$(database)/documents/photos/$(d.photo)).data.uid == request.auth.uid);
     }
     // a post needs words, a GIF or a photo
-    function okBody(d) { return d.text is string && d.text.size() <= 1000 && (d.text.size() > 0 || 'gif' in d || 'photo' in d) && okGif(d) && okPhoto(d); }
+    function okBody(d) { return d.text is string && d.text.size() <= 1000 && (d.text.size() > 0 || 'gif' in d || 'sticker' in d || 'photo' in d || 'song' in d) && okGif(d) && okPhoto(d) && okSong(d); }
+    function asMe(d) {
+      return d.uid == request.auth.uid && d.handle == prof().handle && d.emoji == prof().emoji && d.color == prof().color
+        && d.isMae == isMae() && d.createdAt == request.time;
+    }
     // emoji reactions live in reacts.{uid} = [emoji, …]; you can only change your own list
     function reactOnly() {
       return signedIn()
@@ -59,7 +72,7 @@ service cloud.firestore {
     match /posts/{id} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'type', 'text', 'gif', 'photo', 'hearts', 'replyCount', 'status', 'pinned', 'isMae', 'maeReplied', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'type', 'text', 'gif', 'sticker', 'photo', 'hearts', 'replyCount', 'status', 'pinned', 'isMae', 'maeReplied', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.handle == prof().handle
         && request.resource.data.emoji == prof().emoji
@@ -92,7 +105,8 @@ service cloud.firestore {
       match /replies/{rid} {
         allow read: if true;
         allow create: if signedIn()
-          && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'text', 'gif', 'photo', 'isMae', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'text', 'gif', 'sticker', 'photo', 'parent', 'isMae', 'createdAt'])
+          && (!('parent' in request.resource.data) || (request.resource.data.parent is string && request.resource.data.parent.matches('^[A-Za-z0-9]{1,40}$')))
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.handle == prof().handle
           && request.resource.data.emoji == prof().emoji
@@ -105,7 +119,38 @@ service cloud.firestore {
       }
     }
 
-    // photos readers attach to posts and replies (small JPEGs, under about 700 KB)
+    // the live chat room
+    match /chat/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'text', 'gif', 'sticker', 'photo', 'song', 'isMae', 'createdAt'])
+        && asMe(request.resource.data)
+        && request.resource.data.text is string && request.resource.data.text.size() <= 500
+        && okBody(request.resource.data);
+      allow update: if isMae() || reactOnly();
+      allow delete: if isMae() || (signedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    // "who's here now" in the chat room: each reader writes only their own heartbeat
+    match /presence/{uid} {
+      allow read: if true;
+      allow write: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['handle', 'emoji', 'color', 'at'])
+        && request.resource.data.handle == prof().handle && request.resource.data.emoji == prof().emoji
+        && request.resource.data.color == prof().color && request.resource.data.at == request.time;
+    }
+
+    // each reader's bookshelf (the books they own). Only they (and Mae) can see it.
+    // A store webhook can add purchases with the Admin SDK, which skips these rules.
+    match /libraries/{uid} {
+      allow read: if isMae() || (signedIn() && request.auth.uid == uid);
+      allow write: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['books', 'updatedAt'])
+        && request.resource.data.books is list && request.resource.data.books.size() <= 60
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    // photos readers attach to posts, replies and chat messages (small JPEGs, under about 700 KB)
     match /photos/{id} {
       allow read: if true;
       allow create: if signedIn()

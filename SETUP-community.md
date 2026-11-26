@@ -27,6 +27,13 @@ The GIF button shows trending GIFs and lets readers search. Until a key is added
 - Anyone with a profile can react to posts and replies with any emoji, plus the ♡ votes as before.
 - Readers can attach a photo to a post or reply. It's shrunk in their browser and saved in the database's `photos` collection, so no extra storage service is needed. Deleting a post also deletes its photo.
 
+## Chat room, music and bookshelf
+
+- **Chat room:** one live room for everyone. Messages, reactions, GIFs, stickers, photos and shared songs appear for everyone instantly. "here now" shows who has had the chat open in the last 2 minutes.
+- **Music:** the CD rack plays 30-second previews from Apple Music (the iTunes Search API, no key needed). Change the songs in the `music` block of the settings. Readers can search for and add their own songs, and share the one that's playing into the chat.
+- **My bookshelf:** each reader adds the books they own (edition and whether it's signed). Set `pages` on each book so the spine is the right thickness. Shelves are private to each reader.
+- **New purchases dropping onto the shelf automatically:** this needs your store to send a webhook to a small server that adds the book to `libraries/{reader}` in the database. It also means a reader has to sign in with the same email they bought with. Tell Claude which store you use and it can set this up.
+
 If you set the database up before these features were added, paste the latest `firestore.rules` into **Firestore → Rules** again and **Publish**.
 
 **Moderating:** as Mae you can delete any post or reply, pin posts, and mark ideas as *thinking about it*, *planned* or *done*.
