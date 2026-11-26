@@ -119,18 +119,18 @@ window.MAE_SITE = {
     open: true,
     blurb: "Get free early eBook copies of new releases before anyone else, in exchange for an honest review."
   },
-  music: {   // the CD rack in the community. "song" is looked up on iTunes for the album cover.
+  music: {   // the CD rack in the community. The album cover comes from Apple Music (add "album" if it picks the wrong version).
               // "youtube" is the video that plays the full song (paste any YouTube link). Without one, it plays a 30-second preview.
     title: "the Deuce playlist",
     songs: [
-      { song: "Cruel Summer Taylor Swift",             youtube: "https://youtu.be/ic8j13piAhQ" },
-      { song: "Love Story Taylor Swift",               youtube: "https://youtu.be/aXzVF3XeS8M" },
-      { song: "Espresso Sabrina Carpenter Short n' Sweet", youtube: "https://youtu.be/eVli-tstM5E" },
-      { song: "Electric Love BORNS",                   youtube: "https://youtu.be/RYr96YYEaZY" },
-      { song: "golden hour JVKE",                      youtube: "https://youtu.be/PEM0Vs8jf1w" },
-      { song: "Die With A Smile Lady Gaga Bruno Mars", youtube: "https://youtu.be/kPa7bsKwL-c" },
-      { song: "Yellow Coldplay",                       youtube: "https://youtu.be/yKNxeF4KMsY" },
-      { song: "Sparks Fly Taylor Swift",               youtube: "https://youtu.be/oKar-tF__ac" }
+      { title: "Cruel Summer",     artist: "Taylor Swift",            youtube: "https://youtu.be/ic8j13piAhQ" },
+      { title: "Love Story",       artist: "Taylor Swift",            youtube: "https://youtu.be/aXzVF3XeS8M" },
+      { title: "Espresso",         artist: "Sabrina Carpenter",       album: "Short n' Sweet", youtube: "https://youtu.be/eVli-tstM5E" },
+      { title: "Electric Love",    artist: "BØRNS",                   youtube: "https://youtu.be/RYr96YYEaZY" },
+      { title: "golden hour",      artist: "JVKE",                    youtube: "https://youtu.be/PEM0Vs8jf1w" },
+      { title: "Die With A Smile", artist: "Lady Gaga & Bruno Mars",  youtube: "https://youtu.be/kPa7bsKwL-c" },
+      { title: "Yellow",           artist: "Coldplay",                youtube: "https://youtu.be/yKNxeF4KMsY" },
+      { title: "Sparks Fly",       artist: "Taylor Swift",            youtube: "https://youtu.be/oKar-tF__ac" }
     ]
   },
   community: {
@@ -546,6 +546,7 @@ footer .brand{justify-content:center;font-size:30px;margin-bottom:6px}
 .songprev{display:inline-flex}.songprev>button{top:-8px;right:-8px}
 /* music: deck + 3D CD rack */
 .musicard{overflow:visible}
+.comm>*,.cmpane,.musicard,.rack{min-width:0}   /* long rows (the CD rack) scroll inside instead of widening the page on phones */
 .msearch{position:relative;width:min(280px,100%)}
 .msearch input{width:100%;border:0;background:var(--field);border-radius:99px;padding:10px 16px;font-family:var(--body);font-size:14px;color:var(--ink);outline:0}
 .mres{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:20;background:var(--paper);border-radius:16px;box-shadow:0 18px 40px -14px rgba(60,30,38,.45);padding:6px;display:none}
@@ -2521,7 +2522,7 @@ const Music = (() => {
     return d;
   }
   const isOn = () => mode === 'yt' ? want && ytState !== 2 && ytState !== 0 : !audio.paused;
-  function preview(x){ mode = 'audio'; dock().hidden = true; audio.src = x.p; audio.play().catch(() => {}); draw(); }
+  function preview(x){ mode = 'audio'; dock().hidden = true; if (!x.p) { toast('this song can\'t play right now'); return draw(); } audio.src = x.p; audio.play().catch(() => {}); draw(); }
   async function playYT(x){
     mode = 'yt'; ytState = -1; want = true; dock().hidden = false; draw();
     await loadYT();
@@ -2564,12 +2565,13 @@ const Music = (() => {
     if (r) { cache[q] = r; keep(CK, cache); }
     return r;
   }
+  const artFix = x => okY(x.y) && !x.art.includes('ytimg') ? ` onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${x.y}/mqdefault.jpg'"` : '';
   const fmtT = s => isFinite(s) ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '0:00';
 
   /* ---------- the rack ---------- */
   function cdHTML(x, i){
     return `<button class="cdx ${i === cur ? 'on' : ''}" data-i="${i}" style="--i:${i}" aria-label="play ${esc(x.t)} by ${esc(x.a)}">
-      <span class="cd3"><span class="cdf cd-front"><img src="${esc(x.art)}" alt="" loading="lazy"><i class="gloss"></i></span>
+      <span class="cd3"><span class="cdf cd-front"><img src="${esc(x.art)}" alt="" loading="lazy"${artFix(x)}><i class="gloss"></i></span>
       <span class="cdf cd-spine"><b>${esc(x.t)}</b> · ${esc(x.a)}</span><span class="cdf cd-back"></span></span></button>`;
   }
   async function mount(box){
@@ -2587,11 +2589,16 @@ const Music = (() => {
       $('#muRack').onclick = e => { const c = e.target.closest('.cdx'); if (c) play(+c.dataset.i); };
       loadYT();
       const songs = await Promise.all((M.songs || []).map(async e => {
-        const q = typeof e === 'string' ? e : String(e && e.song || ''), y = typeof e === 'string' ? '' : ytId(e && e.youtube);
-        const r = q && await resolve(q); return r ? { ...r, y } : null;
+        e = typeof e === 'string' ? { song: e } : e || {};
+        const t = String(e.title || '').slice(0, 120), a = String(e.artist || '').slice(0, 120), y = ytId(e.youtube);
+        const q = String(e.song || [t, a.replace(/&/g, ' '), e.album].filter(Boolean).join(' ')).replace(/Ø/g, 'O').replace(/ø/g, 'o');
+        const r = q && await resolve(q);
+        if (r) return { ...r, y };
+        // Apple Music didn't answer (some phones and networks block it): the CD still plays from YouTube, with the video's picture as the cover
+        return y ? { id: 'yt' + y, t: t || q, a, art: `https://i.ytimg.com/vi/${y}/mqdefault.jpg`, p: '', y } : null;
       }));
       list = [...songs.filter(Boolean), ...picks.filter(p => !songs.some(s => s && s.id === p.id))];
-      if (!list.length) $('#muRack').innerHTML = '<div class="meta" style="padding:40px">couldn\'t reach Apple Music right now. try again in a moment?</div>';
+      if (!list.length) $('#muRack').innerHTML = '<div class="meta" style="padding:40px">couldn\'t load the songs right now. try again in a moment?</div>';
     }
     draw();
   }
@@ -2610,14 +2617,14 @@ const Music = (() => {
     if (!el || !$('#muRack')) return;
     if (list.length) $('#muRack').innerHTML = list.map(cdHTML).join('');
     const x = list[cur];
-    $('#muDeck').innerHTML = x ? `<div class="deckcase"><img src="${esc(x.art)}" alt=""></div>
+    $('#muDeck').innerHTML = x ? `<div class="deckcase"><img src="${esc(x.art)}" alt=""${artFix(x)}></div>
       <div class="disc ${isOn() ? 'spin' : ''}" style="--art:url('${esc(x.art)}')"><i></i></div>
       <div class="deckinfo"><div class="lab">now playing</div><h4>${esc(x.t)}</h4><div class="meta">${esc(x.a)}${x.al ? ' · ' + esc(x.al) : ''}</div>
         <div class="mbar"><span id="muNow">0:00</span><i><b id="muProg"></b></i><span id="muEnd">${mode === 'yt' ? '–:––' : '0:30'}</span></div>
         <div class="meta" style="margin-top:4px">${mode === 'yt' ? '♫ full song · playing on YouTube (bottom corner)' : '30-second preview'}</div>
         <div class="crow" style="gap:6px;margin-top:10px"><button class="pbtn" onclick="Music.step(-1)" aria-label="previous">⏮</button>
           <button class="btn dark sm" onclick="Music.toggle()">${isOn() ? '❚❚ pause' : '▶ play'}</button><button class="pbtn" onclick="Music.step(1)" aria-label="next">⏭</button>
-          <button class="pbtn" onclick="Music.share()">🎵 share to chat</button>${x.link ? `<a class="pbtn" href="${esc(x.link)}" target="_blank" rel="noopener">full song ↗</a>` : ''}</div></div>`
+          ${okSong(x) ? '<button class="pbtn" onclick="Music.share()">🎵 share to chat</button>' : ''}${x.link ? `<a class="pbtn" href="${esc(x.link)}" target="_blank" rel="noopener">full song ↗</a>` : ''}</div></div>`
       : `<div class="deckidle"><div class="disc"><i></i></div><div><span class="hand" style="font-size:26px">pick a CD ♡</span><br><span class="meta">it keeps playing while you chat</span></div></div>`;
     mini();
   }
