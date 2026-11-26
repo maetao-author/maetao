@@ -18,13 +18,13 @@
      • Amazon, Apple Books, Kobo, Bookshop.org etc. go under "stores".
    A button with an empty link shows "coming soon" instead of breaking.
 
-   COMMUNITY, SIGNING NOTES & EARLY READER APPLICATIONS need a small free database (Firebase).
+   COMMUNITY, CHAT, BOOKSHELVES, SIGNING NOTES & EARLY READER APPLICATIONS need a small free database (Supabase).
    Until you connect one, they run in "preview mode": everything works but is only saved in your own browser.
-   Setup (about 10 minutes, see SETUP-community.md next to this file):
-     1. console.firebase.google.com → Add project → add a Web app → copy its config into community.firebase below
-     2. Build → Firestore Database → Create. Then Rules tab → paste firestore.rules (put your email in it) → Publish
-     3. Build → Authentication → Sign-in method → turn on Anonymous and Google
-     4. Authentication → Settings → Authorized domains → add your website's domain
+   Setup (about 15 minutes, see SETUP-community.md next to this file):
+     1. supabase.com → New project. Then SQL Editor → paste supabase/schema.sql (put your email in it) → Run
+     2. Authentication → Sign In / Providers → turn on "Allow anonymous sign-ins" and Google (turn Email off)
+     3. Authentication → URL Configuration → Site URL = your website's address
+     4. Project Settings → API Keys → copy the Project URL and the publishable key into community.supabase below
      5. Put the Google email you'll sign in with as ownerEmail below. Only that account can reply as you.
 
    NEWSLETTER: paste the form "action" URL from your email service
@@ -135,7 +135,8 @@ window.MAE_SITE = {
   },
   community: {
     ownerEmail: "",                 // the Google account you'll sign in with to reply as Mae
-    firebase: { apiKey: "", authDomain: "", projectId: "", appId: "" },
+    supabase: { url: "", key: "" },  // Project URL (https://xxxx.supabase.co) and the publishable key (sb_publishable_…). Never the secret key.
+    firebase: { apiKey: "", authDomain: "", projectId: "", appId: "" },   // only for @mention notifications (coming next)
     giphyKey: "lEBqE1zDvcnUJ3Zq86PhdUnwY14QSAwG"                  // GIF search: paste your GIPHY API key here (developers.giphy.com → Create an App → API)
   }
 };
@@ -1723,10 +1724,11 @@ function setupContact(){
 }
 
 /* ♡ community board, signing notes and early reader applications
-   Live mode: Firebase (shared by every visitor). Preview mode: saved in this browser only. */
+   Live mode: Supabase (shared by every visitor, real time). Preview mode: saved in this browser only. */
 const Community = (() => {
-  const C = S.community || {}, FB = C.firebase || {};
-  const live = !!(FB.apiKey && FB.projectId);
+  const C = S.community || {}, SBC = C.supabase || {};
+  const SB_URL = String(SBC.url || '').trim().replace(/\/+$/, ''), SB_KEY = String(SBC.key || '').trim();
+  const live = /^https:\/\/[a-z0-9.-]+$/i.test(SB_URL) && !!SB_KEY;
   const OWNER = String(C.ownerEmail || '').trim().toLowerCase();
   const RESERVED = ['mae', 'maetao', 'mae_tao', 'mae.tao', 'admin', 'official', 'moderator'];
   const EMOJIS = ['🌸', '🍓', '🧸', '🐰', '🌙', '☕', '📚', '🦋', '🍰', '🌷', '✨', '🐱'];
@@ -1743,9 +1745,10 @@ const Community = (() => {
   const TYPES = { chat: '💬 chat', ask: '❓ ask Mae', idea: '💡 idea' };
   const STATUS = { '': 'no status', considering: 'thinking about it 💭', planned: 'planned ✎', done: 'done ♡' };
   const st = { posts: [], replies: {}, ready: false, error: '', me: null, isMae: false, profile: null };
-  let F, auth, db, mounted = false, filter = 'all', postType = 'chat', lastPost = 0, pendingRender = false;
+  let sb = null, user = null, mounted = false, filter = 'all', postType = 'chat', lastPost = 0, pendingRender = false;
   const open = new Set(), unsubs = {}, drafts = {}, seen = new Set(), gifs = {}, pics = {}, photoCache = {}, replyTo = {};
-  const photoId = id => typeof id === 'string' && /^[A-Za-z0-9]{6,40}$/.test(id) ? id : '';
+  // preview photos have short ids; live photos are "<user id>/<name>.jpg" in the Supabase "photos" bucket
+  const photoId = id => typeof id === 'string' && (/^[A-Za-z0-9]{6,40}$/.test(id) || /^[0-9a-f-]{36}\/[A-Za-z0-9]{6,40}\.jpg$/.test(id)) ? id : '';
 
   /* ---------- preview store (localStorage) ---------- */
   const LKEY = 'mt.community.v1';
@@ -1773,51 +1776,100 @@ const Community = (() => {
   }
   function previewMutate(fn){ const d = L.load(); fn(d); L.save(d); previewSync(); render(); }
 
-  /* ---------- live (Firebase) ---------- */
+  /* ---------- live (Supabase) ---------- */
+  const SB_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js';
+  const ms = t => t ? Date.parse(t) : Date.now();
+  const reactsOf = rows => { const o = {}; (rows || []).forEach(r => (o[r.uid] ||= []).push(r.emoji)); return o; };
+  const attOf = r => ({ ...(r.gif ? { gif: r.gif } : {}), ...(r.sticker ? { sticker: r.sticker } : {}), ...(r.photo ? { photo: r.photo } : {}), ...(r.song ? { song: r.song } : {}) });
+  const who4 = r => ({ id: r.id, uid: r.uid, handle: r.handle, emoji: r.emoji, color: r.color, text: r.text, isMae: r.is_mae, createdAt: ms(r.created_at), reacts: reactsOf(r.reactions), ...attOf(r) });
+  const toPost = r => ({ ...who4(r), type: r.type, hearts: (r.post_hearts || []).map(h => h.uid), replyCount: r.reply_count, status: r.status, pinned: r.pinned, maeReplied: r.mae_replied });
+  const toReply = r => ({ ...who4(r), ...(r.parent ? { parent: r.parent } : {}) });
+  const ownerOk = u => !!(u && !u.is_anonymous && OWNER && (u.email || '').toLowerCase() === OWNER && ((u.app_metadata || {}).providers || []).includes('google'));
+  const fail = error => { if (error) { const e = new Error(error.message); e.code = error.code; throw e; } };
+  // changes from other people arrive as "something changed in table X": refetch that list (bunched up, 200 ms)
+  const timers = {};
+  function soon(kind){
+    clearTimeout(timers[kind]);
+    timers[kind] = setTimeout(() => {
+      if (kind === 'posts') loadPosts();
+      else if (kind === 'replies') Object.keys(unsubs).forEach(loadReplies);
+      else if (kind === 'chat' && chatOn) loadChat();
+      else if (kind === 'shelf' && shelfOn) loadShelf();
+    }, 200);
+  }
+  async function loadPosts(){
+    const { data, error } = await sb.from('posts').select('*, post_hearts(uid), reactions(uid, emoji)').order('created_at', { ascending: false }).limit(150);
+    if (error) { st.error = error.message; render(); return; }
+    st.posts = data.map(toPost); st.ready = true; st.error = ''; render();
+  }
+  async function loadReplies(id){
+    const { data, error } = await sb.from('replies').select('*, reactions(uid, emoji)').eq('post_id', id).order('created_at', { ascending: true });
+    if (!error) { st.replies[id] = data.map(toReply); render(); }
+  }
   async function initLive(){
-    const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
-    const [app, a, fs] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
-    F = { ...a, ...fs };
-    const ap = app.initializeApp(FB); auth = a.getAuth(ap); db = fs.getFirestore(ap);
-    a.onAuthStateChanged(auth, async u => {
-      st.me = u ? { uid: u.uid } : null;
-      st.isMae = !!(u && u.email && OWNER && u.email.toLowerCase() === OWNER);
+    if (!window.supabase) await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = SB_JS; sc.onload = ok; sc.onerror = () => no(new Error('couldn\'t load Supabase')); document.head.appendChild(sc); });
+    sb = window.supabase.createClient(SB_URL, SB_KEY);
+    const onUser = async u => {
+      user = u; st.me = u ? { uid: u.id } : null; st.isMae = ownerOk(u);
+      if (u && !u.is_anonymous && !st.isMae) toast('that account isn\'t the owner email in the settings');
       if (!u) { st.profile = null; st.profileUid = null; }
-      else if (st.profileUid !== u.uid) {
+      else if (st.profileUid !== u.id) {
         try {
-          const snap = await fs.getDoc(fs.doc(db, 'profiles', u.uid));
-          if (st.profileUid !== u.uid) { st.profile = snap.exists() ? snap.data() : null; st.profileUid = u.uid; }
+          const { data } = await sb.from('profiles').select('handle, emoji, color').eq('id', u.id).maybeSingle();
+          if (user && user.id === u.id) { st.profile = data || null; st.profileUid = u.id; }
           if (st.isMae && !st.profile) await saveProfile('maetao', '♡', '#f0c1c7');
         } catch (e) { console.warn(e); }
       }
+      if (presCh && st.profile) heartbeat();
+      if (shelfOn) loadShelf();
       render();
-    });
-    fs.onSnapshot(fs.query(fs.collection(db, 'posts'), fs.orderBy('createdAt', 'desc'), fs.limit(150)), snap => {
-      st.posts = snap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() ?? Date.now() }));
-      st.ready = true; render();
-    }, err => { st.error = err.message; render(); });
+    };
+    // supabase asks that nothing else waits on it inside this callback, so the work runs just after
+    sb.auth.onAuthStateChange((ev, session) => { const u = session?.user || null; if (ev === 'TOKEN_REFRESHED' && u && user && u.id === user.id) return; setTimeout(() => onUser(u), 0); });
+    sb.channel('board')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => soon('posts'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'post_hearts' }, () => soon('posts'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'replies' }, () => { soon('replies'); soon('posts'); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat' }, () => soon('chat'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reactions' }, x => { const r = x.new && x.new.id ? x.new : x.old || {}; soon(r.chat_id ? 'chat' : r.reply_id ? 'replies' : 'posts'); })
+      .subscribe();
+    await loadPosts();
   }
   async function ensureUser(){
     if (!live) return true;
-    if (!F) await ready;
-    if (auth.currentUser) return true;
-    try { const c = await F.signInAnonymously(auth); st.me = { uid: c.user.uid }; return true; }
-    catch (e) { toast('couldn\'t connect: ' + e.code); return false; }
+    if (!sb) await ready;
+    if (!sb) return false;
+    if (user) return true;
+    const { data, error } = await sb.auth.signInAnonymously();
+    if (error) { toast('couldn\'t connect: ' + error.message); return false; }
+    user = data.user; st.me = { uid: user.id }; return true;
   }
   function listenReplies(id){
     if (!live || unsubs[id]) return;
-    unsubs[id] = F.onSnapshot(F.query(F.collection(db, 'posts', id, 'replies'), F.orderBy('createdAt', 'asc')), snap => {
-      st.replies[id] = snap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() ?? Date.now() }));
-      render();
-    });
+    unsubs[id] = true; ready.then(() => loadReplies(id));
+  }
+  // a picked photo goes to the "photos" storage bucket, in a folder named after the person
+  async function uploadPic(pic){
+    if (!pic) return {};
+    const path = user.id + '/' + Array.from(crypto.getRandomValues(new Uint8Array(12)), x => (x % 36).toString(36)).join('') + '.jpg';
+    const blob = await (await fetch(pic)).blob();
+    const { error } = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' }); fail(error);
+    photoCache[path] = pic; return { photo: path };
+  }
+  const dropPic = path => { if (live && sb && photoId(path) && path.includes('/')) sb.storage.from('photos').remove([path]).catch(() => {}); };
+  async function insertWith(table, row, pic){
+    const ph = await uploadPic(pic);
+    const { error } = await sb.from(table).insert({ ...row, ...ph });
+    if (error) dropPic(ph.photo); fail(error);
   }
 
   /* ---------- actions (same API for both modes) ---------- */
   const validHandle = h => /^[a-z0-9_.]{3,20}$/.test(h);
   async function handleTaken(h){
     if (!live) { const d = L.load(); return !!d.handles[h] && d.handles[h] !== st.me.uid; }
-    const snap = await F.getDoc(F.doc(db, 'handles', h));
-    return snap.exists() && snap.data().uid !== auth.currentUser?.uid;
+    if (!sb) await ready;
+    const { data } = await sb.from('profiles').select('id').eq('handle', h).maybeSingle();
+    return !!data && data.id !== user?.id;
   }
   async function saveProfile(handle, emoji, color){
     if (!live) {
@@ -1829,78 +1881,72 @@ const Community = (() => {
       return;
     }
     if (!await ensureUser()) return;
-    const uid = auth.currentUser.uid, hRef = F.doc(db, 'handles', handle), pRef = F.doc(db, 'profiles', uid);
-    await F.runTransaction(db, async tx => {
-      const h = await tx.get(hRef), p = await tx.get(pRef);
-      if (h.exists() && h.data().uid !== uid) throw new Error('taken');
-      if (p.exists() && p.data().handle !== handle) tx.delete(F.doc(db, 'handles', p.data().handle));
-      if (!h.exists()) tx.set(hRef, { uid });
-      tx.set(pRef, { handle, emoji, color });
-    });
-    st.profile = { handle, emoji, color }; st.profileUid = uid; render();
+    const uid = user.id;
+    const { error } = await sb.from('profiles').upsert({ id: uid, handle, emoji, color, updated_at: new Date().toISOString() });
+    if (error && error.code === '23505') throw new Error('taken');   // someone else has that @name
+    fail(error);
+    st.profile = { handle, emoji, color }; st.profileUid = uid; if (presCh) heartbeat(); render();
   }
-  // photos are saved as small JPEGs in their own "photos" collection; posts and replies point at them by id
+  // preview: photos are kept with the posts in this browser
   function photoRef(b, pic){
     if (!pic) return {};
-    if (!live) { const id = 'ph' + Date.now() + Math.random().toString(36).slice(2, 6); b.photos[id] = pic; photoCache[id] = pic; return { photo: id }; }
-    const ref = F.doc(F.collection(db, 'photos'));
-    b.set(ref, { uid: auth.currentUser.uid, data: pic, createdAt: F.serverTimestamp() }); photoCache[ref.id] = pic;
-    return { photo: ref.id };
+    const id = 'ph' + Date.now() + Math.random().toString(36).slice(2, 6); b.photos[id] = pic; photoCache[id] = pic; return { photo: id };   // preview only
   }
   async function addPost(type, text, att, pic){
     const base = { uid: st.me.uid, handle: st.profile.handle, emoji: st.profile.emoji, color: st.profile.color, type, text, hearts: [], replyCount: 0, status: '', pinned: false, isMae: st.isMae, maeReplied: false, ...att };
     if (!live) { previewMutate(d => { d.photos ||= {}; d.posts.unshift({ ...base, ...photoRef(d, pic), id: 'p' + Date.now(), createdAt: Date.now(), replies: [] }); }); return; }
-    const b = F.writeBatch(db);
-    b.set(F.doc(F.collection(db, 'posts')), { ...base, ...photoRef(b, pic), createdAt: F.serverTimestamp() });
-    await b.commit();
+    await insertWith('posts', { type, text, ...att }, pic); soon('posts');
   }
   async function addReply(post, text, att, pic, parent){
     const r = { uid: st.me.uid, handle: st.profile.handle, emoji: st.profile.emoji, color: st.profile.color, text, isMae: st.isMae, ...att, ...(parent ? { parent } : {}) };
     if (!live) { previewMutate(d => { d.photos ||= {}; Object.assign(r, photoRef(d, pic)); const p = d.posts.find(x => x.id === post.id); p.replies = p.replies || []; p.replies.push({ ...r, id: 'r' + Date.now(), createdAt: Date.now() }); p.replyCount = p.replies.length; if (st.isMae) p.maeReplied = true; }); return; }
-    const b = F.writeBatch(db), pRef = F.doc(db, 'posts', post.id);
-    b.set(F.doc(F.collection(db, 'posts', post.id, 'replies')), { ...r, ...photoRef(b, pic), createdAt: F.serverTimestamp() });
-    b.update(pRef, st.isMae ? { replyCount: F.increment(1), maeReplied: true } : { replyCount: F.increment(1) });
-    await b.commit();
+    await insertWith('replies', { post_id: post.id, text, ...att, ...(parent ? { parent } : {}) }, pic); loadReplies(post.id); soon('posts');
   }
   async function heart(post){
     if (!await ensureUser()) return;
-    const uid = live ? auth.currentUser.uid : st.me.uid, has = (post.hearts || []).includes(uid);
+    const uid = myUid(), has = (post.hearts || []).includes(uid);
     if (!live) { previewMutate(d => { const p = d.posts.find(x => x.id === post.id); p.hearts = has ? p.hearts.filter(h => h !== uid) : [...p.hearts, uid]; }); return; }
-    await F.updateDoc(F.doc(db, 'posts', post.id), { hearts: has ? F.arrayRemove(uid) : F.arrayUnion(uid) });
+    const { error } = has ? await sb.from('post_hearts').delete().eq('post_id', post.id).eq('uid', uid) : await sb.from('post_hearts').insert({ post_id: post.id });
+    fail(error); soon('posts');
   }
   // emoji reactions: reacts = { uid: [emoji, …] } on a post or a reply
   async function react(post, r, e){
     if (!await ensureUser()) return;
-    const uid = live ? auth.currentUser.uid : st.me.uid, tgt = r || post, mine = (tgt.reacts || {})[uid] || [], has = mine.includes(e);
+    const uid = myUid(), tgt = r || post, mine = (tgt.reacts || {})[uid] || [], has = mine.includes(e);
     if (!has && mine.length >= 20) return toast('that\'s a lot of reactions ♡');
     if (!live) {
       previewMutate(d => { const p = d.posts.find(x => x.id === post.id), t = r ? (p.replies || []).find(x => x.id === r.id) : p; if (!t) return;
         t.reacts = t.reacts || {}; t.reacts[uid] = has ? mine.filter(x => x !== e) : [...mine, e]; });
       return;
     }
-    const ref = r ? F.doc(db, 'posts', post.id, 'replies', r.id) : F.doc(db, 'posts', post.id);
-    await F.updateDoc(ref, { ['reacts.' + uid]: has ? F.arrayRemove(e) : F.arrayUnion(e) });
+    await toggleReact(r ? 'reply_id' : 'post_id', tgt.id, e, has); soon(r ? 'replies' : 'posts');
+  }
+  // one row per person per emoji, on a post, a reply or a chat message
+  async function toggleReact(col, id, e, has){
+    const { error } = has ? await sb.from('reactions').delete().eq(col, id).eq('uid', user.id).eq('emoji', e) : await sb.from('reactions').insert({ [col]: id, emoji: e });
+    fail(error);
   }
   async function patchPost(post, data){
     if (!live) { previewMutate(d => Object.assign(d.posts.find(x => x.id === post.id), data)); return; }
-    await F.updateDoc(F.doc(db, 'posts', post.id), data);
+    const { error } = await sb.from('posts').update(data).eq('id', post.id); fail(error); soon('posts');
   }
   async function delPost(post){
     if (!live) { previewMutate(d => d.posts = d.posts.filter(x => x.id !== post.id)); return; }
-    await F.deleteDoc(F.doc(db, 'posts', post.id));
-    if (photoId(post.photo)) F.deleteDoc(F.doc(db, 'photos', post.photo)).catch(() => {});
+    const { error } = await sb.from('posts').delete().eq('id', post.id); fail(error);
+    dropPic(post.photo); (st.replies[post.id] || []).forEach(r => dropPic(r.photo)); soon('posts');
   }
   async function delReply(post, r){
     if (!live) { previewMutate(d => { const p = d.posts.find(x => x.id === post.id); p.replies = p.replies.filter(x => x.id !== r.id); p.replyCount = p.replies.length; }); return; }
-    await F.deleteDoc(F.doc(db, 'posts', post.id, 'replies', r.id));
-    if (photoId(r.photo)) F.deleteDoc(F.doc(db, 'photos', r.photo)).catch(() => {});
-    if (st.isMae) await F.updateDoc(F.doc(db, 'posts', post.id), { replyCount: F.increment(-1) });
+    const { error } = await sb.from('replies').delete().eq('id', r.id); fail(error);   // the reply count updates itself
+    dropPic(r.photo); loadReplies(post.id); soon('posts');
   }
   async function savePrivate(kind, data){
     try {
       if (live) {
         if (!await ensureUser()) return false;
-        await F.addDoc(F.collection(db, kind), { ...data, createdAt: F.serverTimestamp() });
+        const row = kind === 'signings' ? { book: data.book || '', format: data.format || '', sign_to: data.signTo, message: data.message || '', email: data.email }
+          : { name: data.name, email: data.email, profile: data.profile || '', why: data.why || '', where: data.where || '' };
+        const { error } = await sb.from(kind === 'signings' ? 'signings' : 'arc').insert(row); fail(error);
       } else if (S.contactFormEndpoint) {
         const r = await fetch(S.contactFormEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({ ...data, _subject: kind === 'arc' ? 'Early reader application' : 'Signing note' }) });
@@ -1913,18 +1959,21 @@ const Community = (() => {
   }
   async function readPrivate(kind){
     if (!live) return L.load()[kind] || [];
-    const snap = await F.getDocs(F.query(F.collection(db, kind), F.orderBy('createdAt', 'desc'), F.limit(200)));
-    return snap.docs.map(d => ({ ...d.data(), createdAt: d.data().createdAt?.toMillis?.() ?? 0 }));
+    if (!sb) await ready;
+    const { data, error } = await sb.from(kind === 'signings' ? 'signings' : 'arc').select('*').order('created_at', { ascending: false }).limit(200); fail(error);
+    return data.map(d => ({ ...d, ...(kind === 'signings' ? { signTo: d.sign_to } : {}), createdAt: ms(d.created_at) }));
   }
   async function maeSignIn(){
     if (!live) { localStorage.setItem('mt.previewMae', '1'); previewSync(); render(); toast('preview: you\'re signed in as Mae'); return; }
     if (!OWNER) { toast('add your email as ownerEmail in the settings first'); return; }
-    try { await F.signInWithPopup(auth, new F.GoogleAuthProvider()); if (!st.isMae) toast('that account isn\'t the owner email in the settings'); }
-    catch (e) { toast('sign-in didn\'t finish: ' + e.code); }
+    if (!sb) await ready;
+    // Google sign-in opens in this tab and comes back here
+    const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + '#community' } });
+    if (error) toast('sign-in didn\'t start: ' + error.message);
   }
   async function maeSignOut(){
     if (!live) { localStorage.removeItem('mt.previewMae'); previewSync(); render(); return; }
-    await F.signOut(auth);
+    await sb.auth.signOut(); user = null;
   }
 
   /* ---------- rendering ---------- */
@@ -1951,8 +2000,8 @@ const Community = (() => {
     if (photoCache[id]) return photoCache[id];
     let url = '';
     if (!live) url = (L.load().photos || {})[id] || '';
-    else { const snap = await F.getDoc(F.doc(db, 'photos', id)); url = snap.exists() ? snap.data().data : ''; }
-    if (/^data:image\/(jpeg|webp|png);base64,/.test(url)) photoCache[id] = url; else url = '';
+    else if (id.includes('/')) url = SB_URL + '/storage/v1/object/public/photos/' + id;
+    if (/^data:image\/(jpeg|webp|png);base64,/.test(url) || (live && url.startsWith(SB_URL + '/storage/'))) photoCache[id] = url; else url = '';
     return url;
   }
   function hydratePhotos(){
@@ -1978,7 +2027,7 @@ const Community = (() => {
     } finally { URL.revokeObjectURL(url); }
   }
   const who = p => `<span class="handle">@${esc(p.handle)}</span>${p.isMae ? '<span class="mbadge">♡ author</span>' : ''}`;
-  const myUid = () => live ? auth?.currentUser?.uid : st.me?.uid;
+  const myUid = () => live ? user?.id : st.me?.uid;
   const find = id => st.posts.find(p => p.id === id);
 
   function render(){
@@ -2216,31 +2265,38 @@ const Community = (() => {
       addEventListener('storage', e => { if (e.key === CKEY) { st.chat = chatLoad(); renderChat(); } });   // other tabs of this browser
       return;
     }
-    ready.then(() => F.onSnapshot(F.query(F.collection(db, 'chat'), F.orderBy('createdAt', 'desc'), F.limit(120)), snap => {
-      st.chat = snap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() ?? Date.now() })).reverse();
-      st.chatErr = ''; renderChat();
-    }, err => { st.chatErr = err.message; renderChat(); }));
+    ready.then(loadChat);
   }
-  // who's here: each open chat tab writes a heartbeat every 45s; "here now" = seen in the last 2 minutes
+  async function loadChat(){
+    if (!sb) return;
+    const { data, error } = await sb.from('chat').select('*, reactions(uid, emoji)').order('created_at', { ascending: false }).limit(120);
+    if (error) { st.chatErr = error.message; renderChat(); return; }
+    st.chat = data.map(toReply).reverse(); st.chatErr = ''; renderChat();
+  }
+  // who's here: Supabase Realtime presence. Each open chat tab says "I'm here" and drops off when it closes.
+  let presCh = null;
   function heartbeat(){
-    if (!live || !st.profile || document.hidden || tab !== 'chat' || !auth?.currentUser) return;
-    F.setDoc(F.doc(db, 'presence', auth.currentUser.uid), { handle: st.profile.handle, emoji: st.profile.emoji, color: st.profile.color, at: F.serverTimestamp() }).catch(() => {});
+    if (!live || !presCh) return;
+    if (!st.profile || !user || document.hidden || tab !== 'chat') { presCh.untrack().catch(() => {}); return; }
+    presCh.track({ uid: user.id, handle: st.profile.handle, emoji: st.profile.emoji, color: st.profile.color }).catch(() => {});
   }
   function startPresence(){
     if (presOn) return; presOn = true;
     setInterval(renderHere, 30000);
     if (!live) return renderHere();
     ready.then(async () => {
-      await ensureUser(); heartbeat(); presTimer = setInterval(heartbeat, 45000);
+      if (!sb) return;
+      presCh = sb.channel('here', { config: { presence: { key: user?.id || 'guest' + Math.random().toString(36).slice(2) } } });
+      presCh.on('presence', { event: 'sync' }, () => {
+        const seen = {}; Object.values(presCh.presenceState()).forEach(l => l.forEach(x => { if (x.uid && x.handle) seen[x.uid] = { ...x, at: Date.now() }; }));
+        st.here = Object.values(seen); renderHere();
+      }).subscribe(s => { if (s === 'SUBSCRIBED') heartbeat(); });
       document.addEventListener('visibilitychange', heartbeat);
-      F.onSnapshot(F.query(F.collection(db, 'presence'), F.where('at', '>', F.Timestamp.fromMillis(Date.now() - 6 * 36e5))), snap => {
-        st.here = snap.docs.map(d => ({ uid: d.id, ...d.data(), at: d.data().at?.toMillis?.() ?? Date.now() })); renderHere();
-      }, () => {});
     });
   }
   function renderHere(){
     const el = $('#cmHere'); if (!el) return;
-    let list = live ? st.here.filter(h => Date.now() - h.at < 12e4) : (st.profile ? [{ ...st.profile, uid: myUid() }] : []);
+    let list = live ? st.here : (st.profile ? [{ ...st.profile, uid: myUid() }] : []);
     el.innerHTML = list.length ? `<div class="herestack">${list.slice(0, 6).map(h => av(h, 1)).join('')}</div><span class="meta"><i class="ldot"></i>${list.length} here now</span>`
       : `<span class="meta"><i class="ldot"></i>live</span>`;
   }
@@ -2295,9 +2351,7 @@ const Community = (() => {
         const d = L.load(); d.photos ||= {}; Object.assign(m, photoRef(d, pics.chat)); L.save(d);
         const l = chatLoad(); l.push({ ...m, id: 'c' + Date.now(), createdAt: Date.now() }); localStorage.setItem(CKEY, JSON.stringify(l.slice(-200))); st.chat = l;
       } else {
-        const b = F.writeBatch(db);
-        b.set(F.doc(F.collection(db, 'chat')), { ...m, ...photoRef(b, pics.chat), createdAt: F.serverTimestamp() });
-        await b.commit();
+        await insertWith('chat', { text: m.text, ...attachOf('chat'), ...(song ? { song } : {}) }, pics.chat); soon('chat');
       }
       lastChat = Date.now(); if (t) { t.value = ''; t.style.height = ''; } delete gifs.chat; delete pics.chat; Music.clearPending(); drawGif('chat');
       $('#cmList').dataset.bottom = '1'; renderChat(); scrollChat(true);
@@ -2308,13 +2362,13 @@ const Community = (() => {
     const uid = myUid(), mine = (m.reacts || {})[uid] || [], has = mine.includes(e);
     if (!has && mine.length >= 20) return toast('that\'s a lot of reactions ♡');
     if (!live) { const l = chatLoad(), x = l.find(y => y.id === m.id); if (!x) return; x.reacts = x.reacts || {}; x.reacts[uid] = has ? mine.filter(y => y !== e) : [...mine, e]; localStorage.setItem(CKEY, JSON.stringify(l)); st.chat = l; renderChat(); return; }
-    await F.updateDoc(F.doc(db, 'chat', m.id), { ['reacts.' + uid]: has ? F.arrayRemove(e) : F.arrayUnion(e) });
+    await toggleReact('chat_id', m.id, e, has); soon('chat');
   }
   async function delChat(id){
     const m = st.chat.find(x => x.id === id); if (!m) return;
     if (!live) { localStorage.setItem(CKEY, JSON.stringify(chatLoad().filter(x => x.id !== id))); st.chat = chatLoad(); renderChat(); return; }
-    await F.deleteDoc(F.doc(db, 'chat', id));
-    if (photoId(m.photo)) F.deleteDoc(F.doc(db, 'photos', m.photo)).catch(() => {});
+    const { error } = await sb.from('chat').delete().eq('id', id); fail(error);
+    dropPic(m.photo); soon('chat');
   }
 
   /* ---------- my bookshelf: the books a reader owns, on a 3D wooden shelf ---------- */
@@ -2328,14 +2382,33 @@ const Community = (() => {
     if (!live) { try { st.shelf = JSON.parse(localStorage.getItem(SKEY)) || []; } catch { st.shelf = []; } renderShelf(); return; }
     renderShelf();
     // live: the shelf follows the database, so a book added by a store webhook slides onto the shelf without a refresh
-    ready.then(async () => { if (!await ensureUser()) return;
-      F.onSnapshot(F.doc(db, 'libraries', auth.currentUser.uid), snap => { st.shelf = snap.exists() ? (snap.data().books || []) : []; renderShelf(); }, () => {}); });
+    ready.then(async () => { if (!await ensureUser()) return; loadShelf(); });
+  }
+  let shelfCh = null;
+  async function loadShelf(){
+    if (!sb || !user) return;
+    // live updates for this reader's own shelf (a store webhook adding a purchase shows up right away)
+    if (!shelfCh || shelfCh.uid !== user.id) {
+      if (shelfCh) sb.removeChannel(shelfCh);
+      shelfCh = sb.channel('shelf-' + user.id).on('postgres_changes', { event: '*', schema: 'public', table: 'user_library', filter: 'uid=eq.' + user.id }, () => soon('shelf')).subscribe();
+      shelfCh.uid = user.id;
+    }
+    const { data, error } = await sb.from('user_library').select('id, book, edition, signed, added_at').eq('uid', user.id).order('added_at');
+    if (error) return;
+    st.shelf = data.map(r => ({ id: r.id, book: r.book, ed: r.edition, signed: r.signed, at: ms(r.added_at) })); renderShelf();
   }
   async function saveShelf(list){
     list = list.slice(0, 60);
     if (!live) { localStorage.setItem(SKEY, JSON.stringify(list)); st.shelf = list; renderShelf(); return; }
     if (!await ensureUser()) return;
-    await F.setDoc(F.doc(db, 'libraries', auth.currentUser.uid), { books: list, updatedAt: F.serverTimestamp() });
+    // the shelf is one row per book: add the new ones, remove the gone ones, update "signed"
+    const old = st.shelf, keyOf = new Map(old.map(e => [shelfKey(e), e])), next = new Set(list.map(shelfKey));
+    const gone = old.filter(e => !next.has(shelfKey(e)) && e.id), add = list.filter(e => !keyOf.has(shelfKey(e)));
+    const flip = list.filter(e => keyOf.has(shelfKey(e)) && !!keyOf.get(shelfKey(e)).signed !== !!e.signed);
+    if (gone.length) fail((await sb.from('user_library').delete().in('id', gone.map(e => e.id))).error);
+    if (add.length) fail((await sb.from('user_library').insert(add.map(e => ({ book: e.book, edition: e.ed, signed: !!e.signed })))).error);
+    for (const e of flip) fail((await sb.from('user_library').update({ signed: !!e.signed }).eq('id', keyOf.get(shelfKey(e)).id)).error);
+    await loadShelf();
   }
   function bookSpine(e, b, isNew){
     const pages = +b.pages || 320, w = Math.max(24, Math.min(64, Math.round(pages / 8))), h = 236, D = 158;

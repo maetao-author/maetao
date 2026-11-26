@@ -11,4 +11,4 @@ books, prices, buy links, bio, events, letters, newsletter and contact links, so
 Served with GitHub Pages from the `main` branch. Any change pushed to `main` goes live in a minute or two.
 
 ## Community board
-Runs in preview mode until a free Firebase database is connected. See `SETUP-community.md` and `firestore.rules`.
+Runs in preview mode until a free Supabase database is connected. See `SETUP-community.md` and `supabase/schema.sql`.
