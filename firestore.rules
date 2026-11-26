@@ -22,7 +22,8 @@ service cloud.firestore {
     function okGif(d) { return (!('gif' in d) || gifOk(d.gif)) && (!('sticker' in d) || gifOk(d.sticker)); }
     // a shared song card in the chat (an iTunes preview)
     function okSong(d) {
-      return !('song' in d) || (d.song is map && d.song.keys().hasOnly(['id', 't', 'a', 'art', 'p'])
+      return !('song' in d) || (d.song is map && d.song.keys().hasOnly(['id', 't', 'a', 'art', 'p', 'y'])
+        && (!('y' in d.song) || (d.song.y is string && d.song.y.matches('^[A-Za-z0-9_-]{11}$')))
         && d.song.id is string && d.song.id.matches('^[0-9]{1,15}$')
         && d.song.t is string && d.song.t.size() <= 120 && d.song.a is string && d.song.a.size() <= 120
         && d.song.art is string && d.song.art.matches('^https://is[0-9]-ssl[.]mzstatic[.]com/.{1,400}$')

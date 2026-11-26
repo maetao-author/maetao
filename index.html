@@ -119,10 +119,19 @@ window.MAE_SITE = {
     open: true,
     blurb: "Get free early eBook copies of new releases before anyone else, in exchange for an honest review."
   },
-  music: {   // the CD rack in the community: each line is "song title artist", looked up on iTunes (30-second previews)
+  music: {   // the CD rack in the community. "song" is looked up on iTunes for the album cover.
+              // "youtube" is the video that plays the full song (paste any YouTube link). Without one, it plays a 30-second preview.
     title: "the Deuce playlist",
-    songs: ["Cruel Summer Taylor Swift", "Love Story Taylor Swift", "Espresso Sabrina Carpenter", "Electric Love BORNS",
-            "golden hour JVKE", "Die With A Smile Lady Gaga Bruno Mars", "Yellow Coldplay", "Sparks Fly Taylor Swift"]
+    songs: [
+      { song: "Cruel Summer Taylor Swift",             youtube: "https://youtu.be/ic8j13piAhQ" },
+      { song: "Love Story Taylor Swift",               youtube: "https://youtu.be/aXzVF3XeS8M" },
+      { song: "Espresso Sabrina Carpenter",            youtube: "https://youtu.be/eVli-tstM5E" },
+      { song: "Electric Love BORNS",                   youtube: "https://youtu.be/RYr96YYEaZY" },
+      { song: "golden hour JVKE",                      youtube: "https://youtu.be/PEM0Vs8jf1w" },
+      { song: "Die With A Smile Lady Gaga Bruno Mars", youtube: "https://youtu.be/kPa7bsKwL-c" },
+      { song: "Yellow Coldplay",                       youtube: "https://youtu.be/yKNxeF4KMsY" },
+      { song: "Sparks Fly Taylor Swift",               youtube: "https://youtu.be/oKar-tF__ac" }
+    ]
   },
   community: {
     ownerEmail: "",                 // the Google account you'll sign in with to reply as Mae
@@ -583,7 +592,9 @@ footer .brand{justify-content:center;font-size:30px;margin-bottom:6px}
 #miniPlayer .mtxt{border:0;background:none;color:inherit;text-align:left;cursor:pointer;min-width:0;flex:1;font-family:var(--body);display:grid;line-height:1.2;padding:0 4px}
 #miniPlayer .mtxt b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#miniPlayer .mtxt span{font-size:11.5px;color:#d8c4c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #miniPlayer .mbtn{width:30px;height:30px}
-@media (max-width:640px){#miniPlayer{bottom:70px;right:12px}.cmtabs{border-radius:22px}}
+#ytDock{position:fixed;right:16px;bottom:74px;z-index:70;width:200px;height:200px;border-radius:18px;overflow:hidden;background:#1d1416;box-shadow:0 0 0 4px var(--cocoa),0 18px 36px -14px rgba(30,15,20,.7);animation:popin .4s cubic-bezier(.34,1.5,.5,1)}
+#ytDock iframe{display:block;width:200px;height:200px;border:0}
+@media (max-width:640px){#miniPlayer{bottom:70px;right:12px}#ytDock{bottom:128px;right:12px}.cmtabs{border-radius:22px}}
 /* my bookshelf (3D) */
 .shelfcard{overflow:visible}
 .shelf3d{position:relative;perspective:1400px;perspective-origin:50% 30%;padding:40px 0 0;transition:filter .4s}
@@ -2486,11 +2497,50 @@ const Music = (() => {
   const okArt = u => /^https:\/\/is[0-9]-ssl\.mzstatic\.com\/[^\s"'<>]{1,400}$/.test(u || '');
   const okPrev = u => /^https:\/\/audio-ssl\.itunes\.apple\.com\/[^\s"'<>]{1,500}$/.test(u || '');
   const okSong = x => x && /^[0-9]{1,15}$/.test(x.id || '') && typeof x.t === 'string' && typeof x.a === 'string' && okArt(x.art) && okPrev(x.p);
+  const okY = y => /^[A-Za-z0-9_-]{11}$/.test(y || '');
+  const ytId = v => { const m = String(v || '').trim().match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/); return m ? m[1] : okY(String(v || '').trim()) ? String(v).trim() : ''; };
+  const slim = x => { const o = { id: x.id, t: x.t, a: x.a, art: x.art, p: x.p }; if (okY(x.y)) o.y = x.y; return o; };
   const load = k => { try { return JSON.parse(localStorage.getItem(k)) || null; } catch { return null; } };
   const keep = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const cache = load(CK) || {};
   let picks = (load(PK) || []).filter(okSong), list = [], cur = -1, el = null, pending = null, built = false;
   const audio = new Audio(); audio.preload = 'none';
+  /* full songs: YouTube's own embed player (the same player gaf210 makes). It must stay visible, so it sits above the mini player. */
+  let yt = null, ytApi = null, ytState = -1, mode = 'audio', tick = 0;
+  function loadYT(){
+    if (ytApi) return ytApi;
+    return ytApi = new Promise(ok => {
+      if (window.YT && YT.Player) return ok();
+      const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev && prev(); ok(); };
+      const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; sc.onerror = () => { ytApi = null; ok(); }; document.head.appendChild(sc);
+    });
+  }
+  function dock(){
+    let d = $('#ytDock');
+    if (!d) { d = document.createElement('div'); d.id = 'ytDock'; d.hidden = true; d.innerHTML = '<div id="ytFrame"></div>'; document.body.appendChild(d); }
+    return d;
+  }
+  const isOn = () => mode === 'yt' ? ytState === 1 || ytState === 3 : !audio.paused;
+  function preview(x){ mode = 'audio'; dock().hidden = true; audio.src = x.p; audio.play().catch(() => {}); draw(); }
+  async function playYT(x){
+    mode = 'yt'; ytState = 3; dock().hidden = false; draw();
+    await loadYT();
+    if (!(window.YT && YT.Player)) return preview(x);           // YouTube blocked: fall back to the preview
+    if (list[cur] !== x) return;                                   // they picked another CD while it loaded
+    if (yt && yt.loadVideoById) return yt.loadVideoById(x.y);
+    yt = new YT.Player('ytFrame', { width: 200, height: 200, videoId: x.y,
+      playerVars: { autoplay: 1, playsinline: 1, rel: 0, modestbranding: 1 },
+      events: {
+        onReady: e => { e.target.playVideo(); },
+        onStateChange: e => { ytState = e.data; if (e.data === 0 && list.length) play((cur + 1) % list.length); else draw(); },
+        onError: () => { const y = list[cur]; if (y && mode === 'yt') { y.y = ''; preview(y); } }   // video can't be embedded: play the preview
+      } });
+  }
+  setInterval(() => {
+    if (mode !== 'yt' || !yt || !yt.getCurrentTime) return;
+    const t = yt.getCurrentTime() || 0, d = yt.getDuration() || 0, p = $('#muProg'), n = $('#muNow'), e = $('#muEnd');
+    if (p) p.style.width = (d ? t / d * 100 : 0) + '%'; if (n) n.textContent = fmtT(t); if (e && d) e.textContent = fmtT(d);
+  }, 500);
   // iTunes Search API via JSONP (works from any website without a key)
   function jsonp(url){
     return new Promise((ok, no) => {
@@ -2531,11 +2581,15 @@ const Music = (() => {
           <div class="msearch"><input type="search" id="muQ" placeholder="find a song to add…" aria-label="search songs" autocomplete="off"><div class="mres" id="muRes"></div></div></div>
         <div class="deck" id="muDeck"></div>
         <div class="rack"><div class="rackrow" id="muRack"><div class="meta" style="padding:40px">dusting off the CDs…</div></div><div class="rackwood"></div></div>
-        <p class="meta" style="margin-top:12px">30-second previews from Apple Music · tap a CD to play it</p></div>`;
+        <p class="meta" style="margin-top:12px">tap a CD to play the full song ♡ · songs you add from search play a 30-second preview</p></div>`;
       let tmr;
       $('#muQ').oninput = e => { clearTimeout(tmr); const q = e.target.value.trim(); tmr = setTimeout(() => findSongs(q), 350); };
       $('#muRack').onclick = e => { const c = e.target.closest('.cdx'); if (c) play(+c.dataset.i); };
-      const songs = await Promise.all((M.songs || []).map(q => resolve(String(q))));
+      loadYT();
+      const songs = await Promise.all((M.songs || []).map(async e => {
+        const q = typeof e === 'string' ? e : String(e && e.song || ''), y = typeof e === 'string' ? '' : ytId(e && e.youtube);
+        const r = q && await resolve(q); return r ? { ...r, y } : null;
+      }));
       list = [...songs.filter(Boolean), ...picks.filter(p => !songs.some(s => s && s.id === p.id))];
       if (!list.length) $('#muRack').innerHTML = '<div class="meta" style="padding:40px">couldn\'t reach Apple Music right now. try again in a moment?</div>';
     }
@@ -2557,11 +2611,12 @@ const Music = (() => {
     if (list.length) $('#muRack').innerHTML = list.map(cdHTML).join('');
     const x = list[cur];
     $('#muDeck').innerHTML = x ? `<div class="deckcase"><img src="${esc(x.art)}" alt=""></div>
-      <div class="disc ${audio.paused ? '' : 'spin'}" style="--art:url('${esc(x.art)}')"><i></i></div>
+      <div class="disc ${isOn() ? 'spin' : ''}" style="--art:url('${esc(x.art)}')"><i></i></div>
       <div class="deckinfo"><div class="lab">now playing</div><h4>${esc(x.t)}</h4><div class="meta">${esc(x.a)}${x.al ? ' · ' + esc(x.al) : ''}</div>
-        <div class="mbar"><span id="muNow">0:00</span><i><b id="muProg"></b></i><span>0:30</span></div>
+        <div class="mbar"><span id="muNow">0:00</span><i><b id="muProg"></b></i><span id="muEnd">${mode === 'yt' ? '–:––' : '0:30'}</span></div>
+        <div class="meta" style="margin-top:4px">${mode === 'yt' ? '♫ full song · playing on YouTube (bottom corner)' : '30-second preview'}</div>
         <div class="crow" style="gap:6px;margin-top:10px"><button class="pbtn" onclick="Music.step(-1)" aria-label="previous">⏮</button>
-          <button class="btn dark sm" onclick="Music.toggle()">${audio.paused ? '▶ play' : '❚❚ pause'}</button><button class="pbtn" onclick="Music.step(1)" aria-label="next">⏭</button>
+          <button class="btn dark sm" onclick="Music.toggle()">${isOn() ? '❚❚ pause' : '▶ play'}</button><button class="pbtn" onclick="Music.step(1)" aria-label="next">⏭</button>
           <button class="pbtn" onclick="Music.share()">🎵 share to chat</button>${x.link ? `<a class="pbtn" href="${esc(x.link)}" target="_blank" rel="noopener">full song ↗</a>` : ''}</div></div>`
       : `<div class="deckidle"><div class="disc"><i></i></div><div><span class="hand" style="font-size:26px">pick a CD ♡</span><br><span class="meta">it keeps playing while you chat</span></div></div>`;
     mini();
@@ -2569,35 +2624,41 @@ const Music = (() => {
   function mini(){
     let m = $('#miniPlayer');
     const x = list[cur];
-    if (!x) { m?.remove(); return; }
+    if (!x) { m?.remove(); dock().hidden = true; return; }
     if (!m) { m = document.createElement('div'); m.id = 'miniPlayer'; document.body.appendChild(m); }
-    m.innerHTML = `<div class="disc sm ${audio.paused ? '' : 'spin'}" style="--art:url('${esc(x.art)}')"><i></i></div>
+    m.innerHTML = `<div class="disc sm ${isOn() ? 'spin' : ''}" style="--art:url('${esc(x.art)}')"><i></i></div>
       <button class="mtxt" onclick="go('community');Community.setTab('music')"><b>${esc(x.t)}</b><span>${esc(x.a)}</span></button>
-      <button class="mbtn" onclick="Music.toggle()" aria-label="${audio.paused ? 'play' : 'pause'}">${audio.paused ? '▶' : '❚❚'}</button>
+      <button class="mbtn" onclick="Music.toggle()" aria-label="${isOn() ? 'pause' : 'play'}">${isOn() ? '❚❚' : '▶'}</button>
       <button class="mbtn" onclick="Music.stop()" aria-label="stop">✕</button>`;
   }
   function play(i){
     if (!list[i]) return;
     if (i === cur) return toggle();
-    cur = i; audio.src = list[i].p; audio.play().catch(() => {}); draw();
+    cur = i; audio.pause(); if (yt && yt.pauseVideo) yt.pauseVideo();
+    const x = list[i]; okY(x.y) ? playYT(x) : preview(x);
   }
-  function toggle(){ if (cur < 0) return play(0); audio.paused ? audio.play().catch(() => {}) : audio.pause(); }
+  function toggle(){
+    if (cur < 0) return play(0);
+    if (mode === 'yt') { if (!yt || !yt.playVideo) return; isOn() ? yt.pauseVideo() : yt.playVideo(); return; }
+    audio.paused ? audio.play().catch(() => {}) : audio.pause();
+  }
   audio.onplay = audio.onpause = () => { draw(); };
   audio.onended = () => { if (list.length) play((cur + 1) % list.length); };
   audio.ontimeupdate = () => { const p = $('#muProg'), n = $('#muNow'); if (p) p.style.width = (audio.currentTime / (audio.duration || 30) * 100) + '%'; if (n) n.textContent = fmtT(audio.currentTime); };
   function card(x){
     if (!okSong(x)) return '';
     return `<div class="songcard"><img src="${esc(x.art)}" alt=""><div><b>${esc(x.t)}</b><br><span class="meta">${esc(x.a)}</span></div>
-      <button class="mbtn" data-song='${esc(JSON.stringify({ id: x.id, t: x.t, a: x.a, art: x.art, p: x.p }))}' onclick="Music.playCard(this)" aria-label="play">▶</button></div>`;
+      <button class="mbtn" data-song='${esc(JSON.stringify(slim(x)))}' onclick="Music.playCard(this)" aria-label="play${okY(x.y) ? ' full song' : ' preview'}">▶</button></div>`;
   }
   return {
     mount, card, step(d){ if (list.length) play(((cur < 0 ? 0 : cur) + d + list.length) % list.length); }, toggle,
-    stop(){ audio.pause(); audio.removeAttribute('src'); cur = -1; draw(); mini(); },
-    share(){ const x = list[cur]; if (!x) return; pending = { id: x.id, t: x.t, a: x.a, art: x.art, p: x.p }; Community.songToChat(); },
+    stop(){ audio.pause(); audio.removeAttribute('src'); if (yt && yt.stopVideo) yt.stopVideo(); mode = 'audio'; ytState = -1; cur = -1; draw(); mini(); },
+    share(){ const x = list[cur]; if (!x) return; pending = slim(x); Community.songToChat(); },
     pending: () => pending, clearPending(){ pending = null; },
     pendingHTML: () => pending ? `<div class="gifprev songprev">${card(pending)}<button type="button" aria-label="remove song" onclick="Music.clearPending();Community.setTab('chat');document.getElementById('cmChatGif').innerHTML=''">✕</button></div>` : '',
     playCard(b){
       let x; try { x = JSON.parse(b.dataset.song); } catch { return; } if (!okSong(x)) return;
+      if (!okY(x.y)) delete x.y;
       let i = list.findIndex(y => y.id === x.id);
       if (i < 0) { list.push(x); i = list.length - 1; }
       play(i);
