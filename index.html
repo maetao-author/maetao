@@ -432,8 +432,9 @@ footer .brand{justify-content:center;font-size:30px;margin-bottom:6px}
 .emos button,.cols button{border:0;border-radius:14px;height:44px;font-size:20px;cursor:pointer;background:var(--soft);transition:transform .2s}
 .emos button.on,.cols button.on{box-shadow:0 0 0 3px var(--rose);transform:scale(1.06)}
 .cols{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-.av2.ch{overflow:hidden;place-items:end center}
-.av2.ch img{width:124%;max-width:none;margin-bottom:-12%;display:block}
+.av2.ch{background:none;box-shadow:none;border-radius:0;overflow:visible;place-items:end center}
+.av2.ch img{width:112%;max-width:none;display:block;filter:drop-shadow(0 3px 4px rgba(110,60,72,.28))}
+.herestack .av2.ch{box-shadow:none;margin-left:-6px}.herestack .av2.ch:first-child{margin-left:0}
 .photo{display:block;max-width:min(100%,420px);max-height:420px;border-radius:16px;margin:4px 0 10px;background:var(--soft);cursor:zoom-in;min-height:60px;min-width:80px;object-fit:cover}
 .reply .photo{max-width:min(100%,260px);max-height:260px;margin:6px 0 2px}
 .attach{display:flex;gap:12px;flex-wrap:wrap}
@@ -1917,7 +1918,7 @@ const Community = (() => {
   /* ---------- rendering ---------- */
   const ago = t => { const s = (Date.now() - t) / 1000; if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + 'm ago'; if (s < 86400) return Math.floor(s / 3600) + 'h ago'; if (s < 604800) return Math.floor(s / 86400) + 'd ago'; return new Date(t).toLocaleDateString('en', { month: 'short', day: 'numeric' }); };
   const av = (p, sm) => { const bg = /^#[0-9a-f]{6}$/i.test(p.color) ? p.color : '#f0c1c7';
-    return isChar(p.emoji) ? `<div class="av2 ch ${sm ? 'sm' : ''}" style="background:${bg}"><img src="${charSrc(p.emoji)}" alt="" loading="lazy"></div>`
+    return isChar(p.emoji) ? `<div class="av2 ch ${sm ? 'sm' : ''}"><img src="${charSrc(p.emoji)}" alt="" loading="lazy"></div>`
       : `<div class="av2 ${sm ? 'sm' : ''}" style="background:${bg}">${esc(p.emoji || '♡')}</div>`; };
   function reactsHTML(t, pid, rid, noAdd){
     const me = myUid(), c = new Map();
