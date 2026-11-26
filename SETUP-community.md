@@ -24,7 +24,7 @@ Readers never make an account: the site signs them in anonymously in the backgro
 
 1. **Project Settings → API Keys** (or the **Connect** button at the top): copy the **Project URL** and the **publishable key** (starts with `sb_publishable_`). Never use the *secret* key on the website.
 2. In `index.html`, paste them into `community.supabase` in the settings block: `supabase: { url: "https://xxxx.supabase.co", key: "sb_publishable_…" }`.
-3. Upload the site. Open the **community** tab, scroll to "house rules" and click **are you Mae? sign in**. After Google sends you back you'll see the "♡ author" badge, pin / delete / status buttons, and **mae's desk** with signing notes and early reader applications.
+3. Upload the site. Open your site with `#mae-desk` at the end of the address (e.g. `https://maetao-author.github.io/maetao/#mae-desk`). Readers never see the sign-in link; that address shows it under "house rules". Click **are you Mae? sign in**. After Google sends you back you'll see the "♡ author" badge, pin / delete / status buttons, and **mae's desk** with signing notes and early reader applications.
 
 ## What's stored where
 

@@ -1987,6 +1987,8 @@ const Community = (() => {
     const { data, error } = await sb.from(kind === 'signings' ? 'signings' : 'arc').select('*').order('created_at', { ascending: false }).limit(200); fail(error);
     return data.map(d => ({ ...d, ...(kind === 'signings' ? { signTo: d.sign_to } : {}), createdAt: ms(d.created_at) }));
   }
+  // the sign-in link only shows after opening the site with #mae-desk (readers never see it). The database still decides who Mae is.
+  const maeDoor = () => { try { return sessionStorage.getItem('mt.maeDoor') === '1'; } catch { return false; } };
   async function maeSignIn(){
     if (!live) { localStorage.setItem('mt.previewMae', '1'); previewSync(); render(); toast('preview: you\'re signed in as Mae'); return; }
     if (!sb) await ready;
@@ -2142,7 +2144,7 @@ const Community = (() => {
       ${S.arc?.open ? `<div class="card dark"><div class="lab">early reader team</div><h3 class="h2" style="font-size:24px;color:#fff4f1">read it <em style="color:var(--pink)">first</em></h3>
         <p style="color:#d8c4c7;margin:4px 0 12px;font-size:14px">${esc(S.arc.blurb)}</p><button class="btn rose sm" onclick="openArc()">apply ♡</button></div>` : ''}
       <div class="card"><div class="lab">house rules</div><p style="margin:6px 0 0;font-size:14px;color:var(--ink2)">Be kind, no spoilers without a warning, and keep it cosy. Posts that break the rules get removed.</p>
-        <p class="meta" style="margin-top:12px">${st.isMae ? `signed in as Mae · <a href="javascript:Community.signOut()" style="color:var(--deeprose)">sign out</a>` : `are you Mae? <a href="javascript:Community.signIn()" style="color:var(--deeprose)">sign in</a>`}</p></div>`;
+        <p class="meta" style="margin-top:12px">${st.isMae ? `signed in as Mae · <a href="javascript:Community.signOut()" style="color:var(--deeprose)">sign out</a>` : maeDoor() ? `are you Mae? <a href="javascript:Community.signIn()" style="color:var(--deeprose)">sign in</a>` : ''}</p></div>`;
   }
 
   /* ---------- profile modal ---------- */
@@ -2985,6 +2987,7 @@ function go(v){
 }
 function route(){
   const h = decodeURIComponent(location.hash.slice(1));
+  if (h === 'mae-desk') { try { sessionStorage.setItem('mt.maeDoor', '1'); } catch {} location.replace('#community'); return; }
   const m = h.match(/^book\/(.+)/);
   if (m) { if (current !== 'books') go('books'); openBook(m[1]); return; }
   closeModal(true);
