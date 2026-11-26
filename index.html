@@ -125,7 +125,7 @@ window.MAE_SITE = {
     songs: [
       { song: "Cruel Summer Taylor Swift",             youtube: "https://youtu.be/ic8j13piAhQ" },
       { song: "Love Story Taylor Swift",               youtube: "https://youtu.be/aXzVF3XeS8M" },
-      { song: "Espresso Sabrina Carpenter",            youtube: "https://youtu.be/eVli-tstM5E" },
+      { song: "Espresso Sabrina Carpenter Short n' Sweet", youtube: "https://youtu.be/eVli-tstM5E" },
       { song: "Electric Love BORNS",                   youtube: "https://youtu.be/RYr96YYEaZY" },
       { song: "golden hour JVKE",                      youtube: "https://youtu.be/PEM0Vs8jf1w" },
       { song: "Die With A Smile Lady Gaga Bruno Mars", youtube: "https://youtu.be/kPa7bsKwL-c" },
@@ -2506,7 +2506,7 @@ const Music = (() => {
   let picks = (load(PK) || []).filter(okSong), list = [], cur = -1, el = null, pending = null, built = false;
   const audio = new Audio(); audio.preload = 'none';
   /* full songs: YouTube's own embed player (the same player gaf210 makes). It must stay visible, so it sits above the mini player. */
-  let yt = null, ytApi = null, ytState = -1, mode = 'audio', tick = 0;
+  let yt = null, ytApi = null, ytState = -1, mode = 'audio', want = false;   // want: they pressed play (an ad or buffering still counts as playing)
   function loadYT(){
     if (ytApi) return ytApi;
     return ytApi = new Promise(ok => {
@@ -2520,10 +2520,10 @@ const Music = (() => {
     if (!d) { d = document.createElement('div'); d.id = 'ytDock'; d.hidden = true; d.innerHTML = '<div id="ytFrame"></div>'; document.body.appendChild(d); }
     return d;
   }
-  const isOn = () => mode === 'yt' ? ytState === 1 || ytState === 3 : !audio.paused;
+  const isOn = () => mode === 'yt' ? want && ytState !== 2 && ytState !== 0 : !audio.paused;
   function preview(x){ mode = 'audio'; dock().hidden = true; audio.src = x.p; audio.play().catch(() => {}); draw(); }
   async function playYT(x){
-    mode = 'yt'; ytState = 3; dock().hidden = false; draw();
+    mode = 'yt'; ytState = -1; want = true; dock().hidden = false; draw();
     await loadYT();
     if (!(window.YT && YT.Player)) return preview(x);           // YouTube blocked: fall back to the preview
     if (list[cur] !== x) return;                                   // they picked another CD while it loaded
@@ -2532,7 +2532,7 @@ const Music = (() => {
       playerVars: { autoplay: 1, playsinline: 1, rel: 0, modestbranding: 1 },
       events: {
         onReady: e => { e.target.playVideo(); },
-        onStateChange: e => { ytState = e.data; if (e.data === 0 && list.length) play((cur + 1) % list.length); else draw(); },
+        onStateChange: e => { ytState = e.data; if (e.data === 1) want = true; if (e.data === 2) want = false; if (e.data === 0 && list.length) play((cur + 1) % list.length); else draw(); },
         onError: () => { const y = list[cur]; if (y && mode === 'yt') { y.y = ''; preview(y); } }   // video can't be embedded: play the preview
       } });
   }
@@ -2639,7 +2639,7 @@ const Music = (() => {
   }
   function toggle(){
     if (cur < 0) return play(0);
-    if (mode === 'yt') { if (!yt || !yt.playVideo) return; isOn() ? yt.pauseVideo() : yt.playVideo(); return; }
+    if (mode === 'yt') { if (!yt || !yt.playVideo) return; if (isOn()) { want = false; yt.pauseVideo(); } else { want = true; yt.playVideo(); } draw(); return; }
     audio.paused ? audio.play().catch(() => {}) : audio.pause();
   }
   audio.onplay = audio.onpause = () => { draw(); };
@@ -2652,7 +2652,7 @@ const Music = (() => {
   }
   return {
     mount, card, step(d){ if (list.length) play(((cur < 0 ? 0 : cur) + d + list.length) % list.length); }, toggle,
-    stop(){ audio.pause(); audio.removeAttribute('src'); if (yt && yt.stopVideo) yt.stopVideo(); mode = 'audio'; ytState = -1; cur = -1; draw(); mini(); },
+    stop(){ audio.pause(); audio.removeAttribute('src'); if (yt && yt.stopVideo) yt.stopVideo(); mode = 'audio'; ytState = -1; want = false; cur = -1; draw(); mini(); },
     share(){ const x = list[cur]; if (!x) return; pending = slim(x); Community.songToChat(); },
     pending: () => pending, clearPending(){ pending = null; },
     pendingHTML: () => pending ? `<div class="gifprev songprev">${card(pending)}<button type="button" aria-label="remove song" onclick="Music.clearPending();Community.setTab('chat');document.getElementById('cmChatGif').innerHTML=''">✕</button></div>` : '',
