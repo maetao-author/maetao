@@ -9,16 +9,35 @@ service cloud.firestore {
 
     function signedIn() { return request.auth != null; }
     function isMae() {
-      return signedIn() && request.auth.token.email != null
-        && request.auth.token.email_verified == true
-        && request.auth.token.email.lower() == owner();
+      // .get() so anonymous readers (who have no email) simply aren't Mae instead of causing an error
+      return signedIn() && request.auth.token.get('email', '') is string
+        && request.auth.token.get('email_verified', false) == true
+        && request.auth.token.get('email', '').lower() == owner();
     }
     function prof() { return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data; }
     function text(t, max) { return t is string && t.size() > 0 && t.size() <= max; }
     function reserved(h) { return h in ['mae', 'maetao', 'mae_tao', 'mae.tao', 'admin', 'official', 'moderator']; }
+    // a GIPHY GIF id (optional on posts and replies)
+    function okGif(d) { return !('gif' in d) || (d.gif is string && d.gif.matches('^[A-Za-z0-9]{4,40}$')); }
+    // a photo id must point at a photo the same person is saving in the same write
+    function okPhoto(d) {
+      return !('photo' in d) || (d.photo is string && d.photo.matches('^[A-Za-z0-9]{6,40}$')
+        && getAfter(/databases/$(database)/documents/photos/$(d.photo)).data.uid == request.auth.uid);
+    }
+    // a post needs words, a GIF or a photo
+    function okBody(d) { return d.text is string && d.text.size() <= 1000 && (d.text.size() > 0 || 'gif' in d || 'photo' in d) && okGif(d) && okPhoto(d); }
+    // emoji reactions live in reacts.{uid} = [emoji, …]; you can only change your own list
+    function reactOnly() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reacts'])
+        && request.resource.data.reacts is map
+        && request.resource.data.reacts.diff(resource.data.get('reacts', {})).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.reacts.get(request.auth.uid, []) is list
+        && request.resource.data.reacts.get(request.auth.uid, []).size() <= 20;
+    }
     function okHandle(h) { return h is string && h.matches('^[a-z0-9_.]{3,20}$') && (!reserved(h) || isMae()); }
 
-    // reader profiles: @handle, emoji, colour
+    // reader profiles: @handle, character ("c:01"–"c:60") or emoji, colour
     match /profiles/{uid} {
       allow read: if true;
       allow create, update: if signedIn() && request.auth.uid == uid
@@ -40,13 +59,13 @@ service cloud.firestore {
     match /posts/{id} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'type', 'text', 'hearts', 'replyCount', 'status', 'pinned', 'isMae', 'maeReplied', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'type', 'text', 'gif', 'photo', 'hearts', 'replyCount', 'status', 'pinned', 'isMae', 'maeReplied', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.handle == prof().handle
         && request.resource.data.emoji == prof().emoji
         && request.resource.data.color == prof().color
         && request.resource.data.type in ['chat', 'ask', 'idea']
-        && text(request.resource.data.text, 1000)
+        && okBody(request.resource.data)
         && request.resource.data.hearts.size() == 0
         && request.resource.data.replyCount == 0
         && request.resource.data.status == ''
@@ -56,6 +75,8 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
 
       allow update: if isMae()
+        // anyone signed in can add or remove their own emoji reactions
+        || reactOnly()
         // anyone signed in can add or remove only their own heart / vote
         || (signedIn()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hearts'])
@@ -71,16 +92,30 @@ service cloud.firestore {
       match /replies/{rid} {
         allow read: if true;
         allow create: if signedIn()
-          && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'text', 'isMae', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['uid', 'handle', 'emoji', 'color', 'text', 'gif', 'photo', 'isMae', 'createdAt'])
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.handle == prof().handle
           && request.resource.data.emoji == prof().emoji
           && request.resource.data.color == prof().color
-          && text(request.resource.data.text, 1000)
+          && okBody(request.resource.data)
           && request.resource.data.isMae == isMae()
           && request.resource.data.createdAt == request.time;
+        allow update: if isMae() || reactOnly();
         allow delete: if isMae() || (signedIn() && resource.data.uid == request.auth.uid);
       }
+    }
+
+    // photos readers attach to posts and replies (small JPEGs, under about 700 KB)
+    match /photos/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'data', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.data is string
+        && request.resource.data.data.size() < 750000
+        && request.resource.data.data.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')
+        && request.resource.data.createdAt == request.time;
+      allow delete: if isMae() || (signedIn() && resource.data.uid == request.auth.uid);
     }
 
     // private: only Mae can read these
