@@ -25,7 +25,7 @@
      2. Authentication → Sign In / Providers → turn on "Allow anonymous sign-ins" and Google (turn Email off)
      3. Authentication → URL Configuration → Site URL = your website's address
      4. Project Settings → API Keys → copy the Project URL and the publishable key into community.supabase below
-     5. Put the Google email you'll sign in with as ownerEmail below. Only that account can reply as you.
+     Only the Google email you put in schema.sql can reply as you. It isn't stored in this file.
 
    NEWSLETTER: paste the form "action" URL from your email service
      (Buttondown, Mailchimp, Kit/ConvertKit, MailerLite all give you one), and set the field name it expects.
@@ -134,7 +134,6 @@ window.MAE_SITE = {
     ]
   },
   community: {
-    ownerEmail: "",                 // the Google account you'll sign in with to reply as Mae
     supabase: { url: "", key: "" },  // Project URL (https://xxxx.supabase.co) and the publishable key (sb_publishable_…). Never the secret key.
     firebase: { apiKey: "", authDomain: "", projectId: "", appId: "" },   // only for @mention notifications (coming next)
     giphyKey: "lEBqE1zDvcnUJ3Zq86PhdUnwY14QSAwG"                  // GIF search: paste your GIPHY API key here (developers.giphy.com → Create an App → API)
@@ -1729,7 +1728,6 @@ const Community = (() => {
   const C = S.community || {}, SBC = C.supabase || {};
   const SB_URL = String(SBC.url || '').trim().replace(/\/+$/, ''), SB_KEY = String(SBC.key || '').trim();
   const live = /^https:\/\/[a-z0-9.-]+$/i.test(SB_URL) && !!SB_KEY;
-  const OWNER = String(C.ownerEmail || '').trim().toLowerCase();
   const RESERVED = ['mae', 'maetao', 'mae_tao', 'mae.tao', 'admin', 'official', 'moderator'];
   const EMOJIS = ['🌸', '🍓', '🧸', '🐰', '🌙', '☕', '📚', '🦋', '🍰', '🌷', '✨', '🐱'];
   const COLORS = ['#f0c1c7', '#efcdc9', '#c7c8b9', '#dbb4bc', '#f6d6a8', '#c9d8e8'];
@@ -1784,7 +1782,6 @@ const Community = (() => {
   const who4 = r => ({ id: r.id, uid: r.uid, handle: r.handle, emoji: r.emoji, color: r.color, text: r.text, isMae: r.is_mae, createdAt: ms(r.created_at), reacts: reactsOf(r.reactions), ...attOf(r) });
   const toPost = r => ({ ...who4(r), type: r.type, hearts: (r.post_hearts || []).map(h => h.uid), replyCount: r.reply_count, status: r.status, pinned: r.pinned, maeReplied: r.mae_replied });
   const toReply = r => ({ ...who4(r), ...(r.parent ? { parent: r.parent } : {}) });
-  const ownerOk = u => !!(u && !u.is_anonymous && OWNER && (u.email || '').toLowerCase() === OWNER && ((u.app_metadata || {}).providers || []).includes('google'));
   const fail = error => { if (error) { const e = new Error(error.message); e.code = error.code; throw e; } };
   // changes from other people arrive as "something changed in table X": refetch that list (bunched up, 200 ms)
   const timers = {};
@@ -1810,7 +1807,9 @@ const Community = (() => {
     if (!window.supabase) await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = SB_JS; sc.onload = ok; sc.onerror = () => no(new Error('couldn\'t load Supabase')); document.head.appendChild(sc); });
     sb = window.supabase.createClient(SB_URL, SB_KEY);
     const onUser = async u => {
-      user = u; st.me = u ? { uid: u.id } : null; st.isMae = ownerOk(u);
+      user = u; st.me = u ? { uid: u.id } : null;
+      // the database decides who Mae is (supabase/schema.sql), so your email never has to be in this file
+      st.isMae = !!(u && !u.is_anonymous) && (await sb.rpc('is_mae').then(r => r.data === true, () => false));
       if (u && !u.is_anonymous && !st.isMae) toast('that account isn\'t the owner email in the settings');
       if (!u) { st.profile = null; st.profileUid = null; }
       else if (st.profileUid !== u.id) {
@@ -1965,7 +1964,6 @@ const Community = (() => {
   }
   async function maeSignIn(){
     if (!live) { localStorage.setItem('mt.previewMae', '1'); previewSync(); render(); toast('preview: you\'re signed in as Mae'); return; }
-    if (!OWNER) { toast('add your email as ownerEmail in the settings first'); return; }
     if (!sb) await ready;
     // Google sign-in opens in this tab and comes back here
     const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + '#community' } });
