@@ -8,7 +8,7 @@ export const C = {
   rose: '#d98f97', deeprose: '#c66a77', sage: '#868a76', sageL: '#c7c8b9', sageXL: '#e6e7dc',
   cocoa: '#2f2427', ink: '#3a2b2f', ink2: '#7d6a6e', muted: '#9a8a8d'
 };
-const ROUND = "'Fredoka','Nunito','Quicksand','Arial Rounded MT Bold',Arial,sans-serif";
+const HEAD = "'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif";   // same heading font as the website
 const BODY = "'Nunito','Helvetica Neue',Arial,sans-serif";
 const SERIF = "'Instrument Serif',Georgia,'Times New Roman',serif";
 
@@ -27,7 +27,7 @@ const card = (inner, bg = C.paper, fg = C.ink) =>
 const sticker = (text, bg = C.pink, fg = '#5a3a41') =>
   `<span style="display:inline-block;background:${bg};color:${fg};border-radius:999px;padding:5px 14px;font-family:${SERIF};font-style:italic;font-size:16px">${esc(text)}</span>`;
 
-const h = (t, color = C.ink, size = 26) => `<h2 style="margin:12px 0 8px;font-family:${ROUND};font-weight:700;font-size:${size}px;line-height:1.15;letter-spacing:-.01em;color:${color}">${esc(t)}</h2>`;
+const h = (t, color = C.ink, size = 26) => `<h2 style="margin:12px 0 8px;font-family:${HEAD};font-weight:800;font-size:${size}px;line-height:1.1;letter-spacing:-.03em;color:${color}">${esc(t)}</h2>`;
 
 // ---- blocks Mae types into /admin ----------------------------------------
 // every block: { type, ...fields }. Unknown types are skipped.
@@ -54,7 +54,7 @@ export function renderBlocks(blocks = [], ctx = {}) {
         const items = (b.items || []).map(s => `<tr><td style="padding:0 0 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.paper};border-radius:20px"><tr>
           ${s.cover_url ? `<td width="86" valign="top" style="padding:14px 0 14px 14px"><img src="${safeUrl(s.cover_url)}" width="72" alt="" style="display:block;border-radius:4px 10px 10px 4px;width:72px;height:auto"></td>` : ''}
           <td valign="top" style="padding:14px 16px;font-family:${BODY};font-size:14.5px;color:${C.ink}">
-          <div style="font-family:${ROUND};font-weight:700;font-size:19px;line-height:1.2">${esc(s.book_title)}</div>
+          <div style="font-family:${HEAD};font-weight:700;font-size:19px;line-height:1.2">${esc(s.book_title)}</div>
           <div style="color:${C.ink2};font-size:13px;margin:2px 0 6px">by ${esc(s.author_name)}${s.trope ? ' · ' + esc(s.trope) : ''}${s.release_date ? ' · out ' + esc(s.release_date) : ''}</div>
           ${s.blurb ? `<div style="margin-bottom:6px">${esc(s.blurb)}</div>` : ''}
           ${safeUrl(s.where_to_buy) ? `<a href="${safeUrl(s.where_to_buy)}" style="color:${C.deeprose};font-weight:800;text-decoration:none">find it here →</a>` : ''}
@@ -82,7 +82,7 @@ export function renderBlocks(blocks = [], ctx = {}) {
         out.push(card(`${sticker('🔒 secret shelf', C.pink)}${h(b.title || 'a little extra')}${paras(b.text)}${pill(b.link || site + '/#bonus', b.button || 'open it ♡')}`, C.soft));
         break;
       case 'ps':
-        out.push(`<tr><td style="padding:2px 12px 18px;font-family:${BODY};font-size:14.5px;color:${C.ink2}"><b style="font-family:${ROUND};color:${C.deeprose}">p.s.</b> ${esc(b.text)}</td></tr>`);
+        out.push(`<tr><td style="padding:2px 12px 18px;font-family:${BODY};font-size:14.5px;color:${C.ink2}"><b style="font-family:${HEAD};color:${C.deeprose}">p.s.</b> ${esc(b.text)}</td></tr>`);
         break;
     }
   }
@@ -94,15 +94,14 @@ export function frame({ inner, preheader = '', siteUrl = '', unsubUrl = '{{UNSUB
   const site = (siteUrl || '').replace(/\/$/, '');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@400;700;800&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700..800&family=Nunito:wght@400;700;800&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 <title>${esc(preheader || 'letters from Mae')}</title></head>
 <body style="margin:0;padding:0;background:${C.cream}">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(preheader)}&nbsp;&#8199;&#65279;&nbsp;&#8199;&#65279;&nbsp;&#8199;&#65279;</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.cream}"><tr><td align="center" style="padding:28px 14px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px">
 <tr><td align="center" style="padding:0 0 20px">
-  ${site ? `<img src="${esc(site)}/email/logo.png" width="110" alt="" style="display:block;width:110px;height:auto;margin:0 auto 6px">` : ''}
-  <div style="font-family:${ROUND};font-weight:700;font-size:30px;color:#e48a9c;letter-spacing:-.01em">mae tao</div>
+  ${site ? `<img src="${esc(site)}/email/logo.png" width="150" alt="mae tao" style="display:block;width:150px;height:auto;margin:0 auto 2px">` : `<div style="font-family:${HEAD};font-weight:800;font-size:30px;color:#d9768b">mae tao</div>`}
   <div style="font-family:${SERIF};font-style:italic;font-size:17px;color:${C.ink2}">letters from the tennis court &amp; the writing desk</div>
 </td></tr>
 ${inner}

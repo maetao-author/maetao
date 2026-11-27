@@ -9,10 +9,10 @@
   @keyframes fly{0%{transform:translate(-20px,10px) rotate(-8deg)}50%{transform:translate(20px,-14px) rotate(6deg)}100%{transform:translate(-20px,10px) rotate(-8deg)}}
   .steps{counter-reset:s;display:grid;gap:10px;margin:22px 0;padding:0;list-style:none;text-align:left}
   .steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center;background:var(--soft);border-radius:20px;padding:11px 14px}
-  .steps li::before{content:counter(s);flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--pink);font-family:var(--chubby);font-weight:600;color:#5a2232}
+  .steps li::before{content:counter(s);flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--pink);font-family:var(--head);font-weight:800;letter-spacing:-.03em;color:#5a2232}
 </style></head>
 <body>
-<header class="bar"><div class="barin"><a class="wm" href="../"><span class="heart">♡</span>mae tao</a></div></header>
+<header class="bar"><div class="barin"><a class="wm" href="../" aria-label="Mae Tao home"><img src="../nl/logo.svg" alt="mae tao" width="140" height="100"></a></div></header>
 <main class="stage"><div class="narrow" style="width:100%">
   <div class="card blobby center fadein" style="padding:36px 26px">
     <div class="env fly" style="width:96px;height:96px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:46px;background:var(--blush);box-shadow:var(--lift)">💌</div>

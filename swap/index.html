@@ -12,28 +12,28 @@
   .how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 6px}
   @media (max-width:640px){.how{grid-template-columns:1fr}}
   .how div{background:rgba(255,250,247,.75);border-radius:22px;padding:16px;box-shadow:var(--sh)}
-  .how b{font-family:var(--chubby);font-weight:600;font-size:18px;display:block}
-  .how span{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--pink);font-family:var(--chubby);font-weight:600;margin-bottom:6px}
+  .how b{font-family:var(--head);font-weight:800;letter-spacing:-.03em;font-size:18px;display:block}
+  .how span{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--pink);font-family:var(--head);font-weight:800;letter-spacing:-.03em;margin-bottom:6px}
   .how div:nth-child(2) span{background:var(--sage-xl)} .how div:nth-child(3) span{background:var(--blush)}
   .heat{display:flex;gap:8px;flex-wrap:wrap}
   .heat input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
   .heat label{cursor:pointer;border-radius:999px;padding:8px 14px;background:var(--field);font-weight:800;font-size:13px;color:var(--ink2);transition:background .2s,color .2s,transform .2s var(--ease)}
   .heat input:checked+label{background:var(--rose);color:#fff;transform:translateY(-1px)}
   .heat input:focus-visible+label{box-shadow:0 0 0 3px rgba(217,143,151,.4)}
-  .sect{font-family:var(--chubby);font-weight:600;font-size:18px;margin:8px 0 12px;display:flex;align-items:center;gap:10px}
+  .sect{font-family:var(--head);font-weight:800;letter-spacing:-.03em;font-size:18px;margin:8px 0 12px;display:flex;align-items:center;gap:10px}
   .sect i{font-style:normal;width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:var(--blush);font-size:15px}
   /* live preview card, mirrors the email block */
   .pv{background:var(--sage-xl);border-radius:26px;padding:20px}
   .pv .in{display:flex;gap:14px;background:var(--paper);border-radius:20px;padding:14px;box-shadow:var(--sh)}
   .pv .cv{flex:0 0 76px;aspect-ratio:2/3;border-radius:4px 10px 10px 4px;background:linear-gradient(160deg,var(--pink),var(--sage-l));background-size:cover;background-position:center;box-shadow:var(--lift);display:grid;place-items:center;font-size:24px}
-  .pv h4{font-family:var(--chubby);font-weight:600;font-size:19px;margin:0;line-height:1.15;word-break:break-word}
+  .pv h4{font-family:var(--head);font-weight:800;letter-spacing:-.03em;font-size:19px;margin:0;line-height:1.15;word-break:break-word}
   .pv .by{font-size:12.5px;color:var(--ink2);margin:3px 0 6px}
   .pv p{margin:0;font-size:13.5px;word-break:break-word}
   .done{text-align:center;padding:40px 20px}
 </style></head>
 <body>
 <header class="bar"><div class="barin">
-  <a class="wm" href="../"><span class="heart">♡</span>mae tao</a><span class="sp"></span>
+  <a class="wm" href="../" aria-label="Mae Tao home"><img src="../nl/logo.svg" alt="mae tao" width="140" height="100"></a><span class="sp"></span>
   <a class="btn sm paper" href="../newsletter/">the newsletter</a>
 </div></header>
 
@@ -111,7 +111,7 @@
     </aside>
   </div>
 </main>
-<footer class="nlfoot"><a class="wm" href="../"><span class="heart">♡</span>mae tao</a></footer>
+<footer class="nlfoot"><a class="wm" href="../" aria-label="Mae Tao home"><img src="../nl/logo.svg" alt="mae tao" width="140" height="100"></a></footer>
 
 <script src="../nl/config.js"></script><script src="../nl/nl.js"></script>
 <script>

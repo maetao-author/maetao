@@ -1,7 +1,7 @@
 /* ♡ Mae Tao · newsletter styles
    Mae's palette only: cream, blush, pink, rose, deep rose, sage, cocoa.
    Soft edges everywhere: no hard borders, just shadows, tints and round shapes. */
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;700&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&family=Caveat:wght@500;700&family=Fredoka:wght@700&family=Instrument+Serif:ital@0;1&display=swap');
 
 :root{
   --cream:#fbf5f0; --paper:#fffaf7; --soft:#f6ece8; --field:#f8eeea; --glow:#fdeef0;
@@ -9,7 +9,7 @@
   --rose:#d98f97; --deeprose:#c66a77; --wm:#e48a9c;
   --sage:#868a76; --sage-m:#a9b8a8; --sage-l:#c7c8b9; --sage-xl:#e6e7dc;
   --cocoa:#2f2427; --cocoa2:#3d2f33; --ink:#3a2b2f; --ink2:#7d6a6e; --muted:#9a8a8d;
-  --chubby:'Fredoka','Nunito',system-ui,sans-serif;
+  --head:'Bricolage Grotesque',system-ui,sans-serif;   /* headings, same as the main site */
   --body:'Nunito',system-ui,sans-serif;
   --serif:'Instrument Serif',Georgia,serif;
   --hand:'Caveat',cursive;
@@ -42,11 +42,12 @@ img{max-width:100%;display:block}
 .narrow{max-width:680px;margin:0 auto;padding:0 20px}
 
 /* ---------- type ---------- */
-.chub,.h1,.h2,.h3{font-family:var(--chubby);font-weight:600;letter-spacing:-.015em;line-height:1.04;margin:0}
+.chub,.h1,.h2,.h3{font-family:var(--head);font-weight:800;letter-spacing:-.045em;line-height:1;margin:0}
+.h1{letter-spacing:-.05em;line-height:.96}
 .h1{font-size:clamp(40px,8vw,76px)}
 .h2{font-size:clamp(30px,5vw,46px)}
-.h3{font-size:22px;font-weight:600}
-.h1 em,.h2 em,.h3 em{font-family:var(--serif);font-weight:400;font-style:italic;color:var(--deeprose);letter-spacing:0}
+.h3{font-size:22px;letter-spacing:-.03em;line-height:1.1}
+.h1 em,.h2 em,.h3 em{font-family:var(--serif);font-weight:400;font-style:italic;color:var(--deeprose);letter-spacing:-.02em}
 .sub{color:var(--ink2);font-size:17px;max-width:560px;margin:12px 0 0}
 .lab{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-transform:lowercase}
 .hand{font-family:var(--hand);font-size:26px;color:var(--deeprose);line-height:1}
@@ -56,11 +57,12 @@ img{max-width:100%;display:block}
 /* ---------- top bar (matches the main site pill nav) ---------- */
 .bar{position:sticky;top:12px;z-index:40;max-width:1120px;margin:12px auto 0;padding:0 20px}
 .barin{display:flex;align-items:center;gap:10px;background:rgba(255,250,247,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:999px;padding:8px 8px 8px 18px;box-shadow:var(--sh)}
-.wm{font-family:var(--chubby);font-weight:700;font-size:24px;color:var(--wm);text-decoration:none;text-shadow:0 2px 0 var(--blush);white-space:nowrap;display:inline-flex;gap:8px;align-items:center}
-.wm .heart{display:inline-block;transition:transform .45s var(--ease)}
-.wm:hover .heart{transform:rotate(-14deg) scale(1.25)}
+.wm{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0}
+.wm img{height:58px;width:auto;transition:transform .4s cubic-bezier(.2,1.4,.4,1)}
+.wm:hover img{transform:rotate(-6deg) scale(1.06)}
+.barin{padding-top:2px;padding-bottom:2px}
 .bar .sp{flex:1}
-@media (max-width:480px){.bar .hide-s{display:none}.barin{padding-left:14px}.wm{font-size:21px}}
+@media (max-width:480px){.bar .hide-s{display:none}.barin{padding-left:10px}.wm img{height:50px}}
 
 /* ---------- cards ---------- */
 .card{background:var(--paper);border-radius:var(--r);padding:26px;box-shadow:var(--sh);position:relative;min-width:0}
@@ -99,7 +101,7 @@ img{max-width:100%;display:block}
 .sticker.pink{background:var(--pink)} .sticker.sage{background:var(--sage-xl)}
 .sticker.star{border-radius:0;background:var(--pink);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
 @keyframes bob{50%{transform:translateY(-8px) rotate(4deg)}}
-.stamp{display:inline-grid;place-items:center;width:88px;height:88px;border-radius:50%;text-align:center;font-family:var(--chubby);font-weight:600;font-size:12px;line-height:1.1;
+.stamp{display:inline-grid;place-items:center;width:88px;height:88px;border-radius:50%;text-align:center;font-family:var(--head);font-weight:800;font-size:12px;line-height:1.1;
   color:var(--deeprose);background:radial-gradient(circle,var(--paper) 58%,transparent 59%),repeating-conic-gradient(var(--pink) 0 6deg,transparent 6deg 12deg);transform:rotate(-10deg)}
 
 /* ---------- buttons (pills) ---------- */
@@ -160,7 +162,7 @@ img{max-width:100%;display:block}
 .popt .fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--pink),var(--blush));border-radius:999px;transition:width 1s var(--ease);z-index:0}
 .popt.mine .fill{background:linear-gradient(90deg,var(--rose),var(--pink))}
 .popt span{position:relative;z-index:1;display:flex;justify-content:space-between;gap:10px}
-.popt b{font-family:var(--chubby);font-weight:600}
+.popt b{font-family:var(--head);font-weight:800}
 
 /* ---------- pop-up (soft sheet) ---------- */
 .pop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:rgba(58,43,47,.24);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
@@ -180,7 +182,7 @@ img{max-width:100%;display:block}
   transform:translateY(140%);transition:transform .6s var(--ease)}
 .nudge.open{transform:none}
 .nudge .ic{flex:0 0 46px;height:46px;border-radius:16px;display:grid;place-items:center;font-size:22px;background:var(--blush)}
-.nudge b{font-family:var(--chubby);font-weight:600;display:block;line-height:1.2}
+.nudge b{font-family:var(--head);font-weight:800;display:block;line-height:1.2}
 .nudge small{color:var(--ink2);display:block;line-height:1.35}
 .nudge .x{border:0;background:var(--soft);width:28px;height:28px;border-radius:50%;cursor:pointer;flex:0 0 28px;color:var(--ink2)}
 
@@ -198,7 +200,8 @@ img{max-width:100%;display:block}
 .hero .cloud{position:absolute;border-radius:50%;filter:blur(2px);opacity:.7;z-index:-1;animation:morph 16s ease-in-out infinite}
 .envelope{width:min(320px,80vw);aspect-ratio:1.45;margin:0 auto;position:relative;border-radius:22px;background:linear-gradient(160deg,var(--pink),var(--peach));box-shadow:var(--sh2);transform:rotate(-4deg);transition:transform .6s var(--ease)}
 .envelope::before{content:'';position:absolute;inset:0;border-radius:22px;background:linear-gradient(160deg,#f6cbd1,#f1b8c1);clip-path:polygon(0 0,100% 0,50% 58%);transition:clip-path .7s var(--ease)}
-.envelope::after{content:'♡';position:absolute;left:50%;top:50%;transform:translate(-50%,-30%);width:52px;height:52px;border-radius:50%;background:var(--deeprose);color:#fff;display:grid;place-items:center;font-size:22px;box-shadow:0 8px 16px -8px rgba(110,60,72,.7)}
+.envelope::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-30%);width:58px;height:58px;border-radius:50%;background:var(--paper) url(heart.svg) center/40px no-repeat;box-shadow:0 8px 16px -8px rgba(110,60,72,.6)}
+.sticker img{width:38px;height:38px}
 .envelope .note{position:absolute;left:10%;right:10%;top:12%;height:74%;border-radius:16px;background:var(--paper);box-shadow:var(--sh);transform:translateY(0);transition:transform .7s var(--ease);
   padding:16px;font-family:var(--hand);font-size:22px;color:var(--deeprose);z-index:-1;display:flex;align-items:flex-end;justify-content:center;text-align:center}
 .envelope:hover{transform:rotate(0) scale(1.03)}
@@ -207,7 +210,7 @@ img{max-width:100%;display:block}
 /* countdown bubbles */
 .cd{display:flex;gap:10px;flex-wrap:wrap}
 .cd div{min-width:70px;padding:12px 10px;border-radius:22px;text-align:center;background:var(--paper);box-shadow:var(--sh)}
-.cd b{display:block;font-family:var(--chubby);font-weight:600;font-size:28px;line-height:1}
+.cd b{display:block;font-family:var(--head);font-weight:800;font-size:28px;line-height:1}
 .cd span{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
 
 /* soft list (no hard lines: dotted spacing + tinted rows) */
@@ -215,7 +218,8 @@ img{max-width:100%;display:block}
 .softlist>*{background:var(--soft);border-radius:18px;padding:12px 14px}
 
 footer.nlfoot{padding:50px 0 34px;text-align:center;color:var(--muted);font-size:13.5px}
-footer.nlfoot .wm{justify-content:center;font-size:28px}
+footer.nlfoot .wm{justify-content:center}
+footer.nlfoot .wm img{height:96px}
 
 .fadein{animation:fadeup .7s var(--ease) both}
 .fadein.d1{animation-delay:.08s}.fadein.d2{animation-delay:.16s}.fadein.d3{animation-delay:.24s}

@@ -99,7 +99,7 @@
     box.className = 'mt-row';
     box.innerHTML = `<div class="mt-pollcard"><span class="tape sage">✍ trope poll</span><div id="mtPoll"></div></div>
       <div class="card"><div class="lab">what's inside</div>
-        <h3 style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:24px;margin:8px 0 6px">${NL.esc(N.magnet?.name || 'a bonus chapter')}</h3>
+        <h3 style="font-family:var(--head);font-weight:800;letter-spacing:-.03em;font-size:24px;margin:8px 0 6px">${NL.esc(N.magnet?.name || 'a bonus chapter')}</h3>
         <p style="color:var(--ink2);margin:0 0 14px">${NL.esc(N.magnet?.tagline || '')}. Plus two letters a month, your questions answered, and books from my author friends.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn rose sm" href="newsletter/">more about the letters</a><a class="btn sage sm" href="newsletter/#ama">ask me anything</a><a class="btn ghost sm" href="swap/">authors: swap ✉</a></div></div>`;
     sec.appendChild(box);
