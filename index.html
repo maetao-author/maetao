@@ -53,6 +53,28 @@ window.MAE_SITE = {
     "She found her way back to writing in college, by way of a tennis court. Her grandparents taught her to play, and they're the most competitive people she knows. She hasn't picked up a racket in a while, which she blames on high school, college and high expectations, in that order.",
     "Call It a Let is her debut novel and Book One of the Deuce Series."
   ],
+  // "books I love" shelves on the About page. Each book needs two pictures in the loves/ folder: <img>-spine.webp and <img>-cover.webp
+  // note = what shows when someone taps the book. Rewrite them in your own words any time ♡
+  loves: {
+    intro: "Jane Austen made me fall in love with literature. Elle Kennedy made me blush in public. The rest kept me up way past my bedtime, and I'd read every one of them again tomorrow.",
+    shelves: [
+      { label: "where it all started", decor: ["tea set"], books: [
+        { img: "pride", title: "Pride and Prejudice", author: "Jane Austen", note: "The one that started it all. A man insults her at a ball and then writes the best letter in literature. I never recovered." },
+        { img: "sense", title: "Sense and Sensibility", author: "Jane Austen", note: "Elinor holding it together while everyone else falls apart is my whole personality on a good day." },
+        { img: "emma", title: "Emma", author: "Jane Austen", note: "Wrong about literally everyone and still gets the happy ending. Honestly? Relatable." },
+        { img: "manacled", title: "Manacled", author: "SenLinYu", note: "Proof that fanfiction can wreck you like any classic. It started as fanfic, just like me." },
+        { img: "darkness", title: "A Touch of Darkness", author: "Scarlett St. Clair", note: "Hades and Persephone, but make it a lot hotter. My cheeks still haven't recovered." },
+        { img: "wlh", title: "When Life Happened", author: "Jewel E. Ann", note: "Made me laugh out loud and ugly-cry in the same chapter. Jewel E. Ann has no mercy." }
+      ] },
+      { label: "the blush shelf", decor: ["piglet"], books: [
+        { img: "deal", title: "The Deal", author: "Elle Kennedy", note: "The first book that made me blush so hard I read it with the cover facing the wall." },
+        { img: "mistake", title: "The Mistake", author: "Elle Kennedy", note: "Logan. That's the note. Just Logan." },
+        { img: "score", title: "The Score", author: "Elle Kennedy", note: "I had to put this one face-down more than once. Dean, behave." },
+        { img: "goal", title: "The Goal", author: "Elle Kennedy", note: "Tucker made me believe in soft men again." },
+        { img: "legacy", title: "The Legacy", author: "Elle Kennedy", note: "The whole gang, one last time. I wasn't ready to say goodbye either." }
+      ] }
+    ]
+  },
   books: [   // your debut! add more books later by copying the { ... } block, and the site grows with you
     {
       id: "debut",
@@ -104,9 +126,9 @@ window.MAE_SITE = {
   ],
   library: {   // the mini 3D library on the books tab. It shows your books automatically (from the books list above).
     comingSoon: ["book two"],  // gift-wrapped "coming soon" spines next to your book. Use [] to hide them.
-    decor: ["fairy lights", "plant", "polaroid", "candle", "mug"],
+    decor: ["fairy lights", "plant", "cat", "polaroid", "piglet", "candle", "tea set"],
       // shelf decorations, placed left and right of your books in this order.
-      // choose from: "plant", "candle", "mug", "flowers", "cat", "polaroid", "heart bookend", "fairy lights", or any single emoji like "🧸"
+      // choose from: "plant", "candle", "teacup", "teapot", "tea set", "cat" (purrs when tapped), "piglet", "flowers", "polaroid", "heart bookend", "fairy lights", or any single emoji like "🧸"
     polaroid: "",              // photo for the polaroid (a link or file name). Blank = your about photo, or a little heart
     polaroidCaption: "writing days ♡",
     lamp: true                 // the hanging lamp. It glows at night (readers can click it to switch it on and off)
@@ -332,6 +354,28 @@ section[data-view]:not(#quiz):not(#reviews){padding-top:50px}
 .portrait .ph{font-family:var(--hand);font-size:26px;color:#7a4b54;text-align:center;padding:20px}
 .about p{font-size:17px;margin:0 0 14px}
 .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+/* books I love */
+#loves{padding-top:10px}
+#loves .wrap{max-width:1040px;overflow-x:clip}
+.lovesgrid{display:grid;grid-template-columns:270px minmax(0,1fr);gap:34px;align-items:center}
+.loveshead{position:relative;min-width:0}
+#lovesShelves{min-width:0}
+.lovescript{font-family:var(--hand);font-size:48px;color:var(--deeprose);line-height:1;display:inline-block;rotate:-4deg}
+.lovescript b{font-weight:400;color:var(--rose);display:inline-block;animation:hbeat 3.2s ease-in-out infinite}
+.lovesintro{margin:16px 0 0;font-size:16.5px;color:var(--ink2)}
+.lovestap{margin:10px 0 0;font-family:var(--hand);font-size:21px;color:var(--rose)}
+.lovearrow{display:block;margin:2px 0 0 120px;width:120px;height:70px;fill:none;stroke:var(--rose);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.loveshelf+.loveshelf{margin-top:24px}
+.loveshelf .shelf3d{padding-top:46px}
+.loveshelf .shelfrow{min-height:0;gap:3px}
+.loveshelf .lib-deco{align-self:flex-end;margin:0 0 0 14px}
+.loveshelf .lib-deco:first-of-type{margin-left:auto}
+.loveshelf .sb.open .sb3,.loveshelf .sb.open:hover .sb3{transform:translate3d(var(--ox,0px),-34px,170px) rotateY(-90deg)}
+.lovetag{display:inline-block;font-family:var(--hand);font-size:22px;color:#7a4b54;background:var(--paper);padding:2px 14px 4px;border-radius:12px;box-shadow:var(--sh);rotate:-2deg;position:relative;z-index:2;margin:0 0 -30px 18px}
+.loveinfo .who{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.loveinfo .note{font-family:var(--hand);font-size:25px;line-height:1.15;color:var(--deeprose);margin:6px 0 0;max-width:560px}
+@media (max-width:820px){.lovesgrid{grid-template-columns:minmax(0,1fr);gap:4px}.lovearrow{margin:-6px 0 0 150px;rotate:62deg;width:84px;height:50px}}
+@media (max-width:560px){.lovescript{font-size:40px}.loveshelf .lib-deco{margin-left:2px;transform:translateZ(-30px)}.loveshelf .teaset img:first-child{height:54px!important}.loveshelf .teaset img+img{height:33px!important;margin-left:-6px!important}.loveshelf .piglet img{height:88px!important}.loveshelf .shelfrow{padding:0 6px 0 12px}.lovetag{font-size:19px}.loveshelf .sb.open .sb3,.loveshelf .sb.open:hover .sb3{transform:translate3d(var(--ox,0px),-30px,110px) rotateY(-90deg)}}
 
 /* quotes */
 .quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
@@ -732,6 +776,7 @@ body.t-night .toast{background:#fbeee9;color:#2f2427}
 #themer .sw-sage{background:repeating-linear-gradient(-35deg,#b9c7ad 0 6px,#d3dcc8 6px 12px)}
 #themer .sw-night{background:#2f2427;color:#f0c1c7}
 #themer .sw-fx{background:var(--soft);color:var(--deeprose)}
+#themer .sw-fx.on{background:var(--rose);color:#fff}
 
 /* 1 · heart cursor + sparkle trail */
 @media (pointer:fine){
@@ -852,7 +897,8 @@ footer::before{content:'';display:block;height:10px;max-width:260px;margin:0 aut
 .lib-plank .pt{position:absolute;left:0;right:0;bottom:22px;height:190px;transform-origin:bottom center;transform:rotateX(90deg);
   background:linear-gradient(180deg,#e7b3bd,#f2c6ce 70%,#f6d2d8);box-shadow:inset 0 30px 40px -20px rgba(110,60,72,.35)}
 .lib-plank .pf{position:absolute;inset:0;border-radius:4px;background:var(--candy);box-shadow:inset 0 2px 0 rgba(255,255,255,.6),inset 0 -5px 0 rgba(0,0,0,.08),0 22px 30px -14px rgba(110,60,72,.6)}
-.lib-row{position:absolute;left:0;right:0;bottom:34px;display:flex;align-items:flex-end;justify-content:center;gap:3px;transform-style:preserve-3d}
+.lib-row{position:absolute;left:0;right:0;bottom:34px;display:flex;align-items:flex-end;justify-content:center;gap:3px;transform-style:preserve-3d;pointer-events:none}
+.lib-row>*{pointer-events:auto}
 .slot{position:relative;width:var(--w);height:var(--h);transform-style:preserve-3d;flex-shrink:0;cursor:pointer}
 .slot .lean{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:bottom right;rotate:z var(--lean,0deg)}
 .bk3{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:50% 100% 0;transition:transform .75s cubic-bezier(.2,.85,.25,1.05)}
@@ -903,6 +949,13 @@ body.t-night .lib-wall{background:radial-gradient(120% 90% at 50% 0%,#4a3138,#36
 body.t-sage .lib-wall{background:radial-gradient(120% 90% at 50% 0%,#eef1e8,#dfe5d6 60%,#cfd8c4)}
 /* shelf decorations */
 .lib-deco.emo{font-size:40px}
+.lib-deco.img{display:flex;align-items:flex-end;font-size:0;filter:drop-shadow(0 7px 6px rgba(80,40,50,.28));border:0;background:none;padding:0}
+.lib-deco.img img{display:block;width:auto;max-width:none}
+.lib-deco.cat{cursor:pointer;transform-origin:50% 100%}
+.lib-deco.cat.purring img{animation:purrbody .19s ease-in-out 12}
+.purrpop{position:fixed;z-index:60;translate:-50% -100%;font-family:var(--hand);font-size:22px;color:var(--deeprose);background:var(--paper);padding:2px 12px 4px;border-radius:12px;box-shadow:var(--sh);white-space:nowrap;pointer-events:none;animation:purrtxt 2.4s ease-out both}
+@keyframes purrbody{50%{transform:scale(1.025,.975)}}
+@keyframes purrtxt{0%{opacity:0;translate:-50% -80%}15%,70%{opacity:1;translate:-50% -110%}100%{opacity:0;translate:-50% -150%}}
 .lib-deco.polaroid{width:62px;padding:5px 5px 18px;background:#fffdf9;border-radius:2px;box-shadow:0 6px 12px rgba(80,40,50,.28);rotate:-6deg;font-size:0;align-self:flex-end;margin-bottom:2px;filter:none}
 .lib-deco.polaroid .ph{display:block;width:100%;aspect-ratio:1;background:linear-gradient(135deg,#f6d6d8,#e9b9c0);display:grid;place-items:center;font-size:22px;color:#fff;overflow:hidden}
 .lib-deco.polaroid img{width:100%;height:100%;object-fit:cover}
@@ -964,7 +1017,7 @@ body.t-night .lib-scene:not(.lamp-on) .lib-room{filter:brightness(.72)}
 .lib-read.open .ract{opacity:1;transform:none}
 .rclose{position:absolute;top:10px;right:14px;width:38px;height:38px;border-radius:50%;border:0;background:var(--cocoa);color:#fff4f1;font-size:18px;cursor:pointer;z-index:2}
 @media (max-width:700px){.lib-room{height:300px;transform:rotateX(-4deg) scale(.82)}.lib-scene{padding-top:40px}
-  .lib-deco{margin:0 2px;transform:translateZ(-60px) scale(.7)}.lib-deco.emo{font-size:30px}
+  .lib-deco{margin:0 2px;transform:translateZ(-60px) scale(.7)}.lib-deco.img{transform:translateZ(-40px) scale(.82);margin:0 -4px}.lib-deco.emo{font-size:30px}
   .lib-lamp{right:8%;scale:.8}
   .rstage{scale:.72}}
 /* ← back button */
@@ -1061,7 +1114,7 @@ body.t-night .env .ins{background:#7c5a60}body.t-night .env .pocket{background:#
   .stage .bk.b1{transform:translate(-80px,30px) rotate(-14deg) scale(.7)}
   .stage .bk.b2{transform:translate(80px,40px) rotate(11deg) scale(.7)}
 }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){body:not(.fxon) *{animation:none!important;transition:none!important}body:not(.fxon) .rv{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -1160,6 +1213,20 @@ document.body.className = (localStorage.getItem('mt.theme') || 't-candy') + (loc
         <div class="facts">
           <span class="tag">☕ fuelled by tea</span><span class="tag sage">✎ writing book 4</span><span class="tag">♡ answers every DM</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="loves" data-view="about">
+    <div class="wrap">
+      <div class="lovesgrid">
+      <div class="loveshead rv">
+        <span class="lovescript">books I love <b>♡</b></span>
+        <p class="lovesintro" id="lovesIntro"></p>
+        <p class="lovestap">tap a spine to see why ♡</p>
+        <svg class="lovearrow" viewBox="0 0 120 70" aria-hidden="true"><path d="M6 12 C 34 52, 74 60, 108 40"/><path d="M94 34 L 109 39 L 100 52"/></svg>
+      </div>
+      <div id="lovesShelves" class="rv"></div>
       </div>
     </div>
   </section>
@@ -1305,10 +1372,11 @@ function toast(msg){
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   $('#toasts').appendChild(t); setTimeout(() => t.remove(), 3200);
 }
-const calmFx = () => document.body.classList.contains('calm') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fxForced = () => { try { return localStorage.getItem('mt.fx') === '1'; } catch { return false; } };
+const calmFx = () => document.body.classList.contains('calm') || (!fxForced() && matchMedia('(prefers-reduced-motion: reduce)').matches);
 /* 9 · heart confetti */
 function petals(x, y, n = 38){
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (calmFx()) return;
   const cols = ['#d98f97', '#c66a77', '#f2a9b8', '#868a76', '#f0c1c7', '#e48a9c'], parts = [];
   for (let i = 0; i < n; i++){
     const el = document.createElement('div');
@@ -1563,6 +1631,7 @@ function answer(v){ qans.push(v); qi++; renderQuiz(); }
 /* about, quotes, events, letters */
 function renderRest(){
   $('#bio').innerHTML = S.bio.map(p => `<p>${esc(p)}</p>`).join('');
+  renderLoves();
   if (imgSrc(S.photo)) { $('#portrait').innerHTML = `<img src="${esc(imgSrc(S.photo))}" alt="${esc(S.name)}" loading="lazy">`; $('#ptag').hidden = false; }
   $('#quotes').innerHTML = (S.quotes || []).map((q, i) => `<div class="card quote rv" style="${i % 2 ? 'background:var(--sage-xl)' : 'background:var(--blush)'}">“${esc(q.text)}”<span class="who">${esc(q.who)}</span></div>`).join('');
   if (!(S.quotes || []).length) $('#reviews').style.display = 'none';
@@ -2163,7 +2232,7 @@ const Community = (() => {
         <div style="display:grid;gap:8px;margin-top:8px"><button class="btn sm" onclick="Community.desk('signings')">✎ signing notes</button><button class="btn sm" onclick="Community.desk('arc')">📚 early reader applications</button></div></div>` : ''}
       <div class="card"><div class="lab">top ideas</div>
         ${ideas.map(p => `<div class="desk-row"><b>${(p.hearts || []).length} ♡</b> · ${esc(p.text.slice(0, 70))}${p.text.length > 70 ? '…' : ''}${p.status ? `<br><span class="status ${p.status}" style="display:inline-block;margin-top:6px">${STATUS[p.status]}</span>` : ''}</div>`).join('') || '<p class="meta">no ideas yet. suggest one!</p>'}
-        <button class="pbtn" style="margin-top:8px" onclick="Community.setType('idea');Community.setFilter('idea');document.getElementById('cmText')?.focus()">💡 suggest a feature</button></div>
+        <button class="pbtn" style="margin-top:8px" onclick="Community.suggest()">💡 suggest a feature</button></div>
       ${S.arc?.open ? `<div class="card dark"><div class="lab">early reader team</div><h3 class="h2" style="font-size:24px;color:#fff4f1">read it <em style="color:var(--pink)">first</em></h3>
         <p style="color:#d8c4c7;margin:4px 0 12px;font-size:14px">${esc(S.arc.blurb)}</p><button class="btn rose sm" onclick="openArc()">apply ♡</button></div>` : ''}
       <div class="card"><div class="lab">house rules</div><p style="margin:6px 0 0;font-size:14px;color:var(--ink2)">Be kind, no spoilers without a warning, and keep it cosy. Posts that break the rules get removed.</p>
@@ -2562,6 +2631,13 @@ const Community = (() => {
     profileModal, desk, signIn: maeSignIn, signOut: maeSignOut,
     setType(t){ postType = t; render(); },
     setFilter(f){ filter = f; render(); },
+    // the "suggest a feature" button: go to threads, switch the composer to ideas, and open it (or the profile step first)
+    suggest(){
+      setTab('threads'); postType = 'idea'; filter = 'idea'; render();
+      if (!st.profile) { toast('pick your @ first, then tell me your idea ♡'); return profileModal(); }
+      const t = $('#cmText'); if (!t) return;
+      t.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => t.focus({ preventScroll: true }), 350);
+    },
     draft(id, v){ drafts[id] = v; },
     toggle(id){ open.has(id) ? open.delete(id) : (open.add(id), listenReplies(id)); render(); },
     async post(){
@@ -2629,7 +2705,7 @@ const Community = (() => {
   function confirmDel(){ const now = Date.now(); if (confirmDel.t && now - confirmDel.t < 4000) { confirmDel.t = 0; return true; } confirmDel.t = now; toast('tap delete again to confirm'); return false; }
 })();
 
-/* ♫ music: a 3D CD rack of iTunes previews, one shelf per book, that keeps playing while readers chat */
+/* ♫ music: a 3D CD rack of iTunes previews, one shelf per book, that readers can sample */
 const Music = (() => {
   const M = S.music || {}, CK = 'mt.music.v2', PK = 'mt.picks.v1';
   const okArt = u => /^https:\/\/is[0-9]-ssl\.mzstatic\.com\/[^\s"'<>]{1,400}$/.test(u || '');
@@ -2696,7 +2772,7 @@ const Music = (() => {
     if (!built) {
       built = true;
       box.innerHTML = `<div class="card musicard">
-        <div class="shead2"><div><div class="lab">listen while you chat</div><h3 class="h2" style="font-size:28px;margin:2px 0 0">the <em>CD rack</em></h3><div class="meta" style="margin-top:4px">a playlist for every book ♡</div></div>
+        <div class="shead2"><div><div class="lab">the songs behind the story</div><h3 class="h2" style="font-size:28px;margin:2px 0 0">the <em>CD rack</em></h3><div class="meta" style="margin-top:4px">a playlist for every book ♡</div></div>
           <div class="msearch"><input type="search" id="muQ" placeholder="find a song to add…" aria-label="search songs" autocomplete="off"><div class="mres" id="muRes"></div></div></div>
         <div class="deck" id="muDeck"></div>
         <div class="rack" id="muRack"><div class="meta" style="padding:40px">dusting off the CDs…</div></div>
@@ -2742,7 +2818,7 @@ const Music = (() => {
         <div class="crow" style="gap:6px;margin-top:10px"><button class="pbtn" onclick="Music.step(-1)" aria-label="previous">⏮</button>
           <button class="btn dark sm" onclick="Music.toggle()">${on ? '❚❚ pause' : '▶ play'}</button><button class="pbtn" onclick="Music.step(1)" aria-label="next">⏭</button>
           ${okSong(x) ? '<button class="pbtn" onclick="Music.share()">🎵 share to chat</button>' : ''}${x.link ? `<a class="pbtn" href="${esc(x.link)}" target="_blank" rel="noopener">full song ↗</a>` : ''}</div></div>`
-      : `<div class="deckidle"><div class="disc"><i></i></div><div><span class="hand" style="font-size:26px">pick a CD ♡</span><br><span class="meta">it keeps playing while you chat</span></div></div>`;
+      : `<div class="deckidle"><div class="disc"><i></i></div><div><span class="hand" style="font-size:26px">pick a CD ♡</span><br><span class="meta">a 30-second taste of each song in the book's soundtrack</span></div></div>`;
     mini();
   }
   function mini(){
@@ -2836,15 +2912,99 @@ function renderLibrary(){
     [si, ci].forEach(im => im && (im.complete ? fit() : im.addEventListener('load', fit)));
   });
 }
-const DECO = { plant: '🪴', candle: '🕯️', mug: '☕', flowers: '💐', cat: '🐈' };
+const DECO = { plant: '🪴', candle: '🕯️', flowers: '💐' };
+// real little 3D objects (cut-out photos) that sit on the shelf
+const DECO_IMG = { cat: ['decor/cat.webp', 80, 'a sleepy cat on two books · tap to pet'], piglet: ['decor/piglet.webp', 112, 'Piglet'],
+  teacup: ['decor/teacup.webp', 50, 'a rose teacup'], mug: ['decor/teacup.webp', 50, 'a rose teacup'], teapot: ['decor/teapot.webp', 76, 'a rose teapot'] };
 function decoHTML(d, L){
   const k = d.toLowerCase();
+  if (k === 'tea set') return `<span class="lib-deco img teaset"><img src="decor/teapot.webp" alt="a rose teapot" style="height:76px"><img src="decor/teacup.webp" alt="a rose teacup" style="height:46px;margin-left:-10px"></span>`;
+  if (DECO_IMG[k]) { const [src, h, alt] = DECO_IMG[k];
+    return k === 'cat' ? `<button class="lib-deco img cat" onclick="purr(this)" aria-label="${alt}"><img src="${src}" alt="" style="height:${h}px"></button>`
+      : `<span class="lib-deco img ${k}"><img src="${src}" alt="${alt}" style="height:${h}px"></span>`; }
   if (DECO[k]) return `<span class="lib-deco emo">${DECO[k]}</span>`;
   if (k === 'polaroid') { const src = imgSrc(L.polaroid) || imgSrc(S.photo);
     return `<span class="lib-deco polaroid"><span class="ph">${src ? `<img src="${esc(src)}" alt="">` : '♡'}</span><small>${esc(L.polaroidCaption || '')}</small></span>`; }
   if (k === 'heart bookend') return '<span class="lib-deco bookend"></span>';
   if ([...d].length <= 3 && !/[a-z0-9]/i.test(d)) return `<span class="lib-deco emo">${esc(d)}</span>`;   // any emoji
   return '';
+}
+/* books I love: two little 3D shelves on the About page; tap a book and it turns to show its cover and my note */
+let lovePick = '';
+function renderLoves(){
+  const L = S.loves, box = $('#lovesShelves');
+  if (!L || !(L.shelves || []).length) { $('#loves').style.display = 'none'; return; }
+  $('#lovesIntro').textContent = L.intro || '';
+  const h = innerWidth < 560 ? 196 : 236;
+  box.innerHTML = L.shelves.map((sh, si) => {
+    const pick = (sh.books || []).find((b, i) => lovePick === si + '-' + i);
+    return `<div class="loveshelf">${sh.label ? `<span class="lovetag">${esc(sh.label)}</span>` : ''}
+      <div class="shelf3d ${pick ? 'focus' : ''}"><div class="shelfscene"><span class="shtop"></span>
+        <div class="shelfrow" data-s="${si}">${(sh.books || []).map((b, i) => { const k = si + '-' + i, base = 'loves/' + String(b.img || '').replace(/[^a-z0-9_-]/gi, '');
+          return `<button class="sb ${lovePick === k ? 'open' : ''}" data-k="${k}" style="--w:${Math.round(h * .16)}px;--h:${h}px;--d:${Math.round(h * .66)}px;--c:#e9d6d3;--t:#3a2b2f" aria-label="${esc(b.title)} by ${esc(b.author || '')}">
+            <span class="sb3"><span class="sbf sb-spine"><img src="${base}-spine.webp" alt="" loading="lazy"></span>
+            <span class="sbf sb-cover"><img src="${base}-cover.webp" alt="" loading="lazy"></span>
+            <span class="sbf sb-back"></span><span class="sbf sb-top"></span><span class="sbf sb-fore"></span><span class="sbf sb-pages"></span></span></button>`; }).join('')}
+          ${(sh.decor || []).map(d => decoHTML(String(d), {})).join('')}</div>
+        <div class="shplank"></div></div></div>
+      <div class="shelfinfo loveinfo ${pick ? 'on' : ''}">${pick ? `<button class="x" onclick="pickLove('')" aria-label="put it back">✕</button>
+        <div class="who">${esc(pick.author || '')}</div><h3 class="h2" style="font-size:28px;margin:2px 0 0">${esc(pick.title)}</h3><p class="note">${esc(pick.note || '')}</p>` : ''}</div></div>`;
+  }).join('');
+  box.querySelectorAll('.sb').forEach(sl => {
+    const si = sl.querySelector('.sb-spine img'), ci = sl.querySelector('.sb-cover img');
+    const fit = () => {
+      if (si.naturalHeight) sl.style.setProperty('--w', Math.round(h * si.naturalWidth / si.naturalHeight) + 'px');
+      if (ci.naturalHeight) sl.style.setProperty('--d', Math.round(h * ci.naturalWidth / ci.naturalHeight) + 'px');
+    };
+    [si, ci].forEach(im => im.complete ? fit() : im.addEventListener('load', fit));
+  });
+  box.querySelectorAll('.shelfrow').forEach(r => r.onclick = e => { const b = e.target.closest('.sb'); if (b) pickLove(lovePick === b.dataset.k ? '' : b.dataset.k); });
+}
+// open a book in place (no re-render) so it slides out and turns smoothly
+function pickLove(k){
+  lovePick = k; const box = $('#lovesShelves');
+  box.querySelectorAll('.loveshelf').forEach((shEl, si) => {
+    const sh = S.loves.shelves[si], info = shEl.querySelector('.loveinfo');
+    let pick = null;
+    shEl.querySelectorAll('.sb').forEach(b => {
+      const on = b.dataset.k === k; b.classList.toggle('open', on);
+      if (on) { pick = sh.books[+k.split('-')[1]]; const r = b.parentElement; b.style.setProperty('--ox', Math.round(r.clientWidth / 2 - (b.offsetLeft + b.offsetWidth / 2)) + 'px'); }
+    });
+    shEl.querySelector('.shelf3d').classList.toggle('focus', !!pick);
+    info.classList.toggle('on', !!pick);
+    if (pick) info.innerHTML = `<button class="x" onclick="pickLove('')" aria-label="put it back">✕</button>
+      <div class="who">${esc(pick.author || '')}</div><h3 class="h2" style="font-size:28px;margin:2px 0 0">${esc(pick.title)}</h3><p class="note">${esc(pick.note || '')}</p>`;
+  });
+}
+// the cat sits a little deeper on the shelf than the shelf's front edge, so a tap can land on the shelf instead: catch it by position
+document.addEventListener('click', e => {
+  if (e.target.closest('.lib-deco.cat')) return;
+  document.querySelectorAll('.lib-deco.cat').forEach(c => { const r = c.getBoundingClientRect();
+    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) purr(c); });
+});
+// a soft synthesized purr (no sound file): low rumble pulsing ~26 times a second, breathing in and out
+let purrCtx;
+function purr(el){
+  el.classList.remove('purring'); void el.offsetWidth; el.classList.add('purring'); setTimeout(() => el.classList.remove('purring'), 2600);
+  const r = el.getBoundingClientRect(), pop = document.createElement('span');   // the little "purr ♡" floats above the cat (outside the 3D shelf so nothing hides it)
+  pop.className = 'purrpop'; pop.textContent = 'purr ♡'; pop.style.left = (r.left + r.width / 2) + 'px'; pop.style.top = (r.top + r.height * .15) + 'px';
+  document.body.appendChild(pop); setTimeout(() => pop.remove(), 2500);
+  try {
+    purrCtx = purrCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = purrCtx, t0 = ctx.currentTime + .02, dur = 2.4, sr = ctx.sampleRate;
+    const buf = ctx.createBuffer(1, Math.ceil(sr * dur), sr), d = buf.getChannelData(0);
+    let b = 0; for (let i = 0; i < d.length; i++) { b = .97 * b + .03 * (Math.random() * 2 - 1); d[i] = b * 6; }   // brown-ish noise
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 340; lp.Q.value = .7;
+    const am = ctx.createGain(); am.gain.value = 0;
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 26; const lfoG = ctx.createGain(); lfoG.gain.value = .5;
+    lfo.connect(lfoG).connect(am.gain);
+    const env = ctx.createGain(); env.gain.setValueAtTime(0, t0);
+    [[.05, .0], [.55, .9], [1.05, .35], [1.15, .45], [1.7, .95], [2.3, .0]].forEach(([t, v]) => env.gain.linearRampToValueAtTime(v * .55, t0 + t));
+    src.connect(lp).connect(am).connect(env).connect(ctx.destination);
+    const bias = ctx.createConstantSource ? ctx.createConstantSource() : null; if (bias) { bias.offset.value = .5; bias.connect(am.gain); bias.start(t0); bias.stop(t0 + dur); }
+    src.start(t0); lfo.start(t0); src.stop(t0 + dur); lfo.stop(t0 + dur);
+  } catch {}
 }
 function fairyHTML(){
   const n = 15, pts = [...Array(n)].map((_, i) => { const t = i / (n - 1); return [t * 100, 8 + Math.sin(t * Math.PI * 2) ** 2 * 26 + t * (1 - t) * 30]; });
@@ -2960,9 +3120,16 @@ function setupVisuals(){
   themer.onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.t) { document.body.classList.remove('t-candy', 't-sage', 't-night'); document.body.classList.add(b.dataset.t); localStorage.setItem('mt.theme', b.dataset.t); mark(); }
-    if (b.id === 'fxBtn') { const on = document.body.classList.toggle('calm'); on ? localStorage.setItem('mt.calm', '1') : localStorage.removeItem('mt.calm'); toast(on ? 'sparkles off' : 'sparkles on ✦'); }
+    if (b.id === 'fxBtn') {
+      const off = !calmFx();   // what the reader sees now decides the flip, so it works even when the laptop asks for less motion
+      try { if (off) { localStorage.setItem('mt.calm', '1'); localStorage.removeItem('mt.fx'); } else { localStorage.removeItem('mt.calm'); localStorage.setItem('mt.fx', '1'); } } catch {}
+      document.body.classList.toggle('calm', off); document.body.classList.toggle('fxon', !off); markFx(); toast(off ? 'sparkles off' : 'sparkles on ✦');
+    }
   };
   mark();
+  const markFx = () => $('#fxBtn').classList.toggle('on', !calmFx());
+  if (fxForced()) document.body.classList.add('fxon');
+  markFx();
 
   // 1 · sparkle trail (mouse only)
   let lx = 0, ly = 0, lt = 0, live = 0;
