@@ -68,7 +68,7 @@ window.MAE_SITE = {
       palette: ["#f6b3c0", "#f06b85", "#2a1d3d"],
       spineColor: "#b7a6cc",                // optional, e.g. "#7d8270". Blank = uses the last palette colour
       hook: "Ten years ago he dumped her on live TV. Now they have to win Olympic gold together.",
-      blurb: "At seventeen, Stephen Lior stood in front of the cameras and said the words that ended their partnership: \"I'm done carrying her.\"\n\nTen years later, Avery Auclair is world No. 7, and she's built her whole career on hating him. So when the federation pairs them for Olympic mixed doubles in Los Angeles, she should say no.\n\nShe doesn't.\n\nOne season. One hotel room. One wall of pillows that isn't going to hold. And one question Avery has never been able to answer: what was Stephen looking at in the three seconds before he broke her heart?\n\nA steamy second-chance tennis romance about rivals, replays, and the point you get to play again.",
+      blurb: "She swore she'd never play with him again . . .\n\nAvery Auclair is world No. 7, and she got there on pure spite. Ten years ago, her doubles partner stood in front of the cameras and told the world he was done carrying her. She's been proving him wrong ever since. So when the federation pairs them for Olympic mixed doubles in Los Angeles, the smart move is to walk away . . . except she has never once let Stephen Lior win.\n\n. . . but some points you get to play again\n\nStephen has spent a decade living with the worst three seconds of his life. Now he's got one season, one shared hotel room, and one flimsy wall of pillows to show Avery that he didn't say what he said for the reason she thinks. But the more they win on the court, the harder it gets to keep things professional, and the harder it is to hide why he really walked away.\n\nNow she just has to decide whether the man who broke her heart deserves a second serve.",
       badge: "img:deuce-badge",      // optional series badge shown next to the book
       tropes: ["rivals to lovers", "second chance", "forced proximity"],
       pages: 352,                    // page count: sets how thick the spine is on readers' bookshelves
@@ -2491,7 +2491,7 @@ const Community = (() => {
         <div class="lab">${esc(EDITIONS[sel.e.ed])}${sel.b.series ? ' · ' + esc(sel.b.series) : ''}</div>
         <h3 class="h2" style="font-size:30px;margin:4px 0 6px">${esc(sel.b.title)}</h3>
         <div class="crow" style="gap:8px;margin-bottom:10px">${sel.e.signed ? '<span class="signedb">✒ Signed by Author</span>' : ''}${sel.e.ed === 'special' ? '<span class="specialb">✦ Special Edition</span>' : ''}<span class="meta">${+sel.b.pages || 320} pages</span></div>
-        <p class="syn">${esc(String(sel.b.blurb || sel.b.hook || '').split(/\n\s*\n/)[0])}</p>
+        <p class="syn">${esc(String(sel.b.blurb || sel.b.hook || '').split(/\n\s*\n/).reduce((a, x) => a.length < 120 ? (a ? a + '\n\n' : '') + x : a, ''))}</p>
         <div class="crow" style="gap:8px;margin-top:12px"><button class="btn sm" onclick="openBook('${esc(sel.b.id)}')">see the book</button>
           <button class="pbtn" onclick="Community.toggleSigned('${esc(shelfPick)}')">${sel.e.signed ? 'not signed' : 'it\'s signed ✒'}</button>
           <button class="pbtn" onclick="Community.removeBook('${esc(shelfPick)}')">remove from my shelf</button></div>` : ''}</div>
