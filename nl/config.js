@@ -1,4 +1,4 @@
-/* ♡ Newsletter settings: the ONLY file you edit to connect everything.
+/* 𖹭 Newsletter settings: the ONLY file you edit to connect everything.
    These values are safe to be public: the anon/publishable key can only do what the
    database rules allow (sign up, vote, ask a question, request a swap).
    NEVER paste the service_role key or the Resend API key here. Those live in Supabase secrets. */

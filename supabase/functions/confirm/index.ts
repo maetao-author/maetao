@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
     if (!UUID_RE.test(String(token || ''))) return json({ error: 'This link looks broken.' }, 400);
     const [sub] = await db(`subscribers?confirm_token=eq.${token}&select=*`);
     if (!sub) return json({ error: 'This link has expired. Sign up again and I’ll send a fresh one.' }, 404);
-    if (sub.status === 'unsubscribed') return json({ error: 'This address unsubscribed. Sign up again to come back ♡' }, 410);
+    if (sub.status === 'unsubscribed') return json({ error: 'This address unsubscribed. Sign up again to come back' }, 410);
 
     if (sub.status === 'pending') {
       await db(`subscribers?id=eq.${sub.id}&status=eq.pending`, { method: 'PATCH', prefer: 'return=minimal',
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
         try {
           await resend('/emails', {
             from: cfg.from, to: [sub.email], reply_to: cfg.replyTo || undefined,
-            subject: `you're in ♡ here's ${cfg.magnetName}`,
+            subject: `you're in! here's ${cfg.magnetName}`,
             html: welcomeEmail({ siteUrl: cfg.site, magnetUrl: cfg.magnetUrl, magnetName: cfg.magnetName,
               firstName: sub.first_name, unsubUrl: unsubLink(sub.unsubscribe_token), address: cfg.address }),
             headers: { 'List-Unsubscribe': `<${oneClickLink(sub.unsubscribe_token)}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },

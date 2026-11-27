@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     if (!UUID_RE.test(String(b.issue_id || ''))) return json({ error: 'Missing issue.' }, 400);
     const [issue] = await db(`issues?id=eq.${b.issue_id}&select=*`);
     if (!issue) return json({ error: 'Issue not found.' }, 404);
-    if (!issue.subject?.trim()) return json({ error: 'Give it a subject line first ♡' }, 400);
+    if (!issue.subject?.trim()) return json({ error: 'Give it a subject line first' }, 400);
 
     if (b.mode === 'test') {
       const html = build(issue);

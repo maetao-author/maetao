@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
 
     await resend('/emails', {
       from: cfg.from, to: [email], reply_to: cfg.replyTo || undefined,
-      subject: 'one tap to confirm ♡',
+      subject: 'one tap to confirm',
       html: confirmEmail({ siteUrl: cfg.site, confirmUrl: `${cfg.site}/confirmed/?t=${sub.confirm_token}`,
         firstName: sub.first_name, address: cfg.address, magnetName: cfg.magnetName }),
     });

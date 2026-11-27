@@ -1,4 +1,4 @@
-# ♡ Your newsletter: setup guide
+# 𖹭 Your newsletter: setup guide
 
 Everything is free: **GitHub Pages** (website), **Supabase** (database + email functions), **Resend** (sending).
 Set aside about an hour. Do the steps in order.
@@ -65,8 +65,8 @@ Or by hand, with the Supabase CLI: `supabase functions deploy subscribe --no-ver
 ## 6 · Automations
 - **Automatic scheduled sending:** run `supabase/cron.sql` (instructions inside). Letters you schedule in /admin then go out by themselves within 10 minutes of their time. Without it, /admin shows a "due now" pop-up and you press send.
 - **Your calendar:** /admin → calendar → paste your CALENDAR_KEY → **+ Google Calendar** or **+ Apple Calendar**. One subscription keeps updating by itself: send days (1st & 15th), "draft due" 3 days before, scheduled letters, swap months, swap partners' release days, your own reminders, and Call It a Let's release day.
-  Apple Calendar uses the alerts built into the feed. Google ignores alerts inside subscribed calendars, so in Google Calendar → Settings → "♡ Mae newsletter" → *Event notifications*, add "1 day before" and "2 hours before".
-- **Pop-up reminders in /admin:** every time you open the desk, it pops up what needs you (letter due, swap requests, unanswered questions, approved swaps not placed yet, partners' release days, did-they-feature-you-back). Tap **🔔 turn on reminders** to also get browser notifications.
+  Apple Calendar uses the alerts built into the feed. Google ignores alerts inside subscribed calendars, so in Google Calendar → Settings → "Mae newsletter" → *Event notifications*, add "1 day before" and "2 hours before".
+- **Pop-up reminders in /admin:** every time you open the desk, it pops up what needs you (letter due, swap requests, unanswered questions, approved swaps not placed yet, partners' release days, did-they-feature-you-back). Tap **turn on reminders** to also get browser notifications.
 
 ## 7 · Before you call it done (acceptance tests)
 The same list lives in /admin → setup with tick boxes.

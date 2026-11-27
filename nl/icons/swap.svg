@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="256" height="256">
+  <defs>
+    <linearGradient id="p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6cdd3"/><stop offset="1" stop-color="#e4a3ad"/></linearGradient>
+    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3cdbb"/><stop offset="1" stop-color="#97a796"/></linearGradient>
+    <linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eab0b8"/><stop offset="1" stop-color="#d48b95"/></linearGradient>
+    <linearGradient id="k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d77884"/><stop offset="1" stop-color="#b85866"/></linearGradient>
+  </defs>
+  <!-- bottom book -->
+  <path d="M14 82h92a8 8 0 0 1 0 16v0a8 8 0 0 1 0 16H22a14 14 0 0 1-14-14v-4a14 14 0 0 1 6-14z" fill="url(#r)"/>
+  <rect x="24" y="88" width="80" height="20" rx="8" fill="#fffaf7"/>
+  <rect x="34" y="96" width="48" height="4" rx="2" fill="#f1dcdc"/>
+  <!-- middle book (sage) -->
+  <path d="M100 50H26a8 8 0 0 0 0 16v0a8 8 0 0 0 0 16h72a14 14 0 0 0 14-14v-4a14 14 0 0 0-12-14z" fill="url(#s)"/>
+  <rect x="22" y="56" width="78" height="20" rx="8" fill="#fffaf7"/>
+  <rect x="40" y="64" width="44" height="4" rx="2" fill="#e6e7dc"/>
+  <!-- ribbon -->
+  <path d="M42 62h11v34l-5.5-5-5.5 5z" fill="url(#k)"/>
+  <!-- top book -->
+  <path d="M22 16h68a8 8 0 0 1 0 16v0a8 8 0 0 1 0 16H22a14 14 0 0 1-14-14v-4a14 14 0 0 1 14-14z" fill="url(#p)"/>
+  <rect x="22" y="22" width="68" height="20" rx="8" fill="#fffaf7"/>
+  <rect x="34" y="30" width="44" height="4" rx="2" fill="#f1dcdc"/>
+  <!-- soft light edges -->
+  <path d="M22 18h66" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+  <path d="M28 52h70" stroke="#fff" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/>
+  <path d="M20 84h84" stroke="#fff" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/>
+</svg>

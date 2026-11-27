@@ -45,25 +45,25 @@ Deno.serve(async (req) => {
     if (dt < new Date(now.getTime() - 86400000)) continue;
     const iso = dt.toISOString().slice(0, 10);
     const due = new Date(dt.getTime() - 3 * 86400000).toISOString().slice(0, 10);
-    ev.push({ uid: `send-${iso}`, title: '✉ newsletter day', date: iso, desc: 'Letter goes out today ♡', url: admin, alarms: ['-PT15H'] });
-    ev.push({ uid: `draft-${iso}`, title: '✎ newsletter draft due', date: due, desc: `Draft for ${iso}. Open the composer.`, url: admin, alarms: ['PT9H'] });
+    ev.push({ uid: `send-${iso}`, title: 'newsletter day', date: iso, desc: 'Letter goes out today', url: admin, alarms: ['-PT15H'] });
+    ev.push({ uid: `draft-${iso}`, title: 'newsletter draft due', date: due, desc: `Draft for ${iso}. Open the composer.`, url: admin, alarms: ['PT9H'] });
   }
   for (const i of issues) {
     const when = i.sent_at || i.scheduled_for; if (!when) continue;
     ev.push({ uid: `issue-${i.id}`, at: when, url: admin,
-      title: `${i.status === 'sent' ? '✓ sent' : '⏰ scheduled'}: ${i.subject || 'untitled letter'}`,
+      title: `${i.status === 'sent' ? 'sent' : 'scheduled'}: ${i.subject || 'untitled letter'}`,
       alarms: i.status === 'sent' ? [] : ['-P1D', '-PT2H'] });
   }
   for (const s of swaps) {
-    ev.push({ uid: `swap-${s.id}`, date: `${s.month}-01`, url: admin, title: `📚 swap: ${s.book_title} by ${s.author_name}`,
-      desc: s.reciprocal_sent ? 'They featured you back ♡' : 'Remember to check they feature you back.', alarms: ['-P2D'] });
-    if (s.release_date) ev.push({ uid: `swaprel-${s.id}`, date: s.release_date, title: `🎉 ${s.author_name}'s ${s.book_title} is out — share it!`, alarms: ['PT9H'] });
+    ev.push({ uid: `swap-${s.id}`, date: `${s.month}-01`, url: admin, title: `swap: ${s.book_title} by ${s.author_name}`,
+      desc: s.reciprocal_sent ? 'They featured you back' : 'Remember to check they feature you back.', alarms: ['-P2D'] });
+    if (s.release_date) ev.push({ uid: `swaprel-${s.id}`, date: s.release_date, title: `${s.author_name}'s ${s.book_title} is out · share it!`, alarms: ['PT9H'] });
   }
-  for (const r of reminders) ev.push({ uid: `rem-${r.id}`, at: r.due_at, title: `♡ ${r.title}`, alarms: ['-P1D', '-PT1H'], url: admin });
-  if (cfg.release) ev.push({ uid: `release-${cfg.release}`, date: cfg.release, title: '🎾 Call It a Let release day!', alarms: ['-P7D', '-P1D', 'PT8H'] });
+  for (const r of reminders) ev.push({ uid: `rem-${r.id}`, at: r.due_at, title: r.title, alarms: ['-P1D', '-PT1H'], url: admin });
+  if (cfg.release) ev.push({ uid: `release-${cfg.release}`, date: cfg.release, title: 'Call It a Let release day!', alarms: ['-P7D', '-P1D', 'PT8H'] });
 
   const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Mae Tao//Newsletter//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-    'X-WR-CALNAME:♡ Mae newsletter', 'X-PUBLISHED-TTL:PT1H', 'REFRESH-INTERVAL;VALUE=DURATION:PT1H',
+    'X-WR-CALNAME:Mae newsletter', 'X-PUBLISHED-TTL:PT1H', 'REFRESH-INTERVAL;VALUE=DURATION:PT1H',
     ...ev.map(vevent), 'END:VCALENDAR'].join('\r\n');
   return new Response(body, { headers: { 'Content-Type': 'text/calendar; charset=utf-8', 'Cache-Control': 'no-store' } });
 });

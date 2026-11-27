@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="256" height="256">
+  <defs>
+    <linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9b7bf"/><stop offset="1" stop-color="#d9939d"/></linearGradient>
+    <linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7d3d8"/><stop offset="1" stop-color="#eeb5be"/></linearGradient>
+    <radialGradient id="h" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#e89aa5"/><stop offset="1" stop-color="#c25f6d"/></radialGradient>
+  </defs>
+  <!-- back of envelope + flap -->
+  <path d="M14 52 60 18l46 34v46a10 10 0 0 1-10 10H24a10 10 0 0 1-10-10z" fill="url(#b)"/>
+  <!-- letter -->
+  <rect x="26" y="26" width="68" height="58" rx="10" fill="#fffaf7"/>
+  <path d="M40 46c0-4 6-6 8-2 2-4 8-2 8 2 0 5-8 9-8 9s-8-4-8-9z" fill="#ef9fab"/>
+  <rect x="62" y="40" width="22" height="5" rx="2.5" fill="#efdcdc"/>
+  <rect x="62" y="50" width="22" height="5" rx="2.5" fill="#efdcdc"/>
+  <rect x="38" y="62" width="46" height="5" rx="2.5" fill="#efdcdc"/>
+  <!-- front pocket -->
+  <path d="M14 56 60 88l46-32v42a10 10 0 0 1-10 10H24a10 10 0 0 1-10-10z" fill="url(#f)"/>
+  <path d="M18 104 52 80M102 104 68 80" stroke="#e7a9b2" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+  <!-- heart seal -->
+  <path d="M46 80c0-8 11-11 14-3 3-8 14-5 14 3 0 9-14 16-14 16s-14-7-14-16z" fill="url(#h)"/>
+  <path d="M51 78c1-3 4-4 6-2" stroke="#fff" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+</svg>

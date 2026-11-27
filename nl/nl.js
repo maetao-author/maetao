@@ -1,6 +1,13 @@
-/* ♡ tiny helpers shared by every newsletter page (no framework, no keys beyond the public anon key) */
+/* 𖹭 tiny helpers shared by every newsletter page (no framework, no keys beyond the public anon key) */
 (function () {
   const N = window.MAE_NL || {};
+  // where the site's root is, worked out from this script's own address (works one folder deep too)
+  const BASE = ((document.currentScript && document.currentScript.src) || '').replace(/nl\/nl\.js.*$/, '');
+  // put the small UI icon sprite into the page once, so <use href="#i-home"> works everywhere
+  fetch(BASE + 'nl/icons/ui.svg').then(r => r.ok ? r.text() : '').then(t => {
+    if (!t || document.getElementById('mt-sprite')) return;
+    const d = document.createElement('div'); d.id = 'mt-sprite'; d.setAttribute('aria-hidden', 'true'); d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden'; d.innerHTML = t; document.body.prepend(d);
+  }).catch(() => {});
   const live = () => !!(N.supabaseUrl && N.anonKey);
   const base = () => (N.supabaseUrl || '').replace(/\/$/, '');
   const hdr = () => ({ apikey: N.anonKey, Authorization: 'Bearer ' + N.anonKey, 'Content-Type': 'application/json' });
@@ -26,12 +33,14 @@
   }
 
   const NL = {
-    live,
+    live, BASE,
+    icon: (n, cls = '') => `<svg class="i ${cls}" aria-hidden="true"><use href="#i-${n}"/></svg>`,
+    pic: (n, alt = '') => `<img src="${BASE}nl/icons/${n}" alt="${alt}">`,
     subscribe: (email, first_name, src) => live() ? fn('subscribe', { email, first_name, source: source(src) }) : Promise.resolve({ ok: true, preview: true }),
     confirm: token => fn('confirm', { token }),
     unsubscribe: token => fn('unsubscribe', { token }),
     async activePoll() {
-      if (!live()) return { id: 'preview', question: 'Pick the next trope ♡', options: N.tropes || [] };
+      if (!live()) return { id: 'preview', question: 'Pick the next trope 𖹭', options: N.tropes || [] };
       const rows = await rest('polls?is_active=eq.true&select=id,question,options&order=created_at.desc&limit=1', { headers: { Prefer: '' } });
       return rows && rows[0];
     },
@@ -81,7 +90,7 @@
       setTimeout(() => t.remove(), 3800);
     },
     petals(x = innerWidth / 2, y = innerHeight / 2, n = 14) {
-      const set = ['♡', '✿', '❀', '✦', '♡'];
+      const set = ['𖹭', '𖹭', '•', '𖹭'];
       for (let i = 0; i < n; i++) {
         const p = document.createElement('span'); p.className = 'petal'; p.textContent = set[i % set.length];
         p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.color = ['#d98f97', '#f0c1c7', '#a9b8a8', '#c66a77'][i % 4];
@@ -109,7 +118,7 @@
       el.innerHTML = '<p class="muted">loading the poll…</p>';
       try {
         const poll = await NL.activePoll();
-        if (!poll) { el.innerHTML = '<p class="muted">No poll right now ♡ check back next letter.</p>'; return; }
+        if (!poll) { el.innerHTML = '<p class="muted">No poll right now 𖹭 check back next letter.</p>'; return; }
         const mineKey = 'mt.voted.' + poll.id;
         const draw = async (reveal) => {
           const res = reveal ? await NL.results(poll.id) : {};
@@ -118,22 +127,22 @@
           el.innerHTML = `<h3 class="h3">${NL.esc(poll.question)}</h3><div class="poll">${poll.options.map((o, i) => {
             const pct = total ? Math.round((res[i] || 0) / total * 100) : 0;
             return `<button class="popt ${mine == i ? 'mine' : ''}" data-i="${i}" ${reveal ? 'disabled' : ''} aria-label="${NL.esc(o)}${reveal ? ', ' + pct + ' percent' : ''}">
-              <i class="fill" style="width:${reveal ? pct : 0}%"></i><span><b>${mine == i ? '♥' : '♡'} ${NL.esc(o)}</b>${reveal ? `<em>${pct}%</em>` : ''}</span></button>`;
+              <i class="fill" style="width:${reveal ? pct : 0}%"></i><span><b>${mine == i ? '<span class="heart">𖹭</span> ' : ''}${NL.esc(o)}</b>${reveal ? `<em>${pct}%</em>` : ''}</span></button>`;
           }).join('')}</div>${reveal ? `<p class="lab" style="margin-top:10px">${total} vote${total === 1 ? '' : 's'} so far · results update live</p>` : ''}`;
           if (reveal) { requestAnimationFrame(() => el.querySelectorAll('.fill').forEach(f => { const w = f.style.width; f.style.width = 0; requestAnimationFrame(() => f.style.width = w); })); }
           el.querySelectorAll('.popt:not([disabled])').forEach(b => b.onclick = async e => {
             const i = b.dataset.i; b.disabled = true;
-            try { await NL.vote(poll.id, Number(i)); localStorage.setItem(mineKey, i); NL.petals(e.clientX, e.clientY, 10); NL.toast('vote saved ♡'); draw(true); }
+            try { await NL.vote(poll.id, Number(i)); localStorage.setItem(mineKey, i); NL.petals(e.clientX, e.clientY, 10); NL.toast('vote saved 𖹭'); draw(true); }
             catch { b.disabled = false; NL.toast('couldn’t save that vote, try again?'); }
           });
         };
         const pre = new URLSearchParams(location.search).get('vote');
         if (pre !== null && !localStorage.getItem(mineKey) && poll.options[pre] !== undefined) {
-          await NL.vote(poll.id, Number(pre)); localStorage.setItem(mineKey, pre); NL.toast('your vote from the email is in ♡');
+          await NL.vote(poll.id, Number(pre)); localStorage.setItem(mineKey, pre); NL.toast('your vote from the email is in 𖹭');
         }
         await draw(!!localStorage.getItem(mineKey));
         if (localStorage.getItem(mineKey)) setInterval(() => document.visibilityState === 'visible' && draw(true), 20000);
-      } catch { el.innerHTML = '<p class="muted">The poll is napping. Try again soon ♡</p>'; }
+      } catch { el.innerHTML = '<p class="muted">The poll is napping. Try again soon 𖹭</p>'; }
     }
   };
   window.NL = NL;

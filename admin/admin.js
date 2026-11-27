@@ -1,4 +1,4 @@
-// ♡ Mae's desk. Logged-in dashboard for the newsletter.
+// 𖹭 Mae's desk. Logged-in dashboard for the newsletter.
 // Talks to Supabase with YOUR login (row level security only lets admins read).
 // The Resend key never comes near this page: sending goes through the send-newsletter function.
 import { renderBlocks, frame } from '../supabase/functions/_shared/email.js';
@@ -21,14 +21,14 @@ function demoData() {
     status: i % 9 === 0 ? 'pending' : i % 17 === 0 ? 'unsubscribed' : 'confirmed', created_at: new Date(now - (i * 0.9) * day).toISOString() }));
   return {
     subscribers: subs,
-    issues: [{ id: 'i1', subject: 'release week is here ♡', preheader: '', status: 'sent', blocks: [], sent_at: new Date(now - 9 * day).toISOString(), created_at: new Date(now - 12 * day).toISOString() }],
+    issues: [{ id: 'i1', subject: 'release week is here 𖹭', preheader: '', status: 'sent', blocks: [], sent_at: new Date(now - 9 * day).toISOString(), created_at: new Date(now - 12 * day).toISOString() }],
     swaps: [
       { id: 'w1', month: iso(now).slice(0, 7), author_name: 'Jo Rivera', email: 'jo@example.com', book_title: 'Love, Set, Match', trope: 'fake dating', heat: 'steamy', release_date: iso(now + 6 * day), where_to_buy: 'https://example.com', blurb: 'A fake engagement at Wimbledon. What could go wrong?', status: 'approved', list_size: 1200, created_at: new Date(now - 3 * day).toISOString() },
       { id: 'w2', month: iso(now + 31 * day).slice(0, 7), author_name: 'Sam Lee', email: 'sam@example.com', book_title: 'Off Side', trope: 'forbidden coach-player', heat: 'spicy', where_to_buy: 'https://example.com', status: 'new', list_size: 640, created_at: new Date(now - day).toISOString() }],
-    polls: [{ id: 'p1', question: 'Pick the next trope ♡', options: N.tropes, is_active: true, created_at: new Date().toISOString() }],
+    polls: [{ id: 'p1', question: 'Pick the next trope 𖹭', options: N.tropes, is_active: true, created_at: new Date().toISOString() }],
     ama_questions: [{ id: 'q1', question: 'Will we get a book about Stephen’s sister?', name: 'Bea', answered: false, created_at: new Date(now - 2 * day).toISOString() }],
     reminders: [{ id: 'r1', title: 'cover reveal for book two', due_at: new Date(now + 4 * day).toISOString(), kind: 'promo', done: false }],
-    newsletter_sends: [{ id: 'n1', subject: 'release week is here ♡', recipient_count: 51, sent_at: new Date(now - 9 * day).toISOString() }]
+    newsletter_sends: [{ id: 'n1', subject: 'release week is here 𖹭', recipient_count: 51, sent_at: new Date(now - 9 * day).toISOString() }]
   };
 }
 
@@ -95,7 +95,7 @@ function showLogin() {
         if (error) throw error; session = data.session; $('#login').hidden = true; start();
       } else {
         const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.href.split('#')[0], shouldCreateUser: false } });
-        if (error) throw error; NL.toast('check your inbox for the magic link ♡');
+        if (error) throw error; NL.toast('check your inbox for the magic link 𖹭');
       }
     } catch (err) { NL.toast(err.message || 'that didn’t work'); }
     NL.busy(btn, false);
@@ -132,37 +132,37 @@ function reminders() {
   const near = (d, a, b) => Math.abs(new Date(d) - new Date(a)) < (b || 1.5 * day);
   const planned = D.issues.find(i => i.status === 'scheduled' && near(i.scheduled_for, nx));
   const daysTo = Math.ceil((nx - now) / day);
-  if (!planned && daysTo <= 5) out.push({ k: 'warn', ic: '✎', t: `letter due ${daysTo <= 1 ? 'tomorrow' : 'in ' + daysTo + ' days'}`, s: `${fmt(nx, { weekday: 'long', month: 'short', day: 'numeric' })} · nothing scheduled yet`, go: 'write', b: 'write it' });
-  else if (planned) out.push({ k: 'good', ic: '⏰', t: 'next letter is scheduled ♡', s: `“${planned.subject}” · ${fmt(planned.scheduled_for, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`, go: 'write', b: 'peek' });
+  if (!planned && daysTo <= 5) out.push({ k: 'warn', ic: 'pen', t: `letter due ${daysTo <= 1 ? 'tomorrow' : 'in ' + daysTo + ' days'}`, s: `${fmt(nx, { weekday: 'long', month: 'short', day: 'numeric' })} · nothing scheduled yet`, go: 'write', b: 'write it' });
+  else if (planned) out.push({ k: 'good', ic: 'clock', t: 'next letter is scheduled 𖹭', s: `“${planned.subject}” · ${fmt(planned.scheduled_for, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`, go: 'write', b: 'peek' });
   D.issues.filter(i => i.status === 'scheduled' && new Date(i.scheduled_for) <= now).forEach(i =>
-    out.push({ k: 'warn', ic: '✉', t: `“${i.subject}” is due now`, s: 'If automatic sending isn’t on yet, open it and press send.', go: 'write', b: 'open', issue: i.id }));
+    out.push({ k: 'warn', ic: 'pic:newsletter.svg', t: `“${i.subject}” is due now`, s: 'If automatic sending isn’t on yet, open it and press send.', go: 'write', b: 'open', issue: i.id }));
   D.issues.filter(i => i.status === 'scheduled' && new Date(i.scheduled_for) - now < day && new Date(i.scheduled_for) > now).forEach(i =>
-    out.push({ k: 'warn', ic: '🧪', t: 'goes out within 24 hours', s: `Send yourself a test of “${i.subject}” first`, go: 'write', b: 'test', issue: i.id }));
+    out.push({ k: 'warn', ic: 'flask', t: 'goes out within 24 hours', s: `Send yourself a test of “${i.subject}” first`, go: 'write', b: 'test', issue: i.id }));
   const ns = D.swaps.filter(s => s.status === 'new').length;
-  if (ns) out.push({ k: 'warn', ic: '📚', t: `${ns} new swap request${ns > 1 ? 's' : ''}`, s: 'authors are waiting to hear back', go: 'swaps', b: 'review' });
+  if (ns) out.push({ k: 'warn', ic: 'pic:swap.svg', t: `${ns} new swap request${ns > 1 ? 's' : ''}`, s: 'authors are waiting to hear back', go: 'swaps', b: 'review' });
   const thisMonth = iso(now).slice(0, 7);
   const unplaced = D.swaps.filter(s => s.status === 'approved' && s.month <= thisMonth && !s.issue_id).length;
-  if (unplaced) out.push({ k: 'warn', ic: '♡', t: `${unplaced} approved swap${unplaced > 1 ? 's' : ''} not in a letter yet`, s: 'add them to your next letter', go: 'write', b: 'add' });
+  if (unplaced) out.push({ k: 'warn', ic: 'gift', t: `${unplaced} approved swap${unplaced > 1 ? 's' : ''} not in a letter yet`, s: 'add them to your next letter', go: 'write', b: 'add' });
   D.swaps.filter(s => s.release_date && ['approved', 'scheduled', 'sent'].includes(s.status)).forEach(s => {
     const d = (new Date(s.release_date + 'T00:00:00') - now) / day;
-    if (d > -1 && d < 7) out.push({ k: '', ic: '🎉', t: `${s.author_name}'s ${s.book_title} ${d < 0 ? 'is out today' : 'comes out ' + fmt(s.release_date + 'T12:00')}`, s: 'share it on your stories ♡' });
-    if (s.status === 'sent' && !s.reciprocal_sent) out.push({ k: '', ic: '↺', t: `did ${s.author_name} feature you back?`, s: 'tick it off in swaps', go: 'swaps', b: 'check' });
+    if (d > -1 && d < 7) out.push({ k: '', ic: 'party', t: `${s.author_name}'s ${s.book_title} ${d < 0 ? 'is out today' : 'comes out ' + fmt(s.release_date + 'T12:00')}`, s: 'share it on your stories 𖹭' });
+    if (s.status === 'sent' && !s.reciprocal_sent) out.push({ k: '', ic: 'loop', t: `did ${s.author_name} feature you back?`, s: 'tick it off in swaps', go: 'swaps', b: 'check' });
   });
   const qa = D.ama_questions.filter(q => !q.answered).length;
-  if (qa) out.push({ k: '', ic: '✉', t: `${qa} reader question${qa > 1 ? 's' : ''}`, s: 'answer one in your next letter', go: 'ama', b: 'read' });
+  if (qa) out.push({ k: '', ic: 'chat', t: `${qa} reader question${qa > 1 ? 's' : ''}`, s: 'answer one in your next letter', go: 'ama', b: 'read' });
   D.reminders.filter(r => !r.done && new Date(r.due_at) - now < 2 * day).forEach(r =>
-    out.push({ k: new Date(r.due_at) < now ? 'warn' : '', ic: '♡', t: r.title, s: fmt(r.due_at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }), rem: r.id }));
+    out.push({ k: new Date(r.due_at) < now ? 'warn' : '', ic: 'bell', t: r.title, s: fmt(r.due_at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }), rem: r.id }));
   if (N.book?.release) {
     const d = Math.ceil((new Date(N.book.release + 'T00:00:00') - now) / day);
-    if (d >= 0 && d <= 14) out.push({ k: 'good', ic: '🎾', t: d ? `${d} days until ${N.book.title}` : `${N.book.title} is out today!!`, s: d ? 'plan a release-day letter ♡' : 'send the release-day letter ♡', go: 'write', b: 'write' });
+    if (d >= 0 && d <= 14) out.push({ k: 'good', ic: 'pic:youre-in.png', t: d ? `${d} days until ${N.book.title}` : `${N.book.title} is out today!!`, s: d ? 'plan a release-day letter 𖹭' : 'send the release-day letter 𖹭', go: 'write', b: 'write' });
   }
   const stale = D.subscribers.filter(s => s.status === 'pending' && now - new Date(s.created_at) > 3 * day).length;
-  if (stale > 2) out.push({ k: '', ic: '📭', t: `${stale} people never confirmed`, s: 'normal! but if it grows, check your spam score in setup', go: 'setup', b: 'setup' });
-  if (!out.length) out.push({ k: 'good', ic: '✨', t: 'all caught up', s: 'go write something lovely' });
+  if (stale > 2) out.push({ k: '', ic: 'pic:inbox.png', t: `${stale} people never confirmed`, s: 'normal! but if it grows, check your spam score in setup', go: 'setup', b: 'setup' });
+  if (!out.length) out.push({ k: 'good', ic: 'spark', t: 'all caught up', s: 'go write something lovely' });
   return out;
 }
 function remHtml(list) {
-  return list.map((r, i) => `<div class="rem ${r.k}"><div class="ic">${r.ic}</div><div style="min-width:0;flex:1"><b>${esc(r.t)}</b><small>${esc(r.s || '')}</small></div>
+  return list.map((r, i) => `<div class="rem ${r.k}"><div class="ic">${icon(r.ic)}</div><div style="min-width:0;flex:1"><b>${esc(r.t)}</b><small>${esc(r.s || '')}</small></div>
     ${r.go ? `<button class="btn xs ${r.k === 'warn' ? 'rose' : 'paper'}" data-rgo="${i}">${esc(r.b)}</button>` : ''}${r.rem ? `<button class="btn xs paper" data-rdone="${r.rem}">done ✓</button>` : ''}</div>`).join('');
 }
 function wireRems(box, list) {
@@ -181,72 +181,112 @@ function remindersPopup(quiet) {
   if (quiet && sessionStorage.getItem('mt.popSig') === sig) return;
   if (!urgent.length && sessionStorage.getItem('mt.popSeen')) return;
   sessionStorage.setItem('mt.popSeen', '1'); sessionStorage.setItem('mt.popSig', sig);
-  $('#popIc').textContent = urgent.length ? '🔔' : '✨';
-  $('#popH').textContent = `${greeting()}, Mae ♡ ${urgent.length ? "here's what's up" : "you're all caught up"}`;
+  $('#popIc').innerHTML = NL.icon(urgent.length ? 'bell' : 'spark');
+  $('#popH').textContent = `${greeting()}, Mae 𖹭 ${urgent.length ? "here's what's up" : "you're all caught up"}`;
   const show = urgent.length ? urgent : list.slice(0, 3);
   $('#popList').innerHTML = remHtml(show); wireRems($('#popList'), show);
   $('#pop').classList.add('open');
   if (urgent.length && 'Notification' in window && Notification.permission === 'granted' && document.visibilityState !== 'visible')
-    new Notification('mae’s desk ♡', { body: urgent.map(r => r.t).join(' · ') });
+    new Notification('mae’s desk', { body: urgent.map(r => r.t).join(' · ') });
 }
 $('#popX').onclick = $('#popOk').onclick = () => $('#pop').classList.remove('open');
 $('#pop').addEventListener('click', e => { if (e.target.id === 'pop') $('#pop').classList.remove('open'); });
 $('#notifBtn').onclick = async () => {
   if (!('Notification' in window)) return NL.toast('this browser can’t do notifications');
   const p = await Notification.requestPermission();
-  NL.toast(p === 'granted' ? 'reminders on ♡ I’ll ping you when something’s due' : 'no worries, the pop-ups still work');
-  if (p === 'granted') new Notification('mae’s desk ♡', { body: 'Reminders are on. I’ll nudge you before every letter.' });
+  NL.toast(p === 'granted' ? 'reminders on 𖹭 I’ll ping you when something’s due' : 'no worries, the pop-ups still work');
+  if (p === 'granted') new Notification('mae’s desk', { body: 'Reminders are on. I’ll nudge you before every letter.' });
 };
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'good morning' : h < 18 ? 'good afternoon' : 'good evening'; };
 
 /* ================= overview ================= */
+const icon = n => n.startsWith('pic:') ? `<img src="../nl/icons/${n.slice(4)}" alt="">` : NL.icon(n);
 function renderHome() {
   const S = D.subscribers, conf = S.filter(s => s.status === 'confirmed'), now = Date.now();
-  $('#today').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
-  $('#greet').innerHTML = `${greeting()}, <em>Mae</em>`;
-  $('#sConf').textContent = conf.length;
-  const wk = S.filter(s => s.status !== 'unsubscribed' && now - new Date(s.created_at) < 7 * day).length;
-  $('#sWeek').textContent = wk ? `+${wk} this week ♡` : '';
-  $('#sPend').textContent = S.filter(s => s.status === 'pending').length;
-  $('#sSent').textContent = D.newsletter_sends.filter(s => !s.is_test).length;
-  const nx = nextSend(), dd = Math.max(0, Math.ceil((nx - now) / day));
-  $('#sNext').textContent = dd + (dd === 1 ? ' day' : ' days'); $('#sNextD').textContent = fmt(nx, { weekday: 'short', month: 'short', day: 'numeric' });
-  // bars: last 8 weeks
-  const weeks = Array.from({ length: 8 }, (_, i) => { const end = now - (7 - i) * 7 * day; return { end, n: S.filter(s => { const t = new Date(s.created_at); return t <= end && t > end - 7 * day; }).length }; });
-  const max = Math.max(1, ...weeks.map(w => w.n));
-  $('#bars').innerHTML = weeks.map(w => `<div style="--h:${Math.round(w.n / max * 100)}%"><b>${w.n || ''}</b><span>${fmt(w.end)}</span></div>`).join('');
+  const inRange = (d, from, to) => { const t = new Date(d).getTime(); return t > from && t <= to; };
+  const live = s => s.status !== 'unsubscribed';
+  $('#today').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) + ' · ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const h = new Date().getHours();
+  $('#greet').innerHTML = `${h < 5 || h >= 22 ? 'still up' : greeting()}, mae<sup class="heart">𖹭</sup>`;
+
+  // next up (dark card)
+  const nx = nextSend(), planned = D.issues.find(i => i.status === 'scheduled' && Math.abs(new Date(i.scheduled_for) - nx) < 1.5 * day);
+  const ms = Math.max(0, (planned ? new Date(planned.scheduled_for) : nx) - now);
+  $('#nuTitle').textContent = planned ? planned.subject || 'untitled letter' : `letter for ${fmt(nx, { weekday: 'short', month: 'short', day: 'numeric' })}`;
+  $('#nuTag').textContent = planned ? 'scheduled' : ms < 3 * day ? 'write soon' : 'on track';
+  $('#nuChips').innerHTML = `<span class="chip">${NL.icon('cal')} ${fmt(nx, { weekday: 'long' })}</span><span class="chip">${NL.icon('readers')} ${conf.length} readers</span>`;
+  $('#nuTiles').innerHTML = [[`${Math.floor(ms / day)}d ${Math.floor(ms / 36e5) % 24}h`, 'left'], [(planned ? new Date(planned.scheduled_for) : nx).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), 'send time'], [String(D.issues.filter(i => i.status === 'draft').length), 'drafts']]
+    .map(([v, l]) => `<div><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+  // sparkline: new readers per day, last 14 days
+  const daily = Array.from({ length: 14 }, (_, i) => S.filter(s => live(s) && inRange(s.created_at, now - (14 - i) * day, now - (13 - i) * day)).length);
+  const mx = Math.max(1, ...daily), pts = daily.map((v, i) => [i / 13 * 300, 64 - v / mx * 54]);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  $('#spark').innerHTML = `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0c1c7" stop-opacity=".75"/><stop offset="1" stop-color="#f0c1c7" stop-opacity="0"/></linearGradient></defs>
+    <path d="${line} L300 70 L0 70 Z" fill="url(#sg)"/><path d="${line}" fill="none" stroke="#f0c1c7" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+
+  // reader goal ring
+  const goal = N.readerGoal || 100, pct = Math.min(100, Math.round(conf.length / goal * 100));
+  $('#ring').style.setProperty('--p', pct); $('#ringPct').textContent = pct + '%'; $('#ringSub').textContent = `${conf.length} of ${goal}`;
+  $('#goalLab').textContent = 'goal ' + goal; $('#ringNote').innerHTML = pct >= 100 ? 'goal reached, lovely <span class="heart">𖹭</span>' : `${goal - conf.length} more to go <span class="heart">𖹭</span>`;
+
+  // colour stat cards with mini capsules
+  const mini = (id, vals) => { const m = Math.max(1, ...vals); $(id).innerHTML = vals.map(v => `<i style="--h:${Math.max(16, v / m * 100)}%"></i>`).join(''); };
+  const wk = S.filter(s => live(s) && now - new Date(s.created_at) < 7 * day).length;
+  $('#sConf').textContent = conf.length; $('#sWeek').textContent = `+${wk} this week`;
+  mini('#m1', Array.from({ length: 7 }, (_, i) => S.filter(s => live(s) && inRange(s.created_at, now - (7 - i) * day, now - (6 - i) * day)).length));
+  const pend = S.filter(s => s.status === 'pending');
+  $('#sPend').textContent = pend.length; $('#sPendTag').textContent = pend.length ? 'nudge them' : 'all clear';
+  mini('#m2', Array.from({ length: 7 }, (_, i) => pend.filter(s => inRange(s.created_at, now - (7 - i) * day, now - (6 - i) * day)).length));
+  const sends = D.newsletter_sends.filter(s => !s.is_test), thisM = iso(now).slice(0, 7);
+  $('#sSent').textContent = sends.length; $('#sSentTag').textContent = `${sends.filter(s => (s.sent_at || '').startsWith(thisM)).length} / 2 this month`;
+  mini('#m3', Array.from({ length: 6 }, (_, i) => { const d = new Date(); d.setMonth(d.getMonth() - 5 + i); const k = iso(d).slice(0, 7); return sends.filter(s => (s.sent_at || '').startsWith(k)).length; }));
+  const sw = D.swaps.filter(s => s.month === thisM && s.status !== 'declined');
+  $('#sSwap').textContent = sw.length; $('#sSwapTag').textContent = `${D.swaps.filter(s => s.status === 'new').length} new`;
+  mini('#m4', Array.from({ length: 6 }, (_, i) => D.swaps.filter(s => inRange(s.created_at, now - (6 - i) * 7 * day, now - (5 - i) * 7 * day)).length));
+
+  // growth capsules: last 8 weeks, this week tall + dark
+  const weeks = Array.from({ length: 8 }, (_, i) => { const end = now - (7 - i) * 7 * day; return { end, n: S.filter(s => live(s) && inRange(s.created_at, end - 7 * day, end)).length }; });
+  const wmax = Math.max(1, ...weeks.map(w => w.n)), cur = weeks[7].n, prev = weeks[6].n;
+  const ch = prev ? Math.round((cur - prev) / prev * 100) : (cur ? 100 : 0);
+  $('#gPct').textContent = (ch >= 0 ? '+' : '') + ch + '%'; $('#gNum').textContent = cur;
+  const hNow = Math.round(cur / wmax * 82 + 12);
+  $('#bars').innerHTML = weeks.map((w, i) => { const hh = Math.round(w.n / wmax * 82 + 12); return `<div class="c ${i === 7 ? 'now' : ''}" style="--h:${hh}%"><b>${w.n}</b><i></i><span>${i === 7 ? 'this wk' : fmt(w.end)}</span></div>`; }).join('')
+    + `<div class="guide" style="bottom:${hNow}%"></div>`;
+
   // sources
-  const src = {}; S.filter(s => s.status === 'confirmed').forEach(s => src[s.source || 'website'] = (src[s.source || 'website'] || 0) + 1);
+  const src = {}; conf.forEach(s => src[s.source || 'website'] = (src[s.source || 'website'] || 0) + 1);
   const tot = Math.max(1, conf.length), top = Object.entries(src).sort((a, b) => b[1] - a[1]).slice(0, 6);
   $('#meter').innerHTML = top.length ? top.map(([k, v]) => `<div><span>${esc(k)}</span><i style="--w:${Math.round(v / tot * 100)}%"></i><small>${Math.round(v / tot * 100)}%</small></div>`).join('')
     : '<p class="muted">Add <code class="code">?ref=tiktok</code> to links you share and you’ll see it here.</p>';
   const list = reminders(); $('#rems').innerHTML = remHtml(list); wireRems($('#rems'), list);
+  $('#todoCount').textContent = `${list.filter(r => r.k === 'warn').length} need you`;
   const badge = (id, n) => { $(id).hidden = !n; $(id).textContent = n; };
   badge('#bHome', list.filter(r => r.k === 'warn').length); badge('#bSwaps', D.swaps.filter(s => s.status === 'new').length); badge('#bAma', D.ama_questions.filter(q => !q.answered).length);
 }
+$('#nuTest') && ($('#nuTest').onclick = () => { go('write'); setTimeout(() => $('#testSend').click(), 300); });
 
 /* ================= composer ================= */
 const BLOCKS = {
-  letter: { icon: '✉', name: 'letter', f: [['sticker', 'sticker', '✉ a little letter'], ['title', 'heading', 'hi {{FIRST_NAME}} ♡'], ['text', 'your letter', '', 'ta'], ['signoff', 'sign-off', 'with love, Mae']] },
-  book: { icon: '🎾', name: 'my book', f: [['sticker', 'sticker', 'out now ♡'], ['title', 'title', N.book.title], ['text', 'text', '', 'ta'], ['cover', 'cover image', N.book.cover], ['button', 'button', 'grab your copy'], ['link', 'button link', (N.book.buy || []).find(b => b.link)?.link || '']] },
-  news: { icon: '♡', name: 'news', f: [['sticker', 'sticker', '♡ news'], ['title', 'heading', ''], ['text', 'text', '', 'ta'], ['button', 'button', 'take a look ♡'], ['link', 'button link', '']] },
-  poll: { icon: '✍', name: 'poll', f: [['question', 'question', ''], ['options', 'options (one per line)', '', 'ta']] },
-  swap: { icon: '📚', name: 'swap books', f: [['title', 'heading', 'books my friends wrote'], ['text', 'intro', 'A few books from author friends I think you’ll love ♡', 'ta']] },
-  ama: { icon: '?', name: 'ask me', f: [['title', 'heading', 'your turn ♡'], ['text', 'text', '', 'ta']] },
-  answer: { icon: '💬', name: 'answer', f: [['question', 'reader question', ''], ['text', 'your answer', '', 'ta']] },
-  bonus: { icon: '🔒', name: 'secret shelf', f: [['title', 'heading', 'a little extra'], ['text', 'text', '', 'ta'], ['button', 'button', 'open it ♡'], ['link', 'link', SITE + '/#bonus']] },
-  ps: { icon: 'p.s.', name: 'p.s.', f: [['text', 'p.s.', '', 'ta']] }
+  letter: { icon: 'pic:newsletter.svg', name: 'letter', f: [['sticker', 'sticker', 'a little letter'], ['title', 'heading', 'hi {{FIRST_NAME}}'], ['text', 'your letter', '', 'ta'], ['signoff', 'sign-off', 'with love, Mae']] },
+  book: { icon: 'pic:youre-in.png', name: 'my book', f: [['sticker', 'sticker', 'out now'], ['title', 'title', N.book.title], ['text', 'text', '', 'ta'], ['cover', 'cover image', N.book.cover], ['button', 'button', 'grab your copy'], ['link', 'button link', (N.book.buy || []).find(b => b.link)?.link || '']] },
+  news: { icon: 'spark', name: 'news', f: [['sticker', 'sticker', 'news'], ['title', 'heading', ''], ['text', 'text', '', 'ta'], ['button', 'button', 'take a look'], ['link', 'button link', '']] },
+  poll: { icon: 'poll', name: 'poll', f: [['question', 'question', ''], ['options', 'options (one per line)', '', 'ta']] },
+  swap: { icon: 'pic:swap.svg', name: 'swap books', f: [['title', 'heading', 'books my friends wrote'], ['text', 'intro', 'A few books from author friends I think you’ll love.', 'ta']] },
+  ama: { icon: 'chat', name: 'ask me', f: [['title', 'heading', 'your turn'], ['text', 'text', '', 'ta']] },
+  answer: { icon: 'chat', name: 'answer', f: [['question', 'reader question', ''], ['text', 'your answer', '', 'ta']] },
+  bonus: { icon: 'lock', name: 'secret shelf', f: [['title', 'heading', 'a little extra'], ['text', 'text', '', 'ta'], ['button', 'button', 'open it'], ['link', 'link', SITE + '/#bonus']] },
+  ps: { icon: 'pen', name: 'p.s.', f: [['text', 'p.s.', '', 'ta']] }
 };
 let cur = null, prevT;
 const blank = () => ({ id: null, subject: '', preheader: '', status: 'draft', scheduled_for: null, blocks: [] });
 function fromTemplate() {
   const poll = D.polls.find(p => p.is_active), month = iso(nextSend()).slice(0, 7);
   const blocks = [
-    { type: 'letter', sticker: '✉ a little letter', title: 'hi {{FIRST_NAME}} ♡', text: 'Write to them like a friend: what you’re working on, what made you smile this week.', signoff: 'with love, Mae' },
-    { type: 'book', sticker: new Date(N.book.release) > new Date() ? 'coming ' + fmt(N.book.release + 'T12:00') : 'out now ♡', title: N.book.title, text: 'One line about the book, or a tiny teaser quote.', cover: N.book.cover, button: 'grab your copy', link: (N.book.buy || []).find(b => b.link)?.link || SITE }];
+    { type: 'letter', sticker: 'a little letter', title: 'hi {{FIRST_NAME}}', text: 'Write to them like a friend: what you’re working on, what made you smile this week.', signoff: 'with love, Mae' },
+    { type: 'book', sticker: new Date(N.book.release) > new Date() ? 'coming ' + fmt(N.book.release + 'T12:00') : 'out now', title: N.book.title, text: 'One line about the book, or a tiny teaser quote.', cover: N.book.cover, button: 'grab your copy', link: (N.book.buy || []).find(b => b.link)?.link || SITE }];
   if (poll) blocks.push({ type: 'poll', question: poll.question, options: poll.options });
-  const sw = swapItems(month); if (sw.length) blocks.push({ type: 'swap', title: 'books my friends wrote', text: 'A few books from author friends I think you’ll love ♡', items: sw, swapIds: sw.map(s => s.id) });
-  blocks.push({ type: 'ama', title: 'your turn ♡', text: '' }, { type: 'ps', text: '' });
+  const sw = swapItems(month); if (sw.length) blocks.push({ type: 'swap', title: 'books my friends wrote', text: 'A few books from author friends I think you’ll love.', items: sw, swapIds: sw.map(s => s.id) });
+  blocks.push({ type: 'ama', title: 'your turn', text: '' }, { type: 'ps', text: '' });
   return { ...blank(), blocks, scheduled_for: nextSend().toISOString() };
 }
 function swapItems(month) {
@@ -254,27 +294,27 @@ function swapItems(month) {
     .map(s => ({ id: s.id, author_name: s.author_name, book_title: s.book_title, trope: s.trope, release_date: s.release_date, blurb: s.blurb, cover_url: s.cover_url, where_to_buy: s.where_to_buy }));
 }
 function setupComposer() {
-  $('#adders').insertAdjacentHTML('beforeend', Object.entries(BLOCKS).map(([k, b]) => `<button class="chip" data-add="${k}">${b.icon} ${b.name}</button>`).join(''));
+  $('#adders').insertAdjacentHTML('beforeend', Object.entries(BLOCKS).map(([k, b]) => `<button class="chip" data-add="${k}">${icon(b.icon)} ${b.name}</button>`).join(''));
   $('#adders').onclick = e => { const k = e.target.closest('[data-add]')?.dataset.add; if (!k) return; addBlock(k); };
-  $('#newIssue').onclick = () => { if (dirty() && !confirm('Start a new letter? Your current draft stays saved on this device until you save it.')) return; load(fromTemplate()); NL.toast('fresh letter from your template ✿'); };
+  $('#newIssue').onclick = () => { if (dirty() && !confirm('Start a new letter? Your current draft stays saved on this device until you save it.')) return; load(fromTemplate()); NL.toast('fresh letter from your template'); };
   $('#openIssue').onchange = e => { if (e.target.value) openIssue(e.target.value); e.target.value = ''; };
   $('#subj').oninput = $('#pre').oninput = () => { cur.subject = $('#subj').value; cur.preheader = $('#pre').value; changed(); };
   $('#when').onchange = () => { cur.scheduled_for = $('#when').value ? new Date($('#when').value).toISOString() : null; changed(); };
   $$('.prevbar .chip').forEach(c => c.onclick = () => { $$('.prevbar .chip').forEach(x => x.classList.toggle('on', x === c)); $('#pw').classList.toggle('phone', c.dataset.d === 'phone'); });
-  $('#saveDraft').onclick = () => persist('draft').then(() => NL.toast('draft saved ♡')).catch(oops);
+  $('#saveDraft').onclick = () => persist('draft').then(() => NL.toast('draft saved 𖹭')).catch(oops);
   $('#schedule').onclick = async () => {
     if (!cur.scheduled_for) return NL.toast('pick a date and time first');
-    if (new Date(cur.scheduled_for) < Date.now()) return NL.toast('that time is in the past ♡');
+    if (new Date(cur.scheduled_for) < Date.now()) return NL.toast('that time is in the past 𖹭');
     try { await persist('scheduled'); NL.toast(`scheduled for ${fmt(cur.scheduled_for, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} ⏰`); } catch (e) { oops(e); }
   };
   $('#testSend').onclick = async () => {
     const b = $('#testSend'); NL.busy(b, true);
-    try { await persist(cur.status === 'scheduled' ? 'scheduled' : 'draft'); const r = await api.send(cur.id, 'test'); NL.toast(`test sent to ${r.test_to} ♡`); } catch (e) { oops(e); }
+    try { await persist(cur.status === 'scheduled' ? 'scheduled' : 'draft'); const r = await api.send(cur.id, 'test'); NL.toast(`test sent to ${r.test_to} 𖹭`); } catch (e) { oops(e); }
     NL.busy(b, false);
   };
   $('#sendNow').onclick = async () => {
     const n = D.subscribers.filter(s => s.status === 'confirmed').length;
-    if (!cur.subject.trim()) return NL.toast('give it a subject line first ♡');
+    if (!cur.subject.trim()) return NL.toast('give it a subject line first 𖹭');
     if (!confirm(`Send “${cur.subject}” to ${n} confirmed reader${n === 1 ? '' : 's'} now?\n\nPending and unsubscribed readers never get it.`)) return;
     const b = $('#sendNow'); NL.busy(b, true);
     try {
@@ -282,7 +322,7 @@ function setupComposer() {
       Object.assign(cur, { status: 'sent', sent_at: new Date().toISOString() });
       if (DEMO) { await api.upd('issues', cur.id, { status: 'sent', sent_at: cur.sent_at }); D.newsletter_sends.unshift({ id: crypto.randomUUID(), subject: cur.subject, recipient_count: r.sent, sent_at: cur.sent_at }); }
       else await api.load();
-      NL.petals(innerWidth / 2, innerHeight / 2, 30); NL.toast(`sent to ${r.sent} readers ✉ ♡`);
+      NL.petals(innerWidth / 2, innerHeight / 2, 30); NL.toast(`sent to ${r.sent} readers 𖹭`);
       localStorage.removeItem('mt.draft'); renderAll(); load(D.issues.find(i => i.id === cur.id) || cur);
     } catch (e) { oops(e); }
     NL.busy(b, false);
@@ -304,7 +344,7 @@ function openIssue(id) { const i = D.issues.find(x => x.id === id); if (i) { loa
 function addBlock(k, data) {
   const def = BLOCKS[k], b = { type: k, ...Object.fromEntries(def.f.map(([n, , d]) => [n, d])), ...(data || {}) };
   if (k === 'poll' && !data) { const p = D.polls.find(p => p.is_active); if (p) { b.question = p.question; b.options = p.options; } }
-  if (k === 'swap' && !data) { b.items = swapItems(iso(cur.scheduled_for || Date.now()).slice(0, 7)); b.swapIds = b.items.map(s => s.id); if (!b.items.length) NL.toast('no approved swaps yet: approve some in swaps ♡'); }
+  if (k === 'swap' && !data) { b.items = swapItems(iso(cur.scheduled_for || Date.now()).slice(0, 7)); b.swapIds = b.items.map(s => s.id); if (!b.items.length) NL.toast('no approved swaps yet: approve some in swaps 𖹭'); }
   cur.blocks.push(b); drawBlocks(); changed();
   setTimeout(() => $('#blocks').lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
 }
@@ -312,7 +352,7 @@ function addApprovedSwaps() {
   const items = swapItems(); if (!items.length) return;
   const ex = cur.blocks.find(b => b.type === 'swap');
   if (ex) { const have = new Set(ex.items.map(i => i.id)); items.forEach(i => { if (!have.has(i.id)) ex.items.push(i); }); ex.swapIds = ex.items.map(i => i.id); }
-  else addBlock('swap', { title: 'books my friends wrote', text: 'A few books from author friends I think you’ll love ♡', items, swapIds: items.map(i => i.id) });
+  else addBlock('swap', { title: 'books my friends wrote', text: 'A few books from author friends I think you’ll love.', items, swapIds: items.map(i => i.id) });
   drawBlocks(); changed();
 }
 function drawBlocks() {
@@ -323,9 +363,9 @@ function drawBlocks() {
       return `<div class="f"><label>${label}</label>${kind === 'ta' ? `<textarea data-i="${i}" data-n="${n}" rows="${n === 'text' ? 5 : 4}">${esc(v)}</textarea>` : `<input data-i="${i}" data-n="${n}" value="${esc(v)}">`}</div>`;
     }).join('');
     const extra = b.type === 'swap' ? `<div class="softlist" style="margin-bottom:12px">${(b.items || []).map((s, j) => `<div class="row" style="justify-content:space-between"><span><b>${esc(s.book_title)}</b> <small class="muted">by ${esc(s.author_name)}</small></span><button class="mini" data-rmswap="${i}:${j}" title="remove">✕</button></div>`).join('') || '<small class="muted">no swaps in this block yet</small>'}</div><button class="btn xs paper" data-pullswap="${i}" style="margin-bottom:12px">↻ pull approved swaps</button>` : '';
-    return `<div class="blk" data-t="${b.type}"><div class="top"><span class="tag ${b.type === 'swap' ? 'sage' : 'rose'}">${def.icon} ${def.name}</span><span class="sp"></span>
+    return `<div class="blk" data-t="${b.type}"><div class="top"><span class="tag ${b.type === 'swap' ? 'sage' : 'rose'}">${icon(def.icon)} ${def.name}</span><span class="sp"></span>
       <button class="mini" data-mv="${i}:-1" title="move up" aria-label="move up">↑</button><button class="mini" data-mv="${i}:1" title="move down" aria-label="move down">↓</button><button class="mini" data-rm="${i}" title="remove" aria-label="remove">✕</button></div>${fields}${extra}</div>`;
-  }).join('') || '<p class="muted center" style="padding:20px">Add sections below, or start from your template ✿</p>';
+  }).join('') || '<p class="muted center" style="padding:20px">Add sections below, or start from your template</p>';
   $$('#blocks [data-n]').forEach(el => el.oninput = () => {
     const b = cur.blocks[el.dataset.i]; b[el.dataset.n] = el.dataset.n === 'options' ? el.value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 8) : el.value; changed();
   });
@@ -352,7 +392,7 @@ async function persist(status) {
   // link swaps used in this letter
   const ids = cur.blocks.filter(b => b.type === 'swap').flatMap(b => b.swapIds || []);
   for (const id of ids) { const s = D.swaps.find(x => x.id === id); if (s && s.issue_id !== cur.id) await api.upd('swaps', id, { issue_id: cur.id, status: 'scheduled' }); }
-  ls.set('mt.draft', cur); $('#wState').textContent = status; $('#saveSt').textContent = 'saved ♡ ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  ls.set('mt.draft', cur); $('#wState').textContent = status; $('#saveSt').textContent = 'saved 𖹭 ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   renderIssuePicker(); renderHome(); renderCal(); renderSwaps();
 }
 function renderIssuePicker() {
@@ -370,7 +410,7 @@ function setupCalendar() {
   $('#remW').value = local(Date.now() + day);
   $('#remForm').onsubmit = async e => { e.preventDefault();
     try { await api.ins('reminders', { title: $('#remT').value.trim(), due_at: new Date($('#remW').value).toISOString(), kind: $('#remK').value, done: false });
-      e.target.reset(); $('#remW').value = local(Date.now() + day); NL.toast('reminder added ♡'); renderCal(); renderHome(); remList(); } catch (er) { oops(er); } };
+      e.target.reset(); $('#remW').value = local(Date.now() + day); NL.toast('reminder added 𖹭'); renderCal(); renderHome(); remList(); } catch (er) { oops(er); } };
   remList();
 }
 function calLinks() {
@@ -379,11 +419,11 @@ function calLinks() {
   const url = `${base}/functions/v1/calendar-feed?key=${encodeURIComponent(k)}`, webcal = url.replace(/^https:/, 'webcal:');
   $('#calLinks').innerHTML = `<a class="btn sm rose" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}">+ Google Calendar</a>
     <a class="btn sm paper" href="${esc(webcal)}">+ Apple Calendar</a><button class="btn sm ghost" id="cpFeed">copy link</button>`;
-  $('#cpFeed').onclick = () => navigator.clipboard.writeText(url).then(() => NL.toast('copied ♡'));
+  $('#cpFeed').onclick = () => navigator.clipboard.writeText(url).then(() => NL.toast('copied 𖹭'));
 }
 function remList() {
   $('#remList').innerHTML = D.reminders.filter(r => !r.done).sort((a, b) => a.due_at.localeCompare(b.due_at)).slice(0, 8).map(r =>
-    `<div class="r"><div class="av">♡</div><div class="main"><b>${esc(r.title)}</b><small>${fmt(r.due_at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${r.kind}</small></div>
+    `<div class="r"><div class="av">${NL.icon('bell')}</div><div class="main"><b>${esc(r.title)}</b><small>${fmt(r.due_at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${r.kind}</small></div>
      <a class="btn xs paper" target="_blank" rel="noopener" href="${NL.gcal({ title: r.title, date: iso(r.due_at) })}">+ gcal</a><button class="btn xs sage" data-done="${r.id}">done</button></div>`).join('') || '<small class="muted">no reminders yet</small>';
   $$('#remList [data-done]').forEach(b => b.onclick = async () => { await api.upd('reminders', b.dataset.done, { done: true }).catch(oops); remList(); renderCal(); renderHome(); });
 }
@@ -392,11 +432,11 @@ function calEvents() {
   D.issues.forEach(i => { const d = i.sent_at || i.scheduled_for; if (d) ev.push({ d: iso(d), cls: i.status === 'sent' ? 'sent' : i.status === 'scheduled' ? 'scheduled' : 'draft', t: i.subject || 'untitled', issue: i.id }); });
   D.swaps.filter(s => ['approved', 'scheduled', 'sent'].includes(s.status)).forEach(s => {
     const iss = D.issues.find(i => i.id === s.issue_id);
-    ev.push({ d: iss ? iso(iss.sent_at || iss.scheduled_for || Date.now()) : s.month + '-01', cls: 'swap', t: '📚 ' + s.book_title });
-    if (s.release_date) ev.push({ d: s.release_date, cls: 'swap', t: '🎉 ' + s.author_name });
+    ev.push({ d: iss ? iso(iss.sent_at || iss.scheduled_for || Date.now()) : s.month + '-01', cls: 'swap', t: 'swap: ' + s.book_title });
+    if (s.release_date) ev.push({ d: s.release_date, cls: 'swap', t: 'out: ' + s.author_name });
   });
-  D.reminders.filter(r => !r.done).forEach(r => ev.push({ d: iso(r.due_at), cls: 'rem', t: '♡ ' + r.title }));
-  if (N.book?.release) ev.push({ d: N.book.release, cls: 'rel', t: '🎾 ' + N.book.title });
+  D.reminders.filter(r => !r.done).forEach(r => ev.push({ d: iso(r.due_at), cls: 'rem', t: r.title }));
+  if (N.book?.release) ev.push({ d: N.book.release, cls: 'rel', t: 'release: ' + N.book.title });
   return ev;
 }
 function renderCal() {
@@ -411,7 +451,7 @@ function renderCal() {
     if (i >= 35 && d.getMonth() !== m) break;
     const es = ev.filter(e => e.d === key);
     h += `<div class="c ${d.getMonth() !== m ? 'out' : ''} ${key === today ? 'today' : ''} ${send.includes(d.getDate()) ? 'send' : ''}">
-      <span class="num">${d.getDate()}${send.includes(d.getDate()) ? ' <small style="font-size:11px">✉</small>' : ''}</span>
+      <span class="num">${d.getDate()}</span>
       ${es.map(e => `<a class="ev ${e.cls}" ${e.issue ? `data-iss="${e.issue}" href="#write"` : ''} title="${esc(e.t)}">${esc(e.t)}</a>`).join('')}</div>`;
   }
   $('#cal').innerHTML = h;
@@ -429,7 +469,7 @@ function renderSubs() {
   $('#subList').innerHTML = list.map(s => `<div class="r"><div class="av">${esc((s.first_name || s.email)[0].toUpperCase())}</div>
     <div class="main"><b>${esc(s.first_name ? s.first_name + ' · ' : '')}${esc(s.email)}</b><small>joined ${fmt(s.created_at, { month: 'short', day: 'numeric', year: 'numeric' })} · via ${esc(s.source || 'website')}</small></div>
     <span class="tag ${s.status === 'confirmed' ? 'sage' : s.status === 'pending' ? 'rose' : ''}">${s.status}</span>
-    <button class="btn xs ghost" data-del="${s.id}" title="delete forever (e.g. a data request)">delete</button></div>`).join('') || '<p class="muted">nobody here yet ♡</p>';
+    <button class="btn xs ghost" data-del="${s.id}" title="delete forever (e.g. a data request)">delete</button></div>`).join('') || '<p class="muted">nobody here yet 𖹭</p>';
   $$('#subList [data-del]').forEach(b => b.onclick = async () => { if (!confirm('Delete this reader forever? (Use this for “please delete my data” requests.)')) return; await api.del('subscribers', b.dataset.del).catch(oops); renderSubs(); renderHome(); });
 }
 $('#sq').oninput = () => renderSubs();
@@ -448,25 +488,25 @@ function renderSwaps() {
   const list = W.filter(s => wFilter === 'all' || s.status === wFilter);
   const link = (u, l) => /^https?:\/\//.test(u || '') ? `<a href="${esc(u)}" target="_blank" rel="noopener">${l} ↗</a>` : '';
   $('#swapList').innerHTML = list.map(s => {
-    const mail = `mailto:${encodeURIComponent(s.email)}?subject=${encodeURIComponent('Newsletter swap ♡ ' + s.book_title)}&body=${encodeURIComponent(`Hi ${s.author_name}!\n\nThank you for the swap request. I'd love to feature ${s.book_title} in my ${s.month} letter. Could you share Call It a Let with your readers the same month?\n\nBook link: ${SITE}\n\nwith love,\nMae`)}`;
+    const mail = `mailto:${encodeURIComponent(s.email)}?subject=${encodeURIComponent('Newsletter swap: ' + s.book_title)}&body=${encodeURIComponent(`Hi ${s.author_name}!\n\nThank you for the swap request. I'd love to feature ${s.book_title} in my ${s.month} letter. Could you share Call It a Let with your readers the same month?\n\nBook link: ${SITE}\n\nwith love,\nMae`)}`;
     return `<div class="sc"><span class="tag st ${s.status === 'new' ? 'rose' : s.status === 'declined' ? '' : 'sage'}">${s.status}</span>
       <div class="hd"><div class="cv" style="${/^https:\/\//.test(s.cover_url || '') ? `background-image:url('${esc(s.cover_url).replace(/'/g, '')}')` : ''}"></div>
         <div style="min-width:0;padding-right:60px"><h4>${esc(s.book_title)}</h4><small class="muted">by ${esc(s.author_name)}</small>
-        <div class="meta" style="margin-top:6px"><span class="tag">🗓 ${esc(s.month)}</span>${s.trope ? `<span class="tag rose">${esc(s.trope)}</span>` : ''}${s.heat ? `<span class="tag">${esc(s.heat)}</span>` : ''}${s.list_size ? `<span class="tag sage">${Number(s.list_size).toLocaleString()} readers</span>` : ''}</div></div></div>
-      ${s.blurb ? `<p style="margin:0;font-size:14px">${esc(s.blurb)}</p>` : ''}${s.notes ? `<p class="muted" style="margin:0;font-size:13px">✎ ${esc(s.notes)}</p>` : ''}
+        <div class="meta" style="margin-top:6px"><span class="tag">${NL.icon('cal')} ${esc(s.month)}</span>${s.trope ? `<span class="tag rose">${esc(s.trope)}</span>` : ''}${s.heat ? `<span class="tag">${esc(s.heat)}</span>` : ''}${s.list_size ? `<span class="tag sage">${Number(s.list_size).toLocaleString()} readers</span>` : ''}</div></div></div>
+      ${s.blurb ? `<p style="margin:0;font-size:14px">${esc(s.blurb)}</p>` : ''}${s.notes ? `<p class="muted" style="margin:0;font-size:13px">note: ${esc(s.notes)}</p>` : ''}
       <div class="links">${link(s.where_to_buy, 'buy')}${link(s.newsletter_link, 'their swap link')}${link(s.news_link, 'news')}${s.release_date ? `<span class="tag">out ${fmt(s.release_date + 'T12:00')}</span>` : ''}</div>
       <div class="row" style="gap:6px">
-        ${s.status === 'new' ? `<button class="btn xs rose" data-sw="${s.id}:approved">approve ♡</button><button class="btn xs ghost" data-sw="${s.id}:declined">decline</button>` : ''}
+        ${s.status === 'new' ? `<button class="btn xs rose" data-sw="${s.id}:approved">approve 𖹭</button><button class="btn xs ghost" data-sw="${s.id}:declined">decline</button>` : ''}
         ${['approved', 'scheduled'].includes(s.status) ? `<button class="btn xs dark" data-addsw="${s.id}">+ to my letter</button>` : ''}
         ${s.status === 'sent' ? `<label class="check" style="font-size:12.5px"><input type="checkbox" data-recip="${s.id}" ${s.reciprocal_sent ? 'checked' : ''}> they featured me back</label>` : ''}
-        <a class="btn xs paper" href="${mail}">email ✉</a></div></div>`;
-  }).join('') || '<p class="muted">nothing here ♡ share yoursite.com/swap with author friends</p>';
-  $$('[data-sw]').forEach(b => b.onclick = async () => { const [id, st] = b.dataset.sw.split(':'); await api.upd('swaps', id, { status: st }).catch(oops); NL.toast(st === 'approved' ? 'approved ♡ it’ll show up in your next letter' : 'declined'); renderSwaps(); renderHome(); renderCal(); });
+        <a class="btn xs paper" href="${mail}">email</a></div></div>`;
+  }).join('') || '<p class="muted">nothing here 𖹭 share yoursite.com/swap with author friends</p>';
+  $$('[data-sw]').forEach(b => b.onclick = async () => { const [id, st] = b.dataset.sw.split(':'); await api.upd('swaps', id, { status: st }).catch(oops); NL.toast(st === 'approved' ? 'approved 𖹭 it’ll show up in your next letter' : 'declined'); renderSwaps(); renderHome(); renderCal(); });
   $$('[data-addsw]').forEach(b => b.onclick = () => {
     const s = D.swaps.find(x => x.id === b.dataset.addsw), item = swapItems().find(x => x.id === s.id) || { id: s.id, author_name: s.author_name, book_title: s.book_title, trope: s.trope, release_date: s.release_date, blurb: s.blurb, cover_url: s.cover_url, where_to_buy: s.where_to_buy };
     const ex = cur.blocks.find(x => x.type === 'swap');
-    if (ex) { if (!ex.items.some(i => i.id === s.id)) ex.items.push(item); ex.swapIds = ex.items.map(i => i.id); drawBlocks(); changed(); } else addBlock('swap', { title: 'books my friends wrote', text: 'A few books from author friends I think you’ll love ♡', items: [item], swapIds: [s.id] });
-    go('write'); NL.toast('added to your letter ♡');
+    if (ex) { if (!ex.items.some(i => i.id === s.id)) ex.items.push(item); ex.swapIds = ex.items.map(i => i.id); drawBlocks(); changed(); } else addBlock('swap', { title: 'books my friends wrote', text: 'A few books from author friends I think you’ll love.', items: [item], swapIds: [s.id] });
+    go('write'); NL.toast('added to your letter 𖹭');
   });
   $$('[data-recip]').forEach(c => c.onchange = () => api.upd('swaps', c.dataset.recip, { reciprocal_sent: c.checked }).then(renderHome).catch(oops));
 }
@@ -487,7 +527,7 @@ async function renderPolls() {
   $$('[data-pu]').forEach(b => b.onclick = () => { const p = D.polls.find(x => x.id === b.dataset.pu); addBlock('poll', { question: p.question, options: p.options }); go('write'); });
 }
 async function activate(id) {
-  try { for (const p of D.polls.filter(p => p.is_active && p.id !== id)) await api.upd('polls', p.id, { is_active: false }); await api.upd('polls', id, { is_active: true }); NL.toast('poll is live on your site ♡'); } catch (e) { oops(e); }
+  try { for (const p of D.polls.filter(p => p.is_active && p.id !== id)) await api.upd('polls', p.id, { is_active: false }); await api.upd('polls', id, { is_active: true }); NL.toast('poll is live on your site 𖹭'); } catch (e) { oops(e); }
   renderPolls();
 }
 $('#pollForm').onsubmit = async e => {
@@ -503,7 +543,7 @@ function renderAma() {
   $('#amaList').innerHTML = list.map(q => `<div class="r" style="${q.answered ? 'opacity:.6' : ''}"><div class="av">?</div>
     <div class="main"><b style="word-break:normal;font-family:var(--serif);font-style:italic;font-weight:400;font-size:19px">“${esc(q.question)}”</b><small>${esc(q.name || 'anonymous')} · ${fmt(q.created_at)}${q.issue_ref ? ' · from ' + esc(q.issue_ref) : ''}</small></div>
     ${q.answered ? '<span class="tag sage">answered</span>' : `<button class="btn xs rose" data-ans="${q.id}">answer in my letter</button><button class="btn xs paper" data-done="${q.id}">mark answered</button>`}
-    <button class="btn xs ghost" data-qdel="${q.id}">✕</button></div>`).join('') || '<p class="muted">no questions yet ♡ they’ll show up here</p>';
+    <button class="btn xs ghost" data-qdel="${q.id}">✕</button></div>`).join('') || '<p class="muted">no questions yet 𖹭 they’ll show up here</p>';
   $$('#amaList [data-ans]').forEach(b => b.onclick = async () => { const q = D.ama_questions.find(x => x.id === b.dataset.ans); addBlock('answer', { question: q.question, text: '' }); await api.upd('ama_questions', q.id, { answered: true }).catch(oops); renderAma(); renderHome(); go('write'); });
   $$('#amaList [data-done]').forEach(b => b.onclick = async () => { await api.upd('ama_questions', b.dataset.done, { answered: true }).catch(oops); renderAma(); renderHome(); });
   $$('#amaList [data-qdel]').forEach(b => b.onclick = async () => { await api.del('ama_questions', b.dataset.qdel).catch(oops); renderAma(); renderHome(); });

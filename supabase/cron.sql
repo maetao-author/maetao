@@ -1,4 +1,4 @@
--- ♡ OPTIONAL: automatic sending of scheduled letters (every 10 minutes).
+-- 𖹭 OPTIONAL: automatic sending of scheduled letters (every 10 minutes).
 -- Without this, scheduled letters still show a "due now, press send" pop-up in /admin.
 --
 -- 1. Supabase → Database → Extensions: turn on pg_cron and pg_net.

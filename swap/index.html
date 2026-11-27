@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>newsletter swap with Mae Tao ♡ book besties</title>
+<title>newsletter swap with Mae Tao 𖹭 book besties</title>
 <meta name="description" content="Romance authors: request a newsletter swap with Mae Tao.">
 <link rel="stylesheet" href="../nl/nl.css">
 <style>
@@ -13,15 +13,15 @@
   @media (max-width:640px){.how{grid-template-columns:1fr}}
   .how div{background:rgba(255,250,247,.75);border-radius:22px;padding:16px;box-shadow:var(--sh)}
   .how b{font-family:var(--head);font-weight:800;letter-spacing:-.03em;font-size:18px;display:block}
-  .how span{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--pink);font-family:var(--head);font-weight:800;letter-spacing:-.03em;margin-bottom:6px}
-  .how div:nth-child(2) span{background:var(--sage-xl)} .how div:nth-child(3) span{background:var(--blush)}
+  .how span.n{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--pink);font-family:var(--head);font-weight:800;letter-spacing:-.03em;margin-bottom:6px}
+  .how div:nth-child(2) span.n{background:var(--sage-xl)} .how div:nth-child(3) span.n{background:var(--blush)}
   .heat{display:flex;gap:8px;flex-wrap:wrap}
   .heat input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
   .heat label{cursor:pointer;border-radius:999px;padding:8px 14px;background:var(--field);font-weight:800;font-size:13px;color:var(--ink2);transition:background .2s,color .2s,transform .2s var(--ease)}
   .heat input:checked+label{background:var(--rose);color:#fff;transform:translateY(-1px)}
   .heat input:focus-visible+label{box-shadow:0 0 0 3px rgba(217,143,151,.4)}
   .sect{font-family:var(--head);font-weight:800;letter-spacing:-.03em;font-size:18px;margin:8px 0 12px;display:flex;align-items:center;gap:10px}
-  .sect i{font-style:normal;width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:var(--blush);font-size:15px}
+  .sect .tile{width:40px;height:40px;border-radius:14px}
   /* live preview card, mirrors the email block */
   .pv{background:var(--sage-xl);border-radius:26px;padding:20px}
   .pv .in{display:flex;gap:14px;background:var(--paper);border-radius:20px;padding:14px;box-shadow:var(--sh)}
@@ -39,19 +39,19 @@
 
 <main class="wrap" style="padding-top:44px">
   <div class="fadein">
-    <span class="tape sage">📚 book besties</span>
+    <span class="tape sage">book besties</span>
     <h1 class="h1" style="margin-top:16px">let's <em>swap</em> newsletters</h1>
     <p class="sub">I write contemporary sports romance (tennis! second chances! one bed!). If you write romance too, let's share each other's books with our readers.</p>
     <div class="how">
-      <div><span>1</span><b>tell me about your book</b><small class="muted">takes 2 minutes</small></div>
-      <div><span>2</span><b>I pick a letter</b><small class="muted">usually within a week</small></div>
-      <div><span>3</span><b>we feature each other</b><small class="muted">same month, fair and friendly</small></div>
+      <div><span class="n">1</span><b>tell me about your book</b><small class="muted">takes 2 minutes</small></div>
+      <div><span class="n">2</span><b>I pick a letter</b><small class="muted">usually within a week</small></div>
+      <div><span class="n">3</span><b>we feature each other</b><small class="muted">same month, fair and friendly</small></div>
     </div>
   </div>
 
   <div class="sw" style="margin-top:22px">
     <form class="card fadein d1" id="swapForm" novalidate>
-      <div class="sect"><i>✿</i>you</div>
+      <div class="sect"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-readers"/></svg></span>you</div>
       <div class="f2">
         <div class="f"><label for="author_name">author name *</label><input id="author_name" required maxlength="80" placeholder="Pen name"></div>
         <div class="f"><label for="email">email *</label><input id="email" type="email" required maxlength="254" placeholder="you@yourdomain.com"></div>
@@ -61,7 +61,7 @@
         <div class="f"><label for="list_size">your list size (roughly)</label><input id="list_size" type="number" min="0" inputmode="numeric" placeholder="e.g. 800"></div>
       </div>
 
-      <div class="sect" style="margin-top:6px"><i>📖</i>your book</div>
+      <div class="sect" style="margin-top:6px"><span class="tile"><img src="../nl/icons/swap.svg" alt=""></span>your book</div>
       <div class="f"><label for="book_title">title of book *</label><input id="book_title" required maxlength="120" placeholder="Love, Set, Match"></div>
       <div class="f2">
         <div class="f"><label for="trope">main trope</label>
@@ -71,10 +71,10 @@
       </div>
       <div class="f"><span class="flabel">heat level</span>
         <div class="heat" role="radiogroup" aria-label="heat level">
-          <input type="radio" name="heat" id="h1" value="sweet"><label for="h1">🌸 sweet</label>
-          <input type="radio" name="heat" id="h2" value="warm"><label for="h2">☕ warm</label>
-          <input type="radio" name="heat" id="h3" value="steamy"><label for="h3">🌶 steamy</label>
-          <input type="radio" name="heat" id="h4" value="spicy"><label for="h4">🌶🌶 spicy</label>
+          <input type="radio" name="heat" id="h1" value="sweet"><label for="h1"><span class="dots"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span>sweet</label>
+          <input type="radio" name="heat" id="h2" value="warm"><label for="h2"><span class="dots"><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span>warm</label>
+          <input type="radio" name="heat" id="h3" value="steamy"><label for="h3"><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span>steamy</label>
+          <input type="radio" name="heat" id="h4" value="spicy"><label for="h4"><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>spicy</label>
         </div></div>
       <div class="f2">
         <div class="f"><label for="release_date">release date</label><input id="release_date" type="date"></div>
@@ -82,26 +82,26 @@
       </div>
       <div class="f"><label for="blurb">one-line hook (shown in my letter)</label><textarea id="blurb" maxlength="300" style="min-height:76px" placeholder="She swore she'd never play with him again…"></textarea></div>
 
-      <div class="sect" style="margin-top:6px"><i>🔗</i>links</div>
+      <div class="sect" style="margin-top:6px"><span class="tile sage"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg></span>links</div>
       <div class="f"><label for="where_to_buy">where to buy</label><input id="where_to_buy" type="url" maxlength="400" placeholder="Amazon / universal book link"></div>
       <div class="f2">
         <div class="f"><label for="newsletter_link">your newsletter swap link</label><input id="newsletter_link" type="url" maxlength="400" placeholder="BookFunnel / StoryOrigin / signup page"></div>
         <div class="f"><label for="news_link">latest news link</label><input id="news_link" type="url" maxlength="400" placeholder="preorder, cover reveal, sale…"></div>
       </div>
-      <div class="f"><label for="notes">anything else?</label><textarea id="notes" maxlength="600" style="min-height:76px" placeholder="Sale dates, content warnings, a hello ♡"></textarea></div>
+      <div class="f"><label for="notes">anything else?</label><textarea id="notes" maxlength="600" style="min-height:76px" placeholder="Sale dates, content warnings, a hello 𖹭"></textarea></div>
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label class="check" style="margin:4px 0 16px"><input type="checkbox" id="ok" required><span>I'll feature Mae's book in my newsletter in the same month, and I'm happy for her to email me about this swap.</span></label>
-      <button class="btn rose wide" id="go">send my swap request ♡</button>
+      <button class="btn rose wide" id="go">send my swap request 𖹭</button>
     </form>
 
     <aside class="sticky fadein d2">
       <div class="card">
         <span class="lab">live preview · how you'll look in my letter</span>
         <div class="pv" style="margin-top:12px">
-          <span class="tag sage">📚 book besties</span>
+          <span class="tag sage">book besties</span>
           <h3 class="h3" style="margin:10px 0 12px;font-size:20px">books my friends wrote</h3>
-          <div class="in"><div class="cv" id="pCover">📖</div>
-            <div style="min-width:0"><h4 id="pTitle">Your book title</h4><div class="by" id="pBy">by you</div><p id="pBlurb" class="muted">your hook goes here ♡</p></div></div>
+          <div class="in"><div class="cv" id="pCover"><img src="../nl/icons/swap.svg" alt="" style="width:60%"></div>
+            <div style="min-width:0"><h4 id="pTitle">Your book title</h4><div class="by" id="pBy">by you</div><p id="pBlurb" class="muted">your hook goes here 𖹭</p></div></div>
         </div>
       </div>
       <div class="card dark" style="margin-top:16px">
@@ -122,10 +122,10 @@ function preview() {
   $('#pTitle').textContent = $('#book_title').value || 'Your book title';
   const heat = (F.querySelector('[name=heat]:checked') || {}).value;
   $('#pBy').textContent = ['by ' + ($('#author_name').value || 'you'), $('#trope').value, heat, $('#release_date').value && 'out ' + $('#release_date').value].filter(Boolean).join(' · ');
-  $('#pBlurb').textContent = $('#blurb').value || 'your hook goes here ♡';
+  $('#pBlurb').textContent = $('#blurb').value || 'your hook goes here 𖹭';
   const c = $('#cover_url').value.trim();
   $('#pCover').style.backgroundImage = /^https:\/\//.test(c) ? `url("${c.replace(/"/g, '')}")` : '';
-  $('#pCover').textContent = /^https:\/\//.test(c) ? '' : '📖';
+  $('#pCover').innerHTML = /^https:\/\//.test(c) ? '' : '<img src="../nl/icons/swap.svg" alt="" style="width:60%">';
 }
 F.addEventListener('input', preview);
 F.addEventListener('submit', async e => {
@@ -133,11 +133,11 @@ F.addEventListener('submit', async e => {
   if (F.website.value) return;
   const v = id => $('#' + id).value.trim();
   const need = ['author_name', 'email', 'month', 'book_title'].find(id => !v(id));
-  if (need) { NL.toast('a few required bits are missing ♡'); $('#' + need).focus(); return; }
+  if (need) { NL.toast('a few required bits are missing 𖹭'); $('#' + need).focus(); return; }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v('email'))) { NL.toast('that email looks a little off'); return; }
   const bad = ['where_to_buy', 'newsletter_link', 'news_link', 'cover_url'].find(id => !httpOk(v(id)));
   if (bad) { NL.toast('links need to start with https://'); $('#' + bad).focus(); return; }
-  if (!$('#ok').checked) { NL.toast('tick the box to agree to the swap ♡'); return; }
+  if (!$('#ok').checked) { NL.toast('tick the box to agree to the swap 𖹭'); return; }
   const row = { month: v('month'), author_name: v('author_name'), email: v('email').toLowerCase(), book_title: v('book_title'),
     where_to_buy: v('where_to_buy') || null, trope: v('trope') || null, genre: v('genre') || null,
     heat: (F.querySelector('[name=heat]:checked') || {}).value || null, release_date: v('release_date') || null,
@@ -146,7 +146,7 @@ F.addEventListener('submit', async e => {
   const btn = $('#go'); NL.busy(btn, true);
   try {
     await NL.swap(row);
-    F.innerHTML = `<div class="done"><div class="stamp" style="width:110px;height:110px;font-size:14px">SWAP<br>REQUEST<br>SENT ♡</div>
+    F.innerHTML = `<div class="done"><div class="tile big" style="margin:0 auto"><img src="../nl/icons/swap.svg" alt=""></div>
       <h2 class="h2" style="margin:18px 0 8px">thank you, <em>${NL.esc(row.author_name)}!</em></h2>
       <p class="sub" style="margin:0 auto">I'll look at it this week and email you at ${NL.esc(row.email)} with the letter date.${NL.live() ? '' : ' <br><small>(preview mode: not saved yet)</small>'}</p>
       <a class="btn paper" style="margin-top:18px" href="../">see my book</a></div>`;

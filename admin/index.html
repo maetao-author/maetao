@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>mae's desk ♡ newsletter</title>
+<title>mae's desk 𖹭 newsletter</title>
 <link rel="stylesheet" href="../nl/nl.css">
 <link rel="stylesheet" href="admin.css">
 </head>
@@ -13,14 +13,14 @@
 <!-- login -->
 <div class="login" id="login" hidden>
   <div class="card blobby fadein">
-    <div class="env" style="width:84px;height:84px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;font-size:38px;background:var(--blush);box-shadow:var(--lift)">🗝</div>
+    <div class="tile big" style="margin:0 auto 12px"><img src="../nl/icons/desk.png" alt=""></div>
     <h1 class="h2">mae's <em>desk</em></h1>
-    <p class="muted" style="margin:6px 0 0">just for you ♡</p>
+    <p class="muted" style="margin:6px 0 0">just for you 𖹭</p>
     <div class="tabsw"><button class="on" data-m="pw">password</button><button data-m="link">email me a link</button></div>
     <form id="loginForm">
-      <div class="f"><label for="lem">email</label><input id="lem" type="email" autocomplete="username" required value="mtao.author@gmail.com"></div>
+      <div class="f"><label for="lem">email</label><input id="lem" type="email" autocomplete="username" required></div>
       <div class="f" id="pwRow"><label for="lpw">password</label><input id="lpw" type="password" autocomplete="current-password"></div>
-      <button class="btn rose wide" id="lgo">come in ♡</button>
+      <button class="btn rose wide" id="lgo">come in 𖹭</button>
     </form>
   </div>
 </div>
@@ -29,53 +29,76 @@
 <div class="app" id="app" hidden>
   <aside class="side">
     <a class="wm" href="../" aria-label="Mae Tao home"><img src="../nl/logo.svg" alt="mae tao" width="140" height="100"></a>
-    <div class="who" id="hello">hi Mae ♡</div>
+    <div class="who" id="hello">hi Mae 𖹭</div>
     <nav class="nav" id="nav">
-      <button data-v="home" class="on"><i>🏡</i>overview <span class="badge" id="bHome" hidden></span></button>
-      <button data-v="write"><i>✎</i>write</button>
-      <button data-v="cal"><i>🗓</i>calendar</button>
-      <button data-v="subs"><i>♡</i>readers</button>
-      <button data-v="swaps"><i>📚</i>swaps <span class="badge" id="bSwaps" hidden></span></button>
-      <button data-v="polls"><i>✍</i>polls</button>
-      <button data-v="ama"><i>✉</i>questions <span class="badge" id="bAma" hidden></span></button>
-      <button data-v="setup"><i>✿</i>setup</button>
+      <button data-v="home" class="on"><span class="ni"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg></span>overview <span class="badge" id="bHome" hidden></span></button>
+      <button data-v="write"><span class="ni"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg></span>write</button>
+      <button data-v="cal"><span class="ni"><svg class="i" aria-hidden="true"><use href="#i-cal"/></svg></span>calendar</button>
+      <button data-v="subs"><span class="ni"><svg class="i" aria-hidden="true"><use href="#i-readers"/></svg></span>readers</button>
+      <button data-v="swaps"><span class="ni"><img src="../nl/icons/swap.svg" alt=""></span>swaps <span class="badge" id="bSwaps" hidden></span></button>
+      <button data-v="polls"><span class="ni"><svg class="i" aria-hidden="true"><use href="#i-poll"/></svg></span>polls</button>
+      <button data-v="ama"><span class="ni"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg></span>questions <span class="badge" id="bAma" hidden></span></button>
+      <button data-v="setup"><span class="ni"><svg class="i" aria-hidden="true"><use href="#i-flower"/></svg></span>setup</button>
     </nav>
     <div class="foot">
-      <button class="btn sm paper" id="notifBtn">🔔 turn on reminders</button>
+      <button class="btn sm paper" id="notifBtn"><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg> turn on reminders</button>
       <button class="btn sm ghost" id="logout">log out</button>
     </div>
   </aside>
 
   <main>
-    <div class="ribbon" id="demo" hidden>✿ preview with sample data: connect Supabase in nl/config.js to go live ✿</div>
+    <div class="ribbon" id="demo" hidden>preview with sample data · connect Supabase in nl/config.js to go live</div>
 
-    <!-- overview -->
+    <!-- overview (oonda-style) -->
     <section class="view show" data-view="home">
-      <div class="ph"><div><div class="lab" id="today"></div><h1 class="h2" id="greet">good morning, <em>Mae</em></h1></div>
-        <button class="btn rose" data-go="write">✎ write a letter</button></div>
-      <div class="grid g4">
-        <div class="stat dark"><div class="l">readers</div><div class="n" id="sConf">0</div><div class="d" id="sWeek"></div></div>
-        <div class="stat" style="--c:var(--pink)"><div class="l">waiting to confirm</div><div class="n" id="sPend">0</div></div>
-        <div class="stat" style="--c:var(--sage-xl)"><div class="l">letters sent</div><div class="n" id="sSent">0</div></div>
-        <div class="stat" style="--c:var(--blush)"><div class="l">next letter in</div><div class="n" id="sNext">–</div><div class="d" id="sNextD"></div></div>
-      </div>
-      <div class="grid g2" style="margin-top:18px">
-        <div class="card"><span class="tape">✿ to do</span><div class="rems" id="rems" style="margin-top:16px"></div></div>
-        <div class="grid" style="gap:18px">
-          <div class="card"><div class="lab">new readers · last 8 weeks</div><div class="bars" id="bars" style="margin:14px 0 22px"></div></div>
-          <div class="card"><div class="lab">where readers come from</div><div class="meter" id="meter" style="margin-top:14px"></div></div>
+      <div class="ph"><div><div class="lab" id="today"></div><h1 class="h2 hello" id="greet">good morning, mae<sup class="heart">𖹭</sup></h1></div>
+        <button class="btn dark" data-go="write"><span class="plus">+</span>write a letter</button></div>
+
+      <div class="ov1">
+        <div class="card dark nextup">
+          <span class="clip" aria-hidden="true"></span>
+          <div class="row" style="justify-content:space-between"><span class="lab">next up · picked for you</span><span class="tag rose" id="nuTag">on track</span></div>
+          <h2 class="h3 nuT" id="nuTitle">letter for Tue, Dec 1</h2>
+          <div class="chips" id="nuChips" style="margin:10px 0 14px"></div>
+          <div class="cdTiles" id="nuTiles"></div>
+          <div class="row" style="margin-top:14px"><button class="btn sm rose" data-go="write">write it</button><button class="btn sm ghost" id="nuTest">send me a test</button></div>
+          <div class="lab" style="margin-top:16px">new readers per day · last 14 days</div>
+          <svg class="spark" id="spark" viewBox="0 0 300 70" preserveAspectRatio="none" aria-hidden="true"></svg>
         </div>
+        <div class="card ringcard">
+          <div class="row" style="justify-content:space-between"><b class="h3" style="font-size:18px">reader goal</b><span class="lab" id="goalLab"></span></div>
+          <div class="ring" id="ring"><div><b id="ringPct">0%</b><span id="ringSub">of goal</span></div></div>
+          <p class="hand center" id="ringNote" style="margin:10px 0 0">keep going, lovely 𖹭</p>
+        </div>
+      </div>
+
+      <div class="grid g4 statrow">
+        <div class="stat s-pink"><span class="sic tile"><svg class="i" aria-hidden="true"><use href="#i-readers"/></svg></span><span class="pill" id="sWeek">+0 this week</span><div class="n" id="sConf">0</div><div class="l">readers</div><div class="mini" id="m1"></div></div>
+        <div class="stat s-peach"><span class="sic tile"><img src="../nl/icons/inbox.png" alt=""></span><span class="pill" id="sPendTag">waiting</span><div class="n" id="sPend">0</div><div class="l">waiting to confirm</div><div class="mini" id="m2"></div></div>
+        <div class="stat s-sage"><span class="sic tile"><img src="../nl/icons/newsletter.svg" alt=""></span><span class="pill" id="sSentTag">this month</span><div class="n" id="sSent">0</div><div class="l">letters sent</div><div class="mini" id="m3"></div></div>
+        <div class="stat s-mauve"><span class="sic tile"><img src="../nl/icons/swap.svg" alt=""></span><span class="pill" id="sSwapTag">new</span><div class="n" id="sSwap">0</div><div class="l">swaps this month</div><div class="mini" id="m4"></div></div>
+      </div>
+
+      <div class="ov2">
+        <div class="card growth">
+          <div class="row" style="justify-content:space-between"><b class="h3" style="font-size:20px">reader growth</b><span class="seg2"><b>weekly</b></span></div>
+          <div class="row" style="align-items:flex-end;gap:12px;margin-top:8px"><span class="pill dark" id="gPct">+0%</span><span class="lab">than last week</span></div>
+          <div class="bignum"><b id="gNum">0</b><span>new readers this week</span></div>
+          <div class="caps" id="bars"></div>
+        </div>
+        <div class="card"><div class="row" style="justify-content:space-between"><b class="h3" style="font-size:20px">to do</b><span class="lab" id="todoCount"></span></div><div class="rems" id="rems" style="margin-top:14px"></div></div>
+        <div class="card"><b class="h3" style="font-size:20px">where readers come from</b><div class="meter" id="meter" style="margin-top:16px"></div></div>
       </div>
     </section>
 
     <!-- write -->
     <section class="view" data-view="write">
       <div class="ph"><div><div class="lab" id="wState">new letter</div><h1 class="h2">write a <em>letter</em></h1></div>
-        <div class="row"><button class="btn paper sm" id="newIssue">✿ new from template</button><select class="inp" id="openIssue" style="width:auto;border-radius:999px;padding:9px 14px" aria-label="open a letter"></select></div></div>
+        <div class="row"><button class="btn paper sm" id="newIssue"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg> new from template</button><select class="inp" id="openIssue" style="width:auto;border-radius:999px;padding:9px 14px" aria-label="open a letter"></select></div></div>
       <div class="comp">
         <div>
           <div class="card" style="margin-bottom:14px">
-            <div class="f"><label for="subj">subject line</label><input id="subj" maxlength="150" placeholder="the night Stephen almost said it ♡"></div>
+            <div class="f"><label for="subj">subject line</label><input id="subj" maxlength="150" placeholder="the night Stephen almost said it 𖹭"></div>
             <div class="f" style="margin:0"><label for="pre">preview text (the grey line after the subject)</label><input id="pre" maxlength="200" placeholder="plus: you picked the next trope"></div>
           </div>
           <div id="blocks"></div>
@@ -86,12 +109,12 @@
             <button class="btn sm sage" id="testSend">send me a test</button>
             <input type="datetime-local" class="inp" id="when" style="width:auto;border-radius:999px;padding:8px 12px;font-size:13px" aria-label="schedule for">
             <button class="btn sm dark" id="schedule">⏰ schedule</button>
-            <button class="btn sm rose" id="sendNow">send now ✉</button>
+            <button class="btn sm rose" id="sendNow">send now</button>
           </div>
         </div>
         <div class="prevwrap" id="pw">
           <div class="prevbar"><div class="dots"><i></i><i></i><i></i></div><span class="lab" style="flex:1">live preview · updates as you type</span>
-            <div class="chips"><button class="chip on" data-d="desk">💻</button><button class="chip" data-d="phone">📱</button></div></div>
+            <div class="chips"><button class="chip on" data-d="desk" aria-label="desktop"><svg class="i" aria-hidden="true"><use href="#i-desktop"/></svg></button><button class="chip" data-d="phone" aria-label="phone"><svg class="i" aria-hidden="true"><use href="#i-phone"/></svg></button></div></div>
           <iframe id="prev" title="email preview"></iframe>
         </div>
       </div>
@@ -101,10 +124,10 @@
     <section class="view" data-view="cal">
       <div class="ph"><div><div class="lab">issues, swaps, release days, reminders</div><h1 class="h2" id="calTitle">calendar</h1></div>
         <div class="row"><button class="btn sm paper" id="calPrev">‹</button><button class="btn sm paper" id="calToday">today</button><button class="btn sm paper" id="calNext">›</button></div></div>
-      <div class="card"><div class="cal" id="cal"></div>
-        <div class="legend"><span class="tag" style="background:var(--blush)">✉ send day</span><span class="tag rose">draft</span><span class="tag" style="background:var(--rose);color:#fff">scheduled</span><span class="tag sage">sent</span><span class="tag" style="background:var(--sage-m);color:#fff">swap</span><span class="tag dark">release</span><span class="tag" style="background:var(--peach)">reminder</span></div></div>
+      <div class="card calcard"><div class="rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cal" id="cal"></div>
+        <div class="legend"><span class="tag" style="background:var(--blush)">send day</span><span class="tag rose">draft</span><span class="tag" style="background:var(--rose);color:#fff">scheduled</span><span class="tag sage">sent</span><span class="tag" style="background:var(--sage-m);color:#fff">swap</span><span class="tag dark">release</span><span class="tag" style="background:var(--peach)">reminder</span></div></div>
       <div class="grid g2" style="margin-top:18px">
-        <div class="card blush"><span class="tape">🔔 in your calendar</span>
+        <div class="card blush"><span class="tape">in your calendar</span>
           <p style="margin:14px 0 10px">Subscribe once and Google / Apple Calendar stay in sync by themselves: send days, "draft due" nudges, scheduled letters, swaps and release days.</p>
           <div class="f"><label for="calKey">your calendar key (the CALENDAR_KEY secret)</label><input id="calKey" placeholder="paste it once, it stays on this device"></div>
           <div class="row" id="calLinks"></div>
@@ -114,7 +137,7 @@
             <div class="f"><label for="remT">what</label><input id="remT" maxlength="120" required placeholder="cover reveal for book two"></div>
             <div class="f2"><div class="f"><label for="remW">when</label><input id="remW" type="datetime-local" required></div>
               <div class="f"><label for="remK">kind</label><select id="remK"><option value="note">note</option><option value="promo">promo</option><option value="deadline">deadline</option><option value="event">event</option><option value="release">release</option></select></div></div>
-            <button class="btn dark">add ♡</button>
+            <button class="btn dark">add 𖹭</button>
           </form>
           <div class="rows" id="remList" style="margin-top:12px"></div>
         </div>
@@ -124,7 +147,7 @@
     <!-- readers -->
     <section class="view" data-view="subs">
       <div class="ph"><div><div class="lab">only you can see this</div><h1 class="h2">your <em>readers</em></h1></div>
-        <div class="row"><input class="inp search" id="sq" placeholder="search email or name…" aria-label="search readers"><button class="btn sm paper" id="csv">⇩ export CSV</button></div></div>
+        <div class="row"><input class="inp search" id="sq" placeholder="search email or name…" aria-label="search readers"><button class="btn sm paper" id="csv"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> export CSV</button></div></div>
       <div class="chips" id="sf" style="margin-bottom:14px"></div>
       <div class="rows" id="subList"></div>
     </section>
@@ -143,7 +166,7 @@
       <div class="grid g2">
         <div class="card blush"><span class="tape">+ new poll</span>
           <form id="pollForm" style="margin-top:14px">
-            <div class="f"><label for="pq">question</label><input id="pq" maxlength="200" required value="Pick the next trope ♡"></div>
+            <div class="f"><label for="pq">question</label><input id="pq" maxlength="200" required value="Pick the next trope 𖹭"></div>
             <div class="f"><label for="po">options (one per line, 2–8)</label><textarea id="po" required></textarea></div>
             <button class="btn rose">create + make it live</button>
           </form></div>
@@ -161,10 +184,10 @@
     <section class="view" data-view="setup">
       <div class="ph"><div><div class="lab">the boring-but-important bits</div><h1 class="h2">setup <em>checklist</em></h1></div></div>
       <div class="grid g2">
-        <div class="card"><span class="tape">✉ deliverability</span><div class="todo" id="todoD" style="margin-top:14px"></div>
+        <div class="card"><span class="tape">deliverability</span><div class="todo" id="todoD" style="margin-top:14px"></div>
           <div class="lab" style="margin:16px 0 8px">DNS records (copy exact values from Resend → Domains → your domain)</div>
           <div class="dns" id="dns"></div></div>
-        <div class="card sage"><span class="tape sage">✓ before you launch</span><div class="todo" id="todoA" style="margin-top:14px"></div></div>
+        <div class="card sage"><span class="tape sage">before you launch</span><div class="todo" id="todoA" style="margin-top:14px"></div></div>
       </div>
     </section>
   </main>
@@ -174,10 +197,10 @@
 <div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popH">
   <div class="sheet">
     <button class="x" id="popX" aria-label="close">✕</button>
-    <div class="env" id="popIc">🔔</div>
-    <h2 class="h3 center" id="popH" style="font-size:26px">hi Mae ♡ here's what's up</h2>
+    <div class="env tile big" id="popIc"><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg></div>
+    <h2 class="h3 center" id="popH" style="font-size:26px">hi Mae 𖹭 here's what's up</h2>
     <div class="rems" id="popList" style="margin-top:16px"></div>
-    <button class="btn dark wide" id="popOk" style="margin-top:16px">got it ♡</button>
+    <button class="btn dark wide" id="popOk" style="margin-top:16px">got it 𖹭</button>
   </div>
 </div>
 

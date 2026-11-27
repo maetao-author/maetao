@@ -1,4 +1,4 @@
--- ♡ Mae Tao newsletter: tables + security
+-- 𖹭 Mae Tao newsletter: tables + security
 -- Run once: Supabase dashboard → SQL Editor → paste this whole file → Run.
 -- Then run:  insert into public.admins(email) values ('mtao.author@gmail.com');  (your admin login email)
 
@@ -211,5 +211,5 @@ grant execute on function public.reader_count() to anon, authenticated;
 
 -- starter poll -------------------------------------------------------------
 insert into public.polls (question, options, is_active)
-select 'Pick the next trope ♡', '["rivals-to-lovers","fake dating","forced proximity","forbidden coach-player"]'::jsonb, true
+select 'Pick the next trope 𖹭', '["rivals-to-lovers","fake dating","forced proximity","forbidden coach-player"]'::jsonb, true
 where not exists (select 1 from public.polls);
