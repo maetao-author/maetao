@@ -75,20 +75,18 @@ window.MAE_SITE = {
       dedication: "for every reader who needed a soft place to land ♡",   // shown inside the cover when a reader opens the book on the shelf
       sample: "I still watch it.\n\nI've never told a reporter, a therapist, or my coach. But on bad nights, when a match slips or my ranking drops or I'm lying in a hotel room in a city I'll never see in daylight, I open my phone and watch the worst thirty seconds of my life.\n\nBuenos Aires, 2018. The Youth Olympic Games. A press tent with bad lighting and a blue backdrop that's coming unstuck at one corner. Stephen Lior is seventeen, all elbows and jaw, wearing a silver medal he's already stopped looking at. Someone off camera asks about the future of the partnership.\n\nHe says, \"I'm done carrying her. I'm playing for me now.\"\n\nEverybody remembers that part. 4.1 million people, at last count. I check.\n\nWhat nobody remembers, because nobody watches it as many times as I do, is the three seconds before. Right before he leans into the mic, he turns his head toward the edge of the frame, toward something or someone standing just out of shot. And his face does a thing I've never been able to name.\n\nSo that's my confession. Ten years, and I still don't know what he was looking at.\n\nThe second confession is worse.\n\nThis morning, at 6:12, Graham Lior called me on a number I didn't know he had. He told me the federation wants me and his son for Olympic mixed doubles in Los Angeles.\n\nI didn't hang up.\n\nI didn't say no.\n\nI said, \"What would I have to do?\"",
       formats: [                     // the first one is the main "buy" button
-        { label: "eBook", price: "$4.99", link: "" },
-        { label: "Signed paperback", price: "$18", link: "" }
+        { label: "Kindle eBook", price: "$4.99", link: "" },   // paste your Amazon links here once the pages are live
+        { label: "Paperback", price: "", link: "" }
       ],
-      stores: [
-        { label: "Amazon Kindle", link: "" },
-        { label: "Apple Books", link: "" },
-        { label: "Kobo", link: "" }
-      ]
+      stores: []                     // other stores, e.g. { label: "Apple Books", link: "" }. Empty = Amazon only
     }
   ],
 
   events: [   // signings, launches, live readings. Delete the examples and add your own.
-    { date: "2026-12-14", title: "Launch party + signing", place: "[Bookshop name], [City]", link: "" },
-    { date: "2027-01-20", title: "Live reading on Instagram", place: "online", link: "" }
+    { date: "2026-11-30", title: "Release day ♡ Call It a Let", place: "eBook + paperback on Amazon Kindle", link: "" }
+    // add your art pop-up stands and lives here, e.g.
+    // { date: "2026-12-06", title: "Pop-up stand: signed paperbacks", place: "[Art fair name], [City] · table [no.]", link: "" },
+    // { date: "2026-12-10", title: "Live reading", place: "on TikTok", link: "" }
   ],
   letters: [  // short notes to readers, newest first
     // greeting, signoff and ps are optional. Leave a blank line in body to start a new paragraph.
@@ -1261,7 +1259,7 @@ document.body.className = (localStorage.getItem('mt.theme') || 't-candy') + (loc
       <div class="card rv">
         <div class="lab">say hello</div>
         <h2 class="h2" style="font-size:34px">write to <em>me</em></h2>
-        <p style="color:var(--ink2)">Reader mail, book club visits, interviews, rights and events. I read everything, so tell me what's on your mind.</p>
+        <p style="color:var(--ink2)">Reader mail, collabs, or asking where my next pop-up stand is. I read everything, so tell me what's on your mind ♡</p>
         <div class="social" id="social"></div>
       </div>
       <form class="card rv" id="cform">
@@ -1501,14 +1499,14 @@ function openBook(id, tab = 'about'){
     about: `<div class="pane">${esc(b.blurb)}</div>`,
     sample: `<div class="pane sample">${esc(b.sample)}</div>`,
     buy: (b.formats || []).map((f, i) => {
-        const signed = /sign/i.test(f.label), ebook = /ebook/i.test(f.label);
-        return `<div class="fmtw"><div class="fmt"><b>${esc(f.label)}${ebook ? '<span class="lab" style="display:block;font-weight:400">instant download · EPUB + PDF</span>' : ''}</b><span class="pr">${esc(f.price)}</span>
+        const signed = /sign/i.test(f.label), ebook = /e-?book|kindle/i.test(f.label) && !/paperback/i.test(f.label);
+        return `<div class="fmtw"><div class="fmt"><b>${esc(f.label)}${ebook ? '<span class="lab" style="display:block;font-weight:400">read on any Kindle or the free Kindle app</span>' : ''}</b><span class="pr">${esc(f.price)}</span>
           ${signed ? `<button class="pbtn" onclick="this.closest('.fmtw').querySelector('.signbox').classList.toggle('open');this.classList.toggle('on')">♡ personalise</button>` : ''}
           ${buyBtn(f, ebook ? 'rose' : 'dark', signed ? b.id + '|' + i : '')}</div>
           ${signed ? `<div class="signbox"><div class="f2"><div class="f"><label>sign it to</label><input name="signTo" maxlength="80" placeholder="e.g. Sam"></div><div class="f"><label>your email (to match your order)</label><input name="email" type="email" maxlength="120"></div></div><div class="f"><label>a short message, if you like</label><input name="msg" maxlength="300" placeholder="e.g. happy birthday!"></div></div>` : ''}</div>`;
       }).join('') +
       (stores.length ? `<div class="lab" style="margin:16px 0 8px">also at</div><div class="chips">${stores.map(s => `<a class="btn ghost sm" href="${esc(safeUrl(s.link))}" target="_blank" rel="noopener">${esc(s.label)} ↗</a>`).join('')}</div>` : '') +
-      `<p class="lab" style="margin-top:14px">secure checkout · you'll pay on the next page</p>`
+      `<p class="lab" style="margin-top:14px">you'll finish your order on Amazon</p>`
   };
   const show = t => {
     document.querySelectorAll('#mseg button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
@@ -1577,7 +1575,7 @@ function renderRest(){
     return `<div class="ev"><div class="d"><div><b>${d.getDate()}</b><span>${d.toLocaleString('en', { month: 'short' })}</span></div></div>
       <div><div class="t">${esc(e.title)}</div><div class="p">${esc(e.place)}</div></div>
       ${safeUrl(e.link) ? `<a class="btn sm" href="${esc(safeUrl(e.link))}" target="_blank" rel="noopener">details</a>` : `<button class="btn sm" onclick="addCal(_evs[${evs.indexOf(e)}])">+ calendar</button>`}</div>`;
-  }).join('') : `<div class="empty"><span class="hand">nothing booked yet ♡</span><br>Join the newsletter and you'll hear first.</div>`;
+  }).join('') + (evs.length < 3 ? `<p class="meta" style="margin:14px 4px 0">more art pop-up stands and lives coming soon ♡ the newsletter hears first</p>` : '') : `<div class="empty"><span class="hand">nothing booked yet ♡</span><br>Art pop-up stands and lives get posted here. Join the newsletter and you'll hear first.</div>`;
 
   renderLetters();
 
@@ -1746,7 +1744,7 @@ function openArc(){
 /* contact */
 let topic = 'reader mail';
 function setupContact(){
-  const topics = ['reader mail', 'book club', 'press', 'events', 'rights'];
+  const topics = ['reader mail', 'pop-up stands', 'collabs', 'just saying hi'];
   const draw = () => $('#topics').innerHTML = topics.map(t => `<button type="button" class="chip ${t === topic ? 'on' : ''}" data-t="${t}">${t}</button>`).join('');
   draw();
   $('#topics').addEventListener('click', e => { const t = e.target.dataset.t; if (t) { topic = t; draw(); } });
@@ -2522,7 +2520,7 @@ const Community = (() => {
       <button class="x" onclick="closeModal()" aria-label="close">✕</button>
       <div class="lab">my bookshelf</div><h2 class="h2" style="font-size:32px">add a <em>book</em></h2>
       <div class="f"><label>which book?</label><div class="abooks" id="abBooks">${S.books.map(b => `<button type="button" data-b="${esc(b.id)}">${imgSrc(b.cover) ? `<img src="${esc(imgSrc(b.cover))}" alt="">` : ''}<span>${esc(b.title)}</span></button>`).join('')}</div></div>
-      <div class="f"><label>which edition?</label><div class="chips" id="abEd">${Object.entries(EDITIONS).map(([k, l]) => `<button type="button" class="chip" data-e="${k}">${l}</button>`).join('')}</div></div>
+      <div class="f"><label>which edition?</label><div class="chips" id="abEd">${Object.entries(EDITIONS).filter(([k]) => k === 'ebook' || k === 'paperback').map(([k, l]) => `<button type="button" class="chip" data-e="${k}">${l}</button>`).join('')}</div></div>
       <label class="abs"><input type="checkbox" id="abSigned"> it's signed by ${esc(S.name.split(' ')[0])} ✒</label>
       <button class="btn dark" id="abSave" style="margin-top:14px">put it on my shelf ♡</button></div></div>`;
     const draw = () => { document.querySelectorAll('#abBooks button').forEach(x => x.classList.toggle('on', x.dataset.b === book)); document.querySelectorAll('#abEd button').forEach(x => x.classList.toggle('on', x.dataset.e === ed)); };
