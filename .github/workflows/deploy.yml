@@ -1,0 +1,68 @@
+# ♡ Deploys the website to GitHub Pages, and the email functions to Supabase.
+# One-time setup:
+#   - GitHub → Settings → Pages → Source: "GitHub Actions"
+#   - GitHub → Settings → Secrets and variables → Actions → add:
+#       SUPABASE_ACCESS_TOKEN  (supabase.com → Account → Access Tokens)
+#       SUPABASE_PROJECT_REF   (the "abcdxyz" part of https://abcdxyz.supabase.co)
+#     These are encrypted by GitHub and never appear in the code.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safety check (no secret keys in the website)
+        run: |
+          if grep -rEn "re_[A-Za-z0-9]{20,}|service_role|sb_secret_" --include=*.html --include=*.js . | grep -v node_modules | grep -v "service_role key" | grep -v "SERVICE_ROLE_KEY" ; then
+            echo "A secret-looking key was found in the site files. Not deploying."; exit 1; fi
+      - name: Build the site folder
+        run: |
+          mkdir -p _site/supabase/functions/_shared
+          cp -r index.html email nl newsletter thanks confirmed unsubscribe swap admin _site/
+          [ -f CNAME ] && cp CNAME _site/ || true
+          cp supabase/functions/_shared/email.js _site/supabase/functions/_shared/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  functions:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip if Supabase isn't connected yet
+        id: ready
+        run: echo "ok=$([ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$PROJECT_REF" ] && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+      - uses: supabase/setup-cli@v1
+        if: steps.ready.outputs.ok == 'yes'
+        with:
+          version: latest
+      - name: Deploy edge functions
+        if: steps.ready.outputs.ok == 'yes'
+        run: |
+          for f in subscribe confirm unsubscribe send-newsletter calendar-feed; do
+            supabase functions deploy "$f" --project-ref "$PROJECT_REF" --no-verify-jwt
+          done

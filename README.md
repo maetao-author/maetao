@@ -12,3 +12,7 @@ Served with GitHub Pages from the `main` branch. Any change pushed to `main` goe
 
 ## Community board
 Runs in preview mode until a free Firebase database is connected. See `SETUP-community.md` and `firestore.rules`.
+
+## Newsletter (own system: Supabase + Resend)
+Signup pop-up, reader magnet, double opt-in, trope poll, ask-me-anything, author swap exchange (`/swap`) and a private dashboard (`/admin`).
+Setup steps, DNS/deliverability checklist and launch tests: **`SETUP-newsletter.md`**. Website settings: `nl/config.js`.

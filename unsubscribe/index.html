@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>unsubscribed · Mae Tao</title><meta name="robots" content="noindex"><meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="../nl/nl.css">
+<style>.stage{min-height:calc(100vh - 140px);display:grid;place-items:center;padding:40px 0}.hide{display:none!important}
+.wave{font-size:56px;display:inline-block;animation:wave 1.6s ease-in-out infinite;transform-origin:70% 80%}@keyframes wave{50%{transform:rotate(18deg)}}</style>
+</head><body>
+<header class="bar"><div class="barin"><a class="wm" href="../"><span class="heart">♡</span>mae tao</a></div></header>
+<main class="stage"><div class="narrow" style="width:100%">
+  <div class="card center" id="wait" style="padding:40px 26px"><p class="h3">one sec…</p></div>
+  <div class="card sage blobby center fadein hide" id="ok" style="padding:38px 26px">
+    <div class="wave">👋</div>
+    <h1 class="h2" style="margin:12px 0 8px">you're <em>unsubscribed</em></h1>
+    <p class="sub" style="margin:0 auto 18px">Done, in one click. You won't get any more letters from me. Thank you for reading along for a while ♡</p>
+    <div class="row" style="justify-content:center"><a class="btn paper" href="../">visit the website</a><a class="btn sage" href="../newsletter/#join">oops, I want to stay</a></div>
+  </div>
+  <div class="card center fadein hide" id="bad" style="padding:38px 26px">
+    <h1 class="h2">hmm, <em>that didn't work</em></h1>
+    <p class="sub" style="margin:10px auto 18px" id="msg"></p>
+    <a class="btn rose" href="mailto:" id="mail">email me and I'll remove you</a>
+  </div>
+</div></main>
+<script src="../nl/config.js"></script><script src="../nl/nl.js"></script>
+<script>
+(async () => {
+  const $ = s => document.querySelector(s);
+  const t = new URLSearchParams(location.search).get('t') || '';
+  history.replaceState(null, '', location.pathname);
+  const show = id => ['wait', 'ok', 'bad'].forEach(x => $('#' + x).classList.toggle('hide', x !== id));
+  try {
+    if (!NL.live()) throw new Error('Preview mode: the newsletter isn’t connected yet.');
+    await NL.unsubscribe(t); show('ok');
+  } catch (e) { $('#msg').textContent = e.message; show('bad'); }
+})();
+</script>
+</body></html>

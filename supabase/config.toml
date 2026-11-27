@@ -1,0 +1,17 @@
+# These functions do their own checks (tokens, admin login, cron/calendar secrets),
+# so Supabase's built-in JWT check is turned off for them. Gmail's one-click
+# unsubscribe button and calendar apps can't send a login token.
+[functions.subscribe]
+verify_jwt = false
+
+[functions.confirm]
+verify_jwt = false
+
+[functions.unsubscribe]
+verify_jwt = false
+
+[functions.send-newsletter]
+verify_jwt = false
+
+[functions.calendar-feed]
+verify_jwt = false

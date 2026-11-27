@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>check your inbox ♡ Mae Tao</title><meta name="robots" content="noindex">
+<link rel="stylesheet" href="../nl/nl.css">
+<style>
+  .stage{min-height:calc(100vh - 140px);display:grid;place-items:center;padding:40px 0}
+  .fly{animation:fly 3.2s var(--ease) infinite}
+  @keyframes fly{0%{transform:translate(-20px,10px) rotate(-8deg)}50%{transform:translate(20px,-14px) rotate(6deg)}100%{transform:translate(-20px,10px) rotate(-8deg)}}
+  .steps{counter-reset:s;display:grid;gap:10px;margin:22px 0;padding:0;list-style:none;text-align:left}
+  .steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center;background:var(--soft);border-radius:20px;padding:11px 14px}
+  .steps li::before{content:counter(s);flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--pink);font-family:var(--chubby);font-weight:600;color:#5a2232}
+</style></head>
+<body>
+<header class="bar"><div class="barin"><a class="wm" href="../"><span class="heart">♡</span>mae tao</a></div></header>
+<main class="stage"><div class="narrow" style="width:100%">
+  <div class="card blobby center fadein" style="padding:36px 26px">
+    <div class="env fly" style="width:96px;height:96px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:46px;background:var(--blush);box-shadow:var(--lift)">💌</div>
+    <span class="tape">almost there!</span>
+    <h1 class="h2" style="margin:16px 0 8px">check your <em>inbox</em></h1>
+    <p class="sub" style="margin:0 auto" id="who">I just sent you a little email. Tap the button inside to confirm, and your bonus chapter arrives right after.</p>
+    <ol class="steps">
+      <li><span>Open the email from <b>Mae Tao</b> (subject: “one tap to confirm ♡”)</span></li>
+      <li><span>Tap <b>“yes, sign me up”</b></span></li>
+      <li><span>Your chapter + the secret shelf unlock ✨</span></li>
+    </ol>
+    <p class="muted" style="font-size:14px">Can't find it? Peek in <b>Promotions</b> or <b>Spam</b>, and drag it to your inbox so my letters find you.</p>
+    <div class="row" style="justify-content:center;margin-top:16px">
+      <a class="btn rose" href="https://mail.google.com/mail/u/0/#search/from%3Amae" target="_blank" rel="noopener">open Gmail</a>
+      <a class="btn paper" href="../newsletter/#join">use a different email</a>
+    </div>
+    <p class="lab" id="prev" style="margin-top:16px"></p>
+  </div>
+</div></main>
+<script src="../nl/config.js"></script><script src="../nl/nl.js"></script>
+<script>
+  const e = sessionStorage.getItem('mt.joined');
+  if (e) document.getElementById('who').innerHTML = `I just sent a little email to <b>${NL.esc(e)}</b>. Tap the button inside to confirm, and your bonus chapter arrives right after.`;
+  if (new URLSearchParams(location.search).get('preview')) document.getElementById('prev').textContent = 'preview mode: the newsletter isn’t connected yet, so no email was sent';
+  NL.petals(innerWidth / 2, innerHeight / 3, 16);
+</script>
+</body></html>

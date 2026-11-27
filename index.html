@@ -43,7 +43,7 @@ window.MAE_SITE = {
     mailerlite: "",                 // or your MailerLite form link, e.g. "https://assets.mailerlite.com/jsonp/123456/forms/987654/subscribe"
     action: "",                     // only for other providers, e.g. "https://buttondown.com/api/emails/embed-subscribe/maetao"
     emailField: "email",            // Mailchimp uses "EMAIL", most others use "email"
-    perk: "a free short story + first look at new chapters"
+    perk: "Stephen's first-date chapter (a free bonus scene in his POV) + first looks at new chapters"
   },
   socials: {                        // leave any blank to hide it
     instagram: "", tiktok: "", threads: "", goodreads: "", amazon: "", youtube: ""
@@ -1293,7 +1293,7 @@ function renderRest(){
 
   renderLetters();
 
-  $('#perk').textContent = 'Join for ' + S.newsletter.perk + '. One letter a month, give or take.';
+  $('#perk').textContent = 'Join for ' + S.newsletter.perk + '. Two letters a month, give or take.';
   const icons = { instagram: '◎ instagram', tiktok: '♪ tiktok', threads: '@ threads', goodreads: '❡ goodreads', amazon: '✦ amazon', youtube: '▶ youtube' };
   const soc = Object.entries(S.socials || {}).filter(([, u]) => safeUrl(u));
   $('#social').innerHTML = soc.map(([k, u]) => `<a class="btn sm" href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${icons[k] || esc(k)}</a>`).join('')
@@ -1315,6 +1315,11 @@ function addCal(e){
 const isUnlocked = () => localStorage.getItem('mt.unlocked') === '1';
 function subscribe(email, fromEl){
   if (fromEl) { const r = fromEl.getBoundingClientRect(); petals(r.left + r.width / 2, r.top); }
+  // ♡ own newsletter (Supabase + Resend, see nl/config.js): double opt-in, the shelf unlocks after confirming
+  if (window.NL && NL.live() && window.mtSubscribe) {
+    window.mtSubscribe(email, '', location.hash.replace('#', '') || 'home').catch(e => toast(e.message));
+    return;
+  }
   const ml = String(S.newsletter.mailerlite || '').trim(), bv = String(S.newsletter.brevo || '').trim(), gs = String(S.newsletter.appsScript || '').trim();
   if (/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(gs)) {
     // your own Google Sheet: the Apps Script saves the email
@@ -2083,5 +2088,10 @@ setupVisuals(); setupBookView(); renderHero(); renderBooks(); renderLibrary(); s
 route();
 if (/static/.test(location.search)) document.querySelectorAll('.rv').forEach(el => el.classList.add('in'));
 </script>
+<!-- ♡ newsletter: settings live in nl/config.js -->
+<link rel="stylesheet" href="nl/embed.css">
+<script src="nl/config.js"></script>
+<script src="nl/nl.js"></script>
+<script src="nl/embed.js"></script>
 </body>
 </html>

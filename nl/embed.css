@@ -1,0 +1,59 @@
+/* ♡ Newsletter extras for the main website (index.html).
+   Everything is prefixed "mt-" so it never clashes with the site's own styles.
+   Uses the site's own colour variables (--cream, --pink, --rose, --sage…). */
+
+/* signup pop-up */
+.mt-pop{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:18px;background:rgba(58,43,47,.24);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:0;pointer-events:none;transition:opacity .35s}
+.mt-pop.open{opacity:1;pointer-events:auto}
+.mt-sheet{width:min(440px,100%);background:var(--paper,#fffaf7);border-radius:34px;padding:30px 26px 22px;box-shadow:0 30px 70px -30px rgba(80,40,50,.45),0 6px 18px -8px rgba(80,40,50,.18);position:relative;overflow:hidden;
+  transform:translateY(34px) scale(.93);transition:transform .6s cubic-bezier(.2,1.25,.35,1);text-align:center}
+.mt-pop.open .mt-sheet{transform:none}
+.mt-sheet::before{content:'';position:absolute;left:-10%;right:-10%;top:-60px;height:190px;border-radius:0 0 50% 50%;background:linear-gradient(160deg,var(--blush,#fbe3e2),var(--sage-xl,#e6e7dc));z-index:0}
+.mt-sheet::after{content:'';position:absolute;width:160px;height:160px;right:-50px;bottom:-60px;border-radius:44% 56% 52% 48%/50% 44% 56% 50%;background:radial-gradient(circle,var(--pink,#f0c1c7),transparent 70%);opacity:.6;animation:mtmorph 12s ease-in-out infinite;z-index:0}
+.mt-sheet>*{position:relative;z-index:1}
+@keyframes mtmorph{50%{border-radius:56% 44% 46% 54%/44% 56% 44% 56%;transform:rotate(10deg)}}
+.mt-x{position:absolute;top:14px;right:14px;z-index:2;border:0;width:36px;height:36px;border-radius:50%;background:var(--paper,#fffaf7);box-shadow:0 6px 14px -8px rgba(110,60,72,.5);cursor:pointer;color:var(--ink2,#7d6a6e);font-size:14px}
+.mt-env{width:86px;height:86px;margin:4px auto 12px;border-radius:50%;display:grid;place-items:center;font-size:40px;background:var(--paper,#fffaf7);box-shadow:0 22px 44px -22px rgba(110,60,72,.55);animation:mtbob 4s ease-in-out infinite}
+@keyframes mtbob{50%{transform:translateY(-7px) rotate(5deg)}}
+.mt-tape{display:inline-block;padding:6px 16px;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:17px;color:#3f4234;transform:rotate(-1.6deg);
+  background:repeating-linear-gradient(90deg,rgba(199,200,185,.95) 0 14px,rgba(214,215,203,.95) 14px 28px);clip-path:polygon(0 8%,3% 0,97% 4%,100% 0,99% 50%,100% 100%,96% 94%,4% 100%,0 92%,1% 50%)}
+.mt-h{font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:clamp(28px,7vw,36px);line-height:1.05;letter-spacing:-.01em;margin:12px 0 8px;color:var(--ink,#3a2b2f)}
+.mt-h em{font-family:'Instrument Serif',Georgia,serif;font-weight:400;color:var(--deeprose,#c66a77)}
+.mt-p{color:var(--ink2,#7d6a6e);margin:0 0 16px;font-size:15px}
+.mt-form{display:grid;gap:8px}
+.mt-in{border:0;background:var(--field,#f8eeea);border-radius:999px;padding:14px 18px;font:15px 'Nunito',sans-serif;color:var(--ink,#3a2b2f);outline:0;width:100%;transition:box-shadow .25s,background .25s;text-align:center}
+.mt-in:focus{box-shadow:0 0 0 4px rgba(217,143,151,.22);background:#fff}
+.mt-btn{border:0;border-radius:999px;padding:14px 20px;font:800 15px 'Nunito',sans-serif;cursor:pointer;background:var(--rose,#d98f97);color:#fff;box-shadow:0 12px 22px -14px rgba(198,106,119,.9);transition:transform .25s cubic-bezier(.2,1.25,.35,1);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.mt-btn:hover{transform:translateY(-2px)}
+.mt-btn.soft{background:var(--soft,#f6ece8);color:var(--ink,#3a2b2f);box-shadow:none}
+.mt-btn.sm{padding:8px 13px;font-size:12.5px}
+.mt-small{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted,#9a8a8d);margin-top:10px}
+.mt-later{border:0;background:none;color:var(--muted,#9a8a8d);font:700 13px 'Nunito',sans-serif;cursor:pointer;margin-top:6px;text-decoration:underline;text-underline-offset:3px}
+@media (max-width:520px){.mt-pop{place-items:end center;padding:0}.mt-sheet{border-radius:34px 34px 0 0;width:100%}}
+
+/* slide-in nudge (release day / poll) */
+.mt-nudge{position:fixed;left:16px;bottom:16px;z-index:85;width:min(350px,calc(100vw - 32px));display:flex;gap:12px;align-items:center;background:var(--paper,#fffaf7);border-radius:24px;padding:12px;box-shadow:0 30px 70px -30px rgba(80,40,50,.5),0 6px 18px -8px rgba(80,40,50,.2);
+  transform:translateY(150%);transition:transform .7s cubic-bezier(.2,1.25,.35,1)}
+.mt-nudge.open{transform:none}
+.mt-nudge .ic{flex:0 0 48px;height:48px;border-radius:17px;display:grid;place-items:center;font-size:22px;background:var(--blush,#fbe3e2)}
+.mt-nudge b{font-family:'Fredoka','Nunito',sans-serif;font-weight:600;display:block;line-height:1.2;font-size:15.5px}
+.mt-nudge small{color:var(--ink2,#7d6a6e);display:block;line-height:1.35;margin:2px 0 6px}
+.mt-nudge .acts{display:flex;gap:6px;flex-wrap:wrap}
+.mt-nudge .mt-x{position:static;flex:0 0 28px;width:28px;height:28px;align-self:flex-start;background:var(--soft,#f6ece8);box-shadow:none}
+
+/* poll inside the newsletter tab */
+.mt-pollcard{margin-top:20px;background:linear-gradient(160deg,var(--blush,#fbe3e2),#fdeceb);border-radius:26px;padding:24px;box-shadow:var(--sh)}
+.mt-pollcard .h3{font-family:'Fredoka','Nunito',sans-serif;font-weight:600;font-size:22px;margin:10px 0 0}
+.mt-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+@media (max-width:760px){.mt-row{grid-template-columns:1fr}}
+.poll{display:grid;gap:10px;margin-top:14px}
+.popt{position:relative;overflow:hidden;border:0;text-align:left;border-radius:999px;padding:13px 18px;font:800 14.5px 'Nunito',sans-serif;cursor:pointer;background:var(--paper,#fffaf7);color:var(--ink,#3a2b2f);box-shadow:0 10px 22px -16px rgba(110,60,72,.5);transition:transform .25s cubic-bezier(.2,1.25,.35,1);width:100%}
+.popt:hover:not([disabled]){transform:translateX(4px)}
+.popt .fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--pink,#f0c1c7),var(--blush,#fbe3e2));border-radius:999px;transition:width 1s cubic-bezier(.2,1.25,.35,1)}
+.popt.mine .fill{background:linear-gradient(90deg,var(--rose,#d98f97),var(--pink,#f0c1c7))}
+.popt span{position:relative;display:flex;justify-content:space-between;gap:10px}
+.popt b{font-family:'Fredoka','Nunito',sans-serif;font-weight:600}
+.lab.mt{display:block}
+.spin{display:inline-block;width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:mtsp .8s linear infinite}
+@keyframes mtsp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.mt-pop *,.mt-nudge,.popt .fill{animation:none!important;transition:none!important}}

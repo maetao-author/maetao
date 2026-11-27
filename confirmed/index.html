@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>you're in ♡ Mae Tao</title><meta name="robots" content="noindex"><meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="../nl/nl.css">
+<style>
+  .stage{min-height:calc(100vh - 140px);display:grid;place-items:center;padding:40px 0}
+  .key{width:110px;height:110px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:52px;background:radial-gradient(circle at 35% 30%,#fff,var(--pink));box-shadow:var(--lift);animation:pop .9s var(--ease) both}
+  @keyframes pop{from{transform:scale(.3) rotate(-30deg);opacity:0}}
+  .shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+  .shelf div{border-radius:20px;padding:14px 8px;background:var(--soft);font-size:13px;font-weight:800;color:var(--ink2)}
+  .shelf div span{display:block;font-size:26px;margin-bottom:4px}
+  .hide{display:none!important}
+</style></head>
+<body>
+<header class="bar"><div class="barin"><a class="wm" href="../"><span class="heart">♡</span>mae tao</a></div></header>
+<main class="stage"><div class="narrow" style="width:100%">
+  <div class="card center fadein" id="wait" style="padding:40px 26px"><div class="key">🗝</div><h1 class="h2">opening the door…</h1></div>
+
+  <div class="card blobby center fadein hide" id="ok" style="padding:36px 26px">
+    <div class="key">💝</div>
+    <span class="tape sage">you're in!</span>
+    <h1 class="h2" style="margin:16px 0 8px" id="hi">welcome, <em>friend</em></h1>
+    <p class="sub" style="margin:0 auto" id="mag">Your bonus chapter is ready. I also sent a copy to your inbox so you can come back to it.</p>
+    <div class="row" style="justify-content:center;margin:20px 0 4px">
+      <a class="btn rose" id="magBtn" href="#" target="_blank" rel="noopener">read the chapter ♡</a>
+      <a class="btn dark" href="../#bonus">open the secret shelf 🔓</a>
+    </div>
+    <div class="shelf"><div><span>🎾</span>bonus chapter</div><div><span>🎧</span>the playlist</div><div><span>✎</span>deleted scenes</div></div>
+    <p class="muted" style="font-size:14px">Next letter lands on <b id="next"></b>.
+      <a href="#" id="calNext" target="_blank" rel="noopener" style="color:var(--deeprose);font-weight:800">add it to my calendar</a></p>
+  </div>
+
+  <div class="card center fadein hide" id="bad" style="padding:36px 26px">
+    <div class="key">🥺</div>
+    <h1 class="h2">hmm, that link <em>didn't work</em></h1>
+    <p class="sub" style="margin:10px auto 18px" id="badMsg">It may have expired. Pop your email in again and I'll send a fresh one.</p>
+    <a class="btn rose" href="../newsletter/#join">try again ♡</a>
+  </div>
+</div></main>
+<script src="../nl/config.js"></script><script src="../nl/nl.js"></script>
+<script>
+(async () => {
+  const $ = s => document.querySelector(s), N = window.MAE_NL;
+  const t = new URLSearchParams(location.search).get('t') || '';
+  history.replaceState(null, '', location.pathname);           // keep the token out of history/screenshots
+  const show = id => { ['wait', 'ok', 'bad'].forEach(x => $('#' + x).classList.toggle('hide', x !== id)); };
+  try {
+    if (!NL.live()) { if (!t) throw new Error('Preview mode: connect Supabase in nl/config.js to confirm for real.'); }
+    const r = NL.live() ? await NL.confirm(t) : { first_name: '', magnet_url: '', magnet_name: N.magnet.name };
+    NL.unlockShelf();
+    if (r.first_name) $('#hi').innerHTML = `welcome, <em>${NL.esc(r.first_name)}</em>`;
+    $('#mag').textContent = `${r.magnet_name || N.magnet.name} is ready. I also sent a copy to your inbox so you can come back to it.`;
+    if (r.magnet_url) $('#magBtn').href = r.magnet_url; else $('#magBtn').classList.add('hide');
+    const nx = NL.nextSendDay();
+    $('#next').textContent = nx.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+    $('#calNext').href = NL.gcal({ title: '✉ letter from Mae Tao', date: nx.toISOString().slice(0, 10), details: 'A new letter lands today ♡ check your inbox' });
+    show('ok'); NL.petals(innerWidth / 2, innerHeight / 3, 22);
+  } catch (e) { $('#badMsg').textContent = e.message; show('bad'); }
+})();
+</script>
+</body></html>
