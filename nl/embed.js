@@ -16,7 +16,7 @@
     el.className = 'mt-pop'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'mtPopH');
     el.innerHTML = `<div class="mt-sheet">
       <button class="mt-x" aria-label="close">✕</button>
-      <div class="mt-env" aria-hidden="true">💌</div>
+      <div class="mt-env" aria-hidden="true"><img src="nl/heart.svg" alt="" width="52" height="52"></div>
       <span class="mt-tape">a little gift for you</span>
       <h2 class="mt-h" id="mtPopH">want <em>Stephen's</em> side of the story?</h2>
       <p class="mt-p">Join my letters and get <b>${NL.esc(N.magnet?.name || 'a bonus chapter')}</b> free: ${NL.esc(N.magnet?.tagline || '')}.</p>
@@ -47,6 +47,10 @@
     return { open() { last = document.activeElement; el.classList.add('open'); setTimeout(() => el.querySelector('[name=em]').focus(), 350); } };
   }
 
+  // open the pop-up from any button, e.g. <button onclick="mtOpenPopup()">join</button>
+  let popInst;
+  window.mtOpenPopup = () => (popInst = popInst || buildPop()).open();
+
   // one subscribe for every form on the site (popup, newsletter tab, secret shelf)
   window.mtSubscribe = async function (email, firstName, src) {
     const r = await NL.subscribe(email, firstName, src);
@@ -56,8 +60,8 @@
   };
 
   if (P.enabled !== false && !joined() && !snoozed() && !/^#(newsletter|bonus)/.test(location.hash)) {
-    let pop, shown = false;
-    const show = () => { if (shown || joined() || document.querySelector('.ov')) return; shown = true; (pop = pop || buildPop()).open(); };
+    let shown = false;
+    const show = () => { if (shown || joined() || document.querySelector('.ov')) return; shown = true; window.mtOpenPopup(); };
     setTimeout(show, (P.delaySeconds || 25) * 1000);
     addEventListener('scroll', () => {
       const pct = (scrollY + innerHeight) / document.documentElement.scrollHeight * 100;

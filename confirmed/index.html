@@ -18,7 +18,7 @@
   <div class="card center fadein" id="wait" style="padding:40px 26px"><div class="key">🗝</div><h1 class="h2">opening the door…</h1></div>
 
   <div class="card blobby center fadein hide" id="ok" style="padding:36px 26px">
-    <div class="key">💝</div>
+    <div class="key"><img src="../nl/heart.svg" alt="" width="66" height="66"></div>
     <span class="tape sage">you're in!</span>
     <h1 class="h2" style="margin:16px 0 8px" id="hi">welcome, <em>friend</em></h1>
     <p class="sub" style="margin:0 auto" id="mag">Your bonus chapter is ready. I also sent a copy to your inbox so you can come back to it.</p>
@@ -46,7 +46,6 @@
   history.replaceState(null, '', location.pathname);           // keep the token out of history/screenshots
   const show = id => { ['wait', 'ok', 'bad'].forEach(x => $('#' + x).classList.toggle('hide', x !== id)); };
   try {
-    if (!NL.live()) { if (!t) throw new Error('Preview mode: connect Supabase in nl/config.js to confirm for real.'); }
     const r = NL.live() ? await NL.confirm(t) : { first_name: '', magnet_url: '', magnet_name: N.magnet.name };
     NL.unlockShelf();
     if (r.first_name) $('#hi').innerHTML = `welcome, <em>${NL.esc(r.first_name)}</em>`;
