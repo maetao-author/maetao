@@ -63,6 +63,6 @@ jobs:
       - name: Deploy edge functions
         if: steps.ready.outputs.ok == 'yes'
         run: |
-          for f in subscribe confirm unsubscribe send-newsletter calendar-feed; do
+          for f in subscribe confirm unsubscribe send-newsletter calendar-feed swap resend-webhook; do
             supabase functions deploy "$f" --project-ref "$PROJECT_REF" --no-verify-jwt
           done

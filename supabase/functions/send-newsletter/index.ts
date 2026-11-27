@@ -1,58 +1,62 @@
-// Sends an issue. Only Mae (logged in on /admin) or the scheduler can call this.
-//  POST { issue_id, mode: 'test' }  -> sends one copy to Mae only
-//  POST { issue_id, mode: 'now' }   -> sends to CONFIRMED subscribers only, then logs it
-//  POST { mode: 'scheduled' } with header x-cron-secret -> sends every issue whose scheduled time has passed
-import { cfg, db, json, preflight, resend, adminEmail, unsubLink, oneClickLink, UUID_RE } from '../_shared/util.ts';
+// Sends an issue as a Resend BROADCAST (marketing email: free for up to 1,000 contacts,
+// and it doesn't use up the 100/day transactional quota that confirm/welcome emails need).
+// Only Mae (logged in on /admin) or the scheduler can call this.
+//  POST { issue_id, mode: 'test' }  -> one transactional copy to Mae only
+//  POST { issue_id, mode: 'now' }   -> sync the list, then one broadcast to the newsletter segment
+//  POST { mode: 'scheduled' } + header x-cron-secret -> sends every issue whose time has come
+import { cfg, db, json, preflight, resend, adminEmail, addToResend, removeFromResend, UUID_RE } from '../_shared/util.ts';
 import { renderBlocks, frame } from '../_shared/email.js';
 
-const BATCH = 100;   // Resend batch limit
+const build = (issue: any, unsubUrl: string) => frame({
+  inner: renderBlocks(issue.blocks || [], { siteUrl: cfg.site, issueRef: `issue-${String(issue.id).slice(0, 8)}` }),
+  preheader: issue.preheader, siteUrl: cfg.site, address: cfg.address, unsubUrl,
+});
+// Resend fills the reader's first name in for each person
+const forBroadcast = (s: string) => s.replace(/\{\{\s*first_name\s*\}\}/gi, '{{{contact.first_name|friend}}}');
+const plain = (s: string, name = 'friend') => s.replace(/\{\{\s*first_name\s*\}\}/gi, name);
 
-function build(issue: any) {
-  const inner = renderBlocks(issue.blocks || [], { siteUrl: cfg.site, issueRef: `issue-${String(issue.id).slice(0, 8)}` });
-  return frame({ inner, preheader: issue.preheader, siteUrl: cfg.site, address: cfg.address });
+// make the Resend list match the database before every send:
+// confirmed readers in, everyone else (pending, unsubscribed, bounced) out
+async function syncList() {
+  const join = await db(`subscribers?status=eq.confirmed&resend_state=neq.subscribed&select=id,email,first_name&limit=1000`);
+  for (const s of join) await addToResend(s);
+  const leave = await db(`subscribers?status=neq.confirmed&resend_state=eq.subscribed&select=id,email&limit=1000`);
+  for (const s of leave) await removeFromResend(s);
+  return (await db(`subscribers?status=eq.confirmed&select=id&limit=100000`)).length;
 }
-const personalise = (html: string, s: any) => html
-  .replaceAll('{{UNSUB_URL}}', unsubLink(s.unsubscribe_token))
-  .replaceAll('{{FIRST_NAME}}', (s.first_name || 'friend').replace(/[<>&"']/g, ''))
-  .replaceAll('{{first_name}}', (s.first_name || 'friend').replace(/[<>&"']/g, ''));
 
-async function confirmedSubscribers() {
-  const all: any[] = [];
-  for (let from = 0; ; from += 1000) {
-    const page = await db(`subscribers?status=eq.confirmed&select=email,first_name,unsubscribe_token&order=created_at`, {
-      headers: { Range: `${from}-${from + 999}` } });
-    all.push(...page);
-    if (page.length < 1000) return all;
+// authors can edit their swap until the letter goes out: always send their latest details
+async function freshSwaps(issue: any) {
+  const blocks = issue.blocks || [];
+  for (const blk of blocks) {
+    if (blk.type !== 'swap' || !(blk.swapIds || []).length) continue;
+    const rows = await db(`swaps?id=in.(${blk.swapIds.join(',')})&status=neq.declined&select=id,author_name,book_title,trope,release_date,blurb,cover_url,where_to_buy`);
+    blk.items = blk.swapIds.map((id: string) => rows.find((r: any) => r.id === id)).filter(Boolean);
   }
+  return { ...issue, blocks };
 }
 
 async function sendIssue(issue: any) {
-  // claim it: only one sender may move an issue to "sending"
   const claimed = await db(`issues?id=eq.${issue.id}&status=in.(draft,scheduled)`, { method: 'PATCH',
     body: JSON.stringify({ status: 'sending', updated_at: new Date().toISOString() }) });
   if (!claimed.length) return { skipped: true };
-  const html = build(issue);
   try {
-    const subs = await confirmedSubscribers();
-    let sent = 0;
-    for (let i = 0; i < subs.length; i += BATCH) {
-      const chunk = subs.slice(i, i + BATCH).map((s) => ({
-        from: cfg.from, to: [s.email], reply_to: cfg.replyTo || undefined,
-        subject: personalise(issue.subject, s), html: personalise(html, s),
-        headers: { 'List-Unsubscribe': `<${oneClickLink(s.unsubscribe_token)}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
-      }));
-      await resend('/emails/batch', chunk);
-      sent += chunk.length;
-    }
+    if (!cfg.segmentId) throw new Error('RESEND_SEGMENT_ID is not set');
+    issue = await freshSwaps(issue);
+    const recipients = await syncList();
+    const html = forBroadcast(build(issue, '{{{RESEND_UNSUBSCRIBE_URL}}}'));
+    const b = await resend('/broadcasts', {
+      segment_id: cfg.segmentId, from: cfg.from, reply_to: cfg.replyTo || undefined,
+      subject: plain(issue.subject), html, name: `letter: ${issue.subject}`.slice(0, 100), send: true,
+    });
     const now = new Date().toISOString();
     await db('newsletter_sends', { method: 'POST', prefer: 'return=minimal',
-      body: JSON.stringify({ issue_id: issue.id, subject: issue.subject, body_html: html, recipient_count: sent, sent_at: now }) });
+      body: JSON.stringify({ issue_id: issue.id, subject: issue.subject, body_html: html, recipient_count: recipients, sent_at: now }) });
     await db(`issues?id=eq.${issue.id}`, { method: 'PATCH', prefer: 'return=minimal',
-      body: JSON.stringify({ status: 'sent', sent_at: now, body_html: html, updated_at: now }) });
+      body: JSON.stringify({ status: 'sent', sent_at: now, body_html: html, broadcast_id: b.id || null, updated_at: now }) });
     await db(`swaps?issue_id=eq.${issue.id}`, { method: 'PATCH', prefer: 'return=minimal', body: JSON.stringify({ status: 'sent' }) });
-    return { sent };
+    return { sent: recipients, broadcast_id: b.id };
   } catch (e) {
-    // put it back so Mae can retry (some readers may already have it; Resend logs show who)
     await db(`issues?id=eq.${issue.id}`, { method: 'PATCH', prefer: 'return=minimal', body: JSON.stringify({ status: issue.status }) });
     throw e;
   }
@@ -80,9 +84,8 @@ Deno.serve(async (req) => {
     if (!issue.subject?.trim()) return json({ error: 'Give it a subject line first' }, 400);
 
     if (b.mode === 'test') {
-      const html = build(issue);
-      const fake = { first_name: 'Mae', unsubscribe_token: '00000000-0000-0000-0000-000000000000' };
-      await resend('/emails', { from: cfg.from, to: [me], subject: '[test] ' + personalise(issue.subject, fake), html: personalise(html, fake) });
+      const html = plain(build(await freshSwaps(issue), `${cfg.site}/unsubscribe/`), 'Mae');
+      await resend('/emails', { from: cfg.from, to: [me], subject: '[test] ' + plain(issue.subject, 'Mae'), html });
       await db('newsletter_sends', { method: 'POST', prefer: 'return=minimal',
         body: JSON.stringify({ issue_id: issue.id, subject: issue.subject, body_html: html, recipient_count: 1, is_test: true }) });
       return json({ ok: true, test_to: me });

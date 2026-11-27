@@ -156,7 +156,18 @@
     <section class="view" data-view="swaps">
       <div class="ph"><div><div class="lab">book besties exchange · authors apply at /swap</div><h1 class="h2">newsletter <em>swaps</em></h1></div>
         <a class="btn sm paper" href="../swap/" target="_blank">open the form ↗</a></div>
-      <div class="chips" id="swf" style="margin-bottom:14px"></div>
+      <div class="card blush passes">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <div><span class="tape">friend passes</span><p class="muted" style="margin:10px 0 0;max-width:520px">For author friends and co-authors: their swap skips your inbox and goes straight into the next letter. Each pass gets its own link to share.</p></div>
+          <form id="passForm" class="row" style="gap:8px">
+            <input class="inp" id="passLabel" maxlength="80" required placeholder="who it’s for, e.g. Jo (co-author)" style="width:230px;border-radius:999px;padding:10px 14px" aria-label="who the pass is for">
+            <input class="inp" id="passMax" type="number" min="1" placeholder="uses (any)" style="width:110px;border-radius:999px;padding:10px 14px" aria-label="how many uses">
+            <button class="btn sm rose">+ make a pass</button>
+          </form>
+        </div>
+        <div class="rows" id="passList" style="margin-top:14px"></div>
+      </div>
+      <div class="chips" id="swf" style="margin:18px 0 14px"></div>
       <div class="swaps" id="swapList"></div>
     </section>
 

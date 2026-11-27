@@ -57,7 +57,11 @@
       catch (e) { if (e.status !== 409) throw e; }      // already voted from this browser: that's fine
     },
     ask: (question, name, issue_ref) => live() ? rest('ama_questions', { method: 'POST', body: JSON.stringify({ question, name: name || null, issue_ref: issue_ref || null }) }) : Promise.resolve(),
-    swap: row => live() ? rest('swaps', { method: 'POST', body: JSON.stringify(row) }) : Promise.resolve(),
+    // self-serve swaps: authors create, load, edit and remove their own entry
+    swap: (row, code) => live() ? fn('swap', { action: 'create', row, code: code || undefined }) : Promise.resolve({ ok: true, approved: !!code, preview: true }),
+    swapGet: token => live() ? fn('swap', { action: 'get', token }) : Promise.resolve({ ok: true, preview: true, locked: false, swap: { month: new Date().toISOString().slice(0, 7), author_name: 'Jo Rivera', email: 'jo@example.com', book_title: 'Love, Set, Match', trope: 'fake dating', heat: 'steamy', blurb: 'A fake engagement at Wimbledon. What could go wrong?', where_to_buy: 'https://example.com', status: 'approved', invited: true } }),
+    swapUpdate: (token, row) => live() ? fn('swap', { action: 'update', token, row }) : Promise.resolve({ ok: true }),
+    swapDelete: token => live() ? fn('swap', { action: 'delete', token }) : Promise.resolve({ ok: true }),
     async readerCount() {
       if (!live()) return null;
       try { return Number(await rest('rpc/reader_count', { method: 'POST', body: '{}', headers: { Prefer: '' } })); } catch { return null; }

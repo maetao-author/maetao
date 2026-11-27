@@ -13,7 +13,7 @@ const ls = { get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?
 
 /* ================= data ================= */
 let sb = null, session = null;
-const D = { subscribers: [], issues: [], swaps: [], polls: [], ama_questions: [], reminders: [], newsletter_sends: [] };
+const D = { subscribers: [], issues: [], swaps: [], polls: [], ama_questions: [], reminders: [], newsletter_sends: [], swap_invites: [] };
 
 function demoData() {
   const now = Date.now(), src = ['tiktok', 'instagram', 'popup', 'newsletter-page', 'threads', 'home'], names = ['Bea', 'Lia', 'Cass', 'Joy', 'Nina', 'Pia', 'Ria', 'Tess', '', ''];
@@ -23,12 +23,13 @@ function demoData() {
     subscribers: subs,
     issues: [{ id: 'i1', subject: 'release week is here 𖹭', preheader: '', status: 'sent', blocks: [], sent_at: new Date(now - 9 * day).toISOString(), created_at: new Date(now - 12 * day).toISOString() }],
     swaps: [
-      { id: 'w1', month: iso(now).slice(0, 7), author_name: 'Jo Rivera', email: 'jo@example.com', book_title: 'Love, Set, Match', trope: 'fake dating', heat: 'steamy', release_date: iso(now + 6 * day), where_to_buy: 'https://example.com', blurb: 'A fake engagement at Wimbledon. What could go wrong?', status: 'approved', list_size: 1200, created_at: new Date(now - 3 * day).toISOString() },
+      { id: 'w1', month: iso(now).slice(0, 7), author_name: 'Jo Rivera', email: 'jo@example.com', book_title: 'Love, Set, Match', trope: 'fake dating', heat: 'steamy', release_date: iso(now + 6 * day), where_to_buy: 'https://example.com', blurb: 'A fake engagement at Wimbledon. What could go wrong?', status: 'approved', invited: true, list_size: 1200, created_at: new Date(now - 3 * day).toISOString() },
       { id: 'w2', month: iso(now + 31 * day).slice(0, 7), author_name: 'Sam Lee', email: 'sam@example.com', book_title: 'Off Side', trope: 'forbidden coach-player', heat: 'spicy', where_to_buy: 'https://example.com', status: 'new', list_size: 640, created_at: new Date(now - day).toISOString() }],
     polls: [{ id: 'p1', question: 'Pick the next trope 𖹭', options: N.tropes, is_active: true, created_at: new Date().toISOString() }],
     ama_questions: [{ id: 'q1', question: 'Will we get a book about Stephen’s sister?', name: 'Bea', answered: false, created_at: new Date(now - 2 * day).toISOString() }],
     reminders: [{ id: 'r1', title: 'cover reveal for book two', due_at: new Date(now + 4 * day).toISOString(), kind: 'promo', done: false }],
-    newsletter_sends: [{ id: 'n1', subject: 'release week is here 𖹭', recipient_count: 51, sent_at: new Date(now - 9 * day).toISOString() }]
+    newsletter_sends: [{ id: 'n1', subject: 'release week is here 𖹭', recipient_count: 51, sent_at: new Date(now - 9 * day).toISOString() }],
+    swap_invites: [{ code: 'JO-LOVE-27', label: 'Jo Rivera (co-author)', uses: 1, max_uses: null, active: true, created_at: new Date(now - 5 * day).toISOString() }]
   };
 }
 
@@ -37,9 +38,9 @@ const api = {
     if (DEMO) { Object.assign(D, ls.get('mt.demo', null) || demoData()); return; }
     const q = (t, sel = '*', order = 'created_at') => sb.from(t).select(sel).order(order, { ascending: false }).limit(5000);
     const res = await Promise.all([
-      q('subscribers', 'id,email,first_name,status,source,created_at,confirmed_at'), q('issues'), q('swaps'), q('polls'),
-      q('ama_questions'), q('reminders', '*', 'due_at'), q('newsletter_sends', 'id,issue_id,subject,recipient_count,sent_at,is_test', 'sent_at')]);
-    ['subscribers', 'issues', 'swaps', 'polls', 'ama_questions', 'reminders', 'newsletter_sends'].forEach((k, i) => {
+      q('subscribers', 'id,email,first_name,status,source,created_at,confirmed_at,unsub_reason'), q('issues'), q('swaps'), q('polls'),
+      q('ama_questions'), q('reminders', '*', 'due_at'), q('newsletter_sends', 'id,issue_id,subject,recipient_count,sent_at,is_test', 'sent_at'), q('swap_invites')]);
+    ['subscribers', 'issues', 'swaps', 'polls', 'ama_questions', 'reminders', 'newsletter_sends', 'swap_invites'].forEach((k, i) => {
       if (res[i].error) throw res[i].error; D[k] = res[i].data;
     });
   },
@@ -111,7 +112,7 @@ async function start() {
   remindersPopup();
   setInterval(() => { renderHome(); remindersPopup(true); }, 5 * 60 * 1000);
 }
-function renderAll() { renderHome(); renderSubs(); renderSwaps(); renderPolls(); renderAma(); renderCal(); renderIssuePicker(); }
+function renderAll() { renderHome(); renderSubs(); renderSwaps(); renderPasses(); renderPolls(); renderAma(); renderCal(); renderIssuePicker(); }
 
 /* ================= nav ================= */
 function go(v) {
@@ -468,7 +469,7 @@ function renderSubs() {
   const list = S.filter(s => (sFilter === 'all' || s.status === sFilter) && (!q || (s.email + ' ' + (s.first_name || '')).toLowerCase().includes(q))).slice(0, 300);
   $('#subList').innerHTML = list.map(s => `<div class="r"><div class="av">${esc((s.first_name || s.email)[0].toUpperCase())}</div>
     <div class="main"><b>${esc(s.first_name ? s.first_name + ' · ' : '')}${esc(s.email)}</b><small>joined ${fmt(s.created_at, { month: 'short', day: 'numeric', year: 'numeric' })} · via ${esc(s.source || 'website')}</small></div>
-    <span class="tag ${s.status === 'confirmed' ? 'sage' : s.status === 'pending' ? 'rose' : ''}">${s.status}</span>
+    <span class="tag ${s.status === 'confirmed' ? 'sage' : s.status === 'pending' ? 'rose' : ''}">${s.status}${s.unsub_reason && s.status === 'unsubscribed' ? ' · ' + esc({ link: 'their link', resend: 'via email', bounced: 'bounced', complained: 'marked spam', admin: 'by you' }[s.unsub_reason] || s.unsub_reason) : ''}</span>
     <button class="btn xs ghost" data-del="${s.id}" title="delete forever (e.g. a data request)">delete</button></div>`).join('') || '<p class="muted">nobody here yet 𖹭</p>';
   $$('#subList [data-del]').forEach(b => b.onclick = async () => { if (!confirm('Delete this reader forever? (Use this for “please delete my data” requests.)')) return; await api.del('subscribers', b.dataset.del).catch(oops); renderSubs(); renderHome(); });
 }
@@ -492,7 +493,7 @@ function renderSwaps() {
     return `<div class="sc"><span class="tag st ${s.status === 'new' ? 'rose' : s.status === 'declined' ? '' : 'sage'}">${s.status}</span>
       <div class="hd"><div class="cv" style="${/^https:\/\//.test(s.cover_url || '') ? `background-image:url('${esc(s.cover_url).replace(/'/g, '')}')` : ''}"></div>
         <div style="min-width:0;padding-right:60px"><h4>${esc(s.book_title)}</h4><small class="muted">by ${esc(s.author_name)}</small>
-        <div class="meta" style="margin-top:6px"><span class="tag">${NL.icon('cal')} ${esc(s.month)}</span>${s.trope ? `<span class="tag rose">${esc(s.trope)}</span>` : ''}${s.heat ? `<span class="tag">${esc(s.heat)}</span>` : ''}${s.list_size ? `<span class="tag sage">${Number(s.list_size).toLocaleString()} readers</span>` : ''}</div></div></div>
+        <div class="meta" style="margin-top:6px"><span class="tag">${NL.icon('cal')} ${esc(s.month)}</span>${s.invited ? `<span class="tag dark">${NL.icon('gift')} friend pass</span>` : ''}${s.trope ? `<span class="tag rose">${esc(s.trope)}</span>` : ''}${s.heat ? `<span class="tag">${esc(s.heat)}</span>` : ''}${s.list_size ? `<span class="tag sage">${Number(s.list_size).toLocaleString()} readers</span>` : ''}</div></div></div>
       ${s.blurb ? `<p style="margin:0;font-size:14px">${esc(s.blurb)}</p>` : ''}${s.notes ? `<p class="muted" style="margin:0;font-size:13px">note: ${esc(s.notes)}</p>` : ''}
       <div class="links">${link(s.where_to_buy, 'buy')}${link(s.newsletter_link, 'their swap link')}${link(s.news_link, 'news')}${s.release_date ? `<span class="tag">out ${fmt(s.release_date + 'T12:00')}</span>` : ''}</div>
       <div class="row" style="gap:6px">
@@ -510,6 +511,33 @@ function renderSwaps() {
   });
   $$('[data-recip]').forEach(c => c.onchange = () => api.upd('swaps', c.dataset.recip, { reciprocal_sent: c.checked }).then(renderHome).catch(oops));
 }
+
+/* ================= friend passes ================= */
+const passCode = label => (label.replace(/[^A-Za-z]/g, '').slice(0, 6).toUpperCase() || 'FRIEND') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+const passLink = code => `${SITE}/swap/?code=${encodeURIComponent(code)}`;
+async function passSave(code, patch) {
+  if (DEMO) { Object.assign(D.swap_invites.find(p => p.code === code), patch); api.save(); return; }
+  const { error } = await sb.from('swap_invites').update(patch).eq('code', code); if (error) throw error;
+  Object.assign(D.swap_invites.find(p => p.code === code), patch);
+}
+function renderPasses() {
+  $('#passList').innerHTML = D.swap_invites.map(p => `<div class="r"><div class="av">${NL.icon('gift')}</div>
+    <div class="main"><b>${esc(p.label)}</b><small><code class="code">${esc(p.code)}</code> · used ${p.uses}${p.max_uses ? ' of ' + p.max_uses : ''} · ${p.active ? 'active' : 'switched off'}</small></div>
+    ${p.active ? `<button class="btn xs rose" data-copy="${esc(p.code)}">copy their link</button><button class="btn xs ghost" data-off="${esc(p.code)}">switch off</button>` : `<button class="btn xs sage" data-on="${esc(p.code)}">switch on</button>`}</div>`).join('')
+    || '<small class="muted">No passes yet. Make one for each author friend or co-author.</small>';
+  $$('#passList [data-copy]').forEach(b => b.onclick = () => navigator.clipboard.writeText(passLink(b.dataset.copy)).then(() => NL.toast('link copied 𖹭 send it to them'), () => NL.toast(passLink(b.dataset.copy))));
+  $$('#passList [data-off]').forEach(b => b.onclick = () => passSave(b.dataset.off, { active: false }).then(renderPasses).catch(oops));
+  $$('#passList [data-on]').forEach(b => b.onclick = () => passSave(b.dataset.on, { active: true }).then(renderPasses).catch(oops));
+}
+$('#passForm').onsubmit = async e => {
+  e.preventDefault();
+  const row = { code: passCode($('#passLabel').value), label: $('#passLabel').value.trim(), max_uses: $('#passMax').value ? Math.max(1, parseInt($('#passMax').value, 10)) : null, active: true, uses: 0 };
+  try {
+    if (DEMO) { D.swap_invites.unshift({ ...row, created_at: new Date().toISOString() }); api.save(); }
+    else { const { data, error } = await sb.from('swap_invites').insert({ code: row.code, label: row.label, max_uses: row.max_uses }).select().single(); if (error) throw error; D.swap_invites.unshift(data); }
+    e.target.reset(); renderPasses(); NL.toast(`pass ${row.code} is ready 𖹭 copy their link`);
+  } catch (er) { oops(er); }
+};
 
 /* ================= polls ================= */
 async function renderPolls() {

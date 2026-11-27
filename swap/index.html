@@ -30,6 +30,13 @@
   .pv .by{font-size:12.5px;color:var(--ink2);margin:3px 0 6px}
   .pv p{margin:0;font-size:13.5px;word-break:break-word}
   .done{text-align:center;padding:40px 20px}
+  .pass{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-radius:22px;padding:12px 14px;margin-bottom:18px;background:linear-gradient(165deg,#fdf0f1,var(--blush));box-shadow:inset 0 1px 0 #fff}
+  .pass .tile{width:44px;height:44px;border-radius:15px}
+  .pass .inp{flex:0 1 190px;border-radius:999px;padding:10px 14px;background:var(--paper);text-transform:uppercase;letter-spacing:.04em}
+  .pass.on{background:linear-gradient(165deg,#f1f2ea,var(--sage-xl))}
+  .pass small{display:block;line-height:1.35}
+  .locked{border-radius:22px;padding:14px 16px;margin-bottom:18px;background:var(--soft);font-weight:700;color:var(--ink2)}
+  input[readonly]{opacity:.7}
 </style></head>
 <body>
 <header class="bar"><div class="barin">
@@ -40,8 +47,8 @@
 <main class="wrap" style="padding-top:44px">
   <div class="fadein">
     <span class="tape sage">book besties</span>
-    <h1 class="h1" style="margin-top:16px">let's <em>swap</em> newsletters</h1>
-    <p class="sub">I write contemporary sports romance (tennis! second chances! one bed!). If you write romance too, let's share each other's books with our readers.</p>
+    <h1 class="h1" style="margin-top:16px" id="swH">let's <em>swap</em> newsletters</h1>
+    <p class="sub" id="swSub">Author friends and co-authors: add your book yourself, and edit it any time before the letter goes out. I write contemporary sports romance (tennis! second chances! one bed!). If you write romance too, let's share each other's books with our readers.</p>
     <div class="how">
       <div><span class="n">1</span><b>tell me about your book</b><small class="muted">takes 2 minutes</small></div>
       <div><span class="n">2</span><b>I pick a letter</b><small class="muted">usually within a week</small></div>
@@ -51,6 +58,13 @@
 
   <div class="sw" style="margin-top:22px">
     <form class="card fadein d1" id="swapForm" novalidate>
+      <div class="pass" id="passBox">
+        <span class="tile"><svg class="i" aria-hidden="true"><use href="#i-gift"/></svg></span>
+        <div style="min-width:0;flex:1"><b class="chub" style="font-size:17px">friend pass</b>
+          <small class="muted" id="passNote">Got a code from Mae? Your swap goes straight into her next letter, no waiting.</small></div>
+        <input id="code" class="inp" maxlength="40" placeholder="code (optional)" aria-label="friend pass code" autocomplete="off">
+      </div>
+      <div class="locked" id="lockedBox" hidden></div>
       <div class="sect"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-readers"/></svg></span>you</div>
       <div class="f2">
         <div class="f"><label for="author_name">author name *</label><input id="author_name" required maxlength="80" placeholder="Pen name"></div>
@@ -90,8 +104,9 @@
       </div>
       <div class="f"><label for="notes">anything else?</label><textarea id="notes" maxlength="600" style="min-height:76px" placeholder="Sale dates, content warnings, a hello 𖹭"></textarea></div>
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label class="check" style="margin:4px 0 16px"><input type="checkbox" id="ok" required><span>I'll feature Mae's book in my newsletter in the same month, and I'm happy for her to email me about this swap.</span></label>
-      <button class="btn rose wide" id="go">send my swap request 𖹭</button>
+      <label class="check" id="okRow" style="margin:4px 0 16px"><input type="checkbox" id="ok" required><span>I'll feature Mae's book in my newsletter in the same month, and I'm happy for her to email me about this swap.</span></label>
+      <button class="btn rose wide" id="go">add my book 𖹭</button>
+      <button class="btn ghost wide" type="button" id="del" hidden style="margin-top:10px">remove my swap</button>
     </form>
 
     <aside class="sticky fadein d2">
@@ -128,6 +143,44 @@ function preview() {
   $('#pCover').innerHTML = /^https:\/\//.test(c) ? '' : '<img src="../nl/icons/swap.svg" alt="" style="width:60%">';
 }
 F.addEventListener('input', preview);
+const q = new URLSearchParams(location.search), H = location.hash.slice(1);
+const editToken = q.get('edit') || (H.startsWith('edit-') ? H.slice(5) : '');
+const startCode = q.get('code') || (H.startsWith('pass-') ? H.slice(5) : '');
+if (startCode) { $('#code').value = startCode.toUpperCase(); }
+const passOn = () => { const on = !!$('#code').value.trim(); $('#passBox').classList.toggle('on', on);
+  $('#passNote').textContent = on ? 'Friend pass added: your swap goes straight into my next letter.' : 'Got a code from Mae? Your swap goes straight into her next letter, no waiting.'; };
+$('#code').addEventListener('input', passOn); passOn();
+const setVals = s => {
+  for (const k of ['author_name', 'email', 'month', 'book_title', 'trope', 'genre', 'release_date', 'cover_url', 'blurb', 'where_to_buy', 'newsletter_link', 'news_link', 'notes', 'list_size'])
+    if ($('#' + k) && s[k] != null) $('#' + k).value = s[k];
+  const h = F.querySelector(`[name=heat][value="${s.heat}"]`); if (h) h.checked = true;
+  preview();
+};
+
+if (editToken) {
+  // the author's private edit page
+  $('#swH').innerHTML = 'edit your <em>swap</em>'; $('#swSub').textContent = 'Change anything you like until the letter goes out. Your edits show up in the letter automatically.';
+  $('#passBox').hidden = true; $('#okRow').hidden = true; $('#ok').checked = true;
+  $('#email').readOnly = true; $('#go').textContent = 'save changes'; $('#del').hidden = false;
+  NL.swapGet(editToken).then(r => {
+    setVals(r.swap);
+    if (r.locked) {
+      $('#lockedBox').hidden = false; $('#lockedBox').textContent = r.swap.status === 'sent' ? 'This swap already went out in a letter, so it can’t be changed. Thank you for swapping!' : 'This swap was declined.';
+      F.querySelectorAll('input,textarea,button').forEach(x => x.disabled = true);
+    } else {
+      $('#lockedBox').hidden = false;
+      $('#lockedBox').textContent = r.swap.status === 'new' ? 'Status: waiting for Mae to look at it.' : 'Status: approved, it’s going into the ' + r.swap.month + ' letter.';
+    }
+  }).catch(err => { $('#lockedBox').hidden = false; $('#lockedBox').textContent = err.message; F.querySelectorAll('input,textarea,button').forEach(x => x.disabled = true); });
+  $('#del').onclick = async () => {
+    const b = $('#del');
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'tap again to remove it'; return; }
+    NL.busy(b, true);
+    try { await NL.swapDelete(editToken); F.innerHTML = `<div class="done"><h2 class="h2">removed</h2><p class="sub" style="margin:10px auto 0">Your swap is gone. You can always add a new one.</p></div>`; }
+    catch (err) { NL.toast(err.message); NL.busy(b, false); }
+  };
+}
+
 F.addEventListener('submit', async e => {
   e.preventDefault();
   if (F.website.value) return;
@@ -145,13 +198,15 @@ F.addEventListener('submit', async e => {
     list_size: v('list_size') ? Math.max(0, parseInt(v('list_size'), 10) || 0) : null, blurb: v('blurb') || null, notes: v('notes') || null };
   const btn = $('#go'); NL.busy(btn, true);
   try {
-    await NL.swap(row);
+    if (editToken) { await NL.swapUpdate(editToken, row); NL.busy(btn, false, 'save changes'); NL.toast('saved 𖹭 your letter entry is updated'); NL.petals(innerWidth / 2, innerHeight / 2, 12); return; }
+    const r = await NL.swap(row, v('code').toUpperCase());
     F.innerHTML = `<div class="done"><div class="tile big" style="margin:0 auto"><img src="../nl/icons/swap.svg" alt=""></div>
       <h2 class="h2" style="margin:18px 0 8px">thank you, <em>${NL.esc(row.author_name)}!</em></h2>
-      <p class="sub" style="margin:0 auto">I'll look at it this week and email you at ${NL.esc(row.email)} with the letter date.${NL.live() ? '' : ' <br><small>(preview mode: not saved yet)</small>'}</p>
+      <p class="sub" style="margin:0 auto">${r.approved ? `You're in: <b>${NL.esc(row.book_title)}</b> goes into my ${NL.esc(row.month)} letter automatically.` : `I'll look at it this week.`}
+      I sent a private edit link to ${NL.esc(row.email)} so you can change anything before it goes out.${r.preview ? ' <br><small>(preview mode: not saved)</small>' : ''}</p>
       <a class="btn paper" style="margin-top:18px" href="../">see my book</a></div>`;
     NL.petals(innerWidth / 2, innerHeight / 2, 18);
-  } catch { NL.toast('couldn’t send that, try again in a moment?'); NL.busy(btn, false); }
+  } catch (err) { NL.toast(err.message || 'couldn’t send that, try again in a moment?'); NL.busy(btn, false); }
 });
 </script>
 </body></html>

@@ -8,6 +8,8 @@ export const cfg = {
   url: env('SUPABASE_URL'),
   service: env('SUPABASE_SERVICE_ROLE_KEY'),
   resendKey: env('RESEND_API_KEY'),
+  segmentId: env('RESEND_SEGMENT_ID'),                          // Resend → Audience → Segments → your newsletter segment id
+  webhookSecret: env('RESEND_WEBHOOK_SECRET'),                   // Resend → Webhooks → signing secret (whsec_...)
   from: env('FROM_EMAIL', 'Mae Tao <hello@example.com>'),       // "Mae Tao <hello@YOURDOMAIN>"
   replyTo: env('REPLY_TO', ''),
   site: env('SITE_URL', '').replace(/\/$/, ''),                  // "https://YOURDOMAIN"
@@ -48,12 +50,12 @@ export async function db(path: string, init: RequestInit & { prefer?: string } =
   return text ? JSON.parse(text) : null;
 }
 
-export async function resend(path: '/emails' | '/emails/batch', payload: unknown) {
+export async function resend(path: string, payload?: unknown, method = 'POST') {
   if (!cfg.resendKey) throw new Error('RESEND_API_KEY is not set');
   const r = await fetch(`https://api.resend.com${path}`, {
-    method: 'POST',
+    method,
     headers: { Authorization: `Bearer ${cfg.resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: payload === undefined ? undefined : JSON.stringify(payload),
   });
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(`resend ${r.status}: ${JSON.stringify(body)}`);
@@ -75,3 +77,20 @@ export async function adminEmail(req: Request): Promise<string | null> {
 
 export const unsubLink = (token: string) => `${cfg.site}/unsubscribe/?t=${token}`;
 export const oneClickLink = (token: string) => `${fnUrl('unsubscribe')}?t=${token}`;
+
+// ---- Resend contacts (the newsletter list lives in a Resend segment) ----------
+// Only CONFIRMED readers are ever added, so pending readers can never get a broadcast.
+export async function addToResend(sub: { id: string; email: string; first_name?: string | null }) {
+  if (!cfg.segmentId) throw new Error('RESEND_SEGMENT_ID is not set');
+  try {
+    await resend('/contacts', { email: sub.email, first_name: sub.first_name || undefined, unsubscribed: false, segments: [{ id: cfg.segmentId }] });
+  } catch (_e) {
+    // already a contact (e.g. they came back): switch them back on
+    await resend(`/contacts/${encodeURIComponent(sub.email)}`, { unsubscribed: false, first_name: sub.first_name || undefined }, 'PATCH');
+  }
+  await db(`subscribers?id=eq.${sub.id}`, { method: 'PATCH', prefer: 'return=minimal', body: JSON.stringify({ resend_state: 'subscribed' }) });
+}
+export async function removeFromResend(sub: { id: string; email: string }) {
+  try { await resend(`/contacts/${encodeURIComponent(sub.email)}`, { unsubscribed: true }, 'PATCH'); } catch (e) { console.error('resend unsub', e); return; }
+  await db(`subscribers?id=eq.${sub.id}`, { method: 'PATCH', prefer: 'return=minimal', body: JSON.stringify({ resend_state: 'unsubscribed' }) });
+}

@@ -1,6 +1,6 @@
 // POST { token } from the /confirmed page.
 // Marks the reader confirmed, sends the welcome email with the reader magnet (once), returns the magnet link.
-import { cfg, db, json, preflight, resend, UUID_RE, unsubLink, oneClickLink } from '../_shared/util.ts';
+import { cfg, db, json, preflight, resend, UUID_RE, unsubLink, oneClickLink, addToResend } from '../_shared/util.ts';
 import { welcomeEmail } from '../_shared/email.js';
 
 Deno.serve(async (req) => {
@@ -15,8 +15,9 @@ Deno.serve(async (req) => {
 
     if (sub.status === 'pending') {
       await db(`subscribers?id=eq.${sub.id}&status=eq.pending`, { method: 'PATCH', prefer: 'return=minimal',
-        body: JSON.stringify({ status: 'confirmed', confirmed_at: new Date().toISOString() }) });
+        body: JSON.stringify({ status: 'confirmed', confirmed_at: new Date().toISOString(), unsub_reason: null }) });
     }
+    if (sub.resend_state !== 'subscribed') await addToResend(sub).catch((e) => console.error('resend contact', e));
     if (!sub.magnet_delivered) {
       // claim the delivery first so a double click can't send two welcome emails
       const claimed = await db(`subscribers?id=eq.${sub.id}&magnet_delivered=is.false`, { method: 'PATCH',

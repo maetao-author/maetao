@@ -2,7 +2,7 @@
 //  - POST { token } from the /unsubscribe page
 //  - POST ?t=TOKEN from Gmail/Apple's built-in "Unsubscribe" button (RFC 8058 List-Unsubscribe-Post)
 //  - GET  ?t=TOKEN redirects to the friendly /unsubscribe page, which then POSTs
-import { cfg, db, json, preflight, UUID_RE } from '../_shared/util.ts';
+import { cfg, db, json, preflight, UUID_RE, removeFromResend } from '../_shared/util.ts';
 
 Deno.serve(async (req) => {
   const pf = preflight(req); if (pf) return pf;
@@ -16,8 +16,9 @@ Deno.serve(async (req) => {
     if (!token && (req.headers.get('content-type') || '').includes('json')) token = (await req.json().catch(() => ({}))).token || '';
     if (!UUID_RE.test(token)) return json({ error: 'This link looks broken.' }, 400);
     const rows = await db(`subscribers?unsubscribe_token=eq.${token}`, { method: 'PATCH',
-      body: JSON.stringify({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString() }) });
+      body: JSON.stringify({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString(), unsub_reason: 'link' }) });
     if (!rows.length) return json({ error: 'I couldn’t find that subscription.' }, 404);
+    await removeFromResend(rows[0]);
     return json({ ok: true });
   } catch (e) {
     console.error(e);
