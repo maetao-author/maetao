@@ -64,7 +64,7 @@ const api = {
     return Object.fromEntries((data || []).map(r => [r.option_index, Number(r.votes)]));
   },
   async send(issueId, mode) {
-    if (DEMO) { await new Promise(r => setTimeout(r, 900)); return mode === 'test' ? { test_to: 'you' } : { sent: D.subscribers.filter(s => s.status === 'confirmed').length }; }
+    if (DEMO) { await new Promise(r => setTimeout(r, 900)); const n = D.subscribers.filter(s => s.status === 'confirmed').length; return mode === 'test' ? { test_to: 'you' } : { queued: n, days: Math.ceil(n / 90) }; }
     const r = await fetch(`${N.supabaseUrl.replace(/\/$/, '')}/functions/v1/send-newsletter`, { method: 'POST',
       headers: { apikey: N.anonKey, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ issue_id: issueId, mode }) });
@@ -323,7 +323,8 @@ function setupComposer() {
       Object.assign(cur, { status: 'sent', sent_at: new Date().toISOString() });
       if (DEMO) { await api.upd('issues', cur.id, { status: 'sent', sent_at: cur.sent_at }); D.newsletter_sends.unshift({ id: crypto.randomUUID(), subject: cur.subject, recipient_count: r.sent, sent_at: cur.sent_at }); }
       else await api.load();
-      NL.petals(innerWidth / 2, innerHeight / 2, 30); NL.toast(`sent to ${r.sent} readers 𖹭`);
+      NL.petals(innerWidth / 2, innerHeight / 2, 30);
+      NL.toast(r.queued !== undefined ? `on its way to ${r.queued} readers 𖹭 ${r.days > 1 ? 'spread over ' + r.days + ' days (Gmail limit)' : 'within the hour'}` : `sent to ${r.sent} readers 𖹭`);
       localStorage.removeItem('mt.draft'); renderAll(); load(D.issues.find(i => i.id === cur.id) || cur);
     } catch (e) { oops(e); }
     NL.busy(b, false);
@@ -379,7 +380,25 @@ function changed() {
   if (cur.status !== 'sent') { ls.set('mt.draft', cur); $('#saveSt').textContent = 'saved on this device · ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
   clearTimeout(prevT); prevT = setTimeout(preview, 140);
 }
+// a gentle spam check: things that push letters into spam or Promotions
+function spamCheck() {
+  const out = [], subj = cur.subject || '', all = [subj, ...cur.blocks.map(b => [b.title, b.text, b.button].join(' '))].join(' ');
+  if (!subj.trim()) out.push('add a subject line');
+  if (subj.length > 60) out.push('shorter subject (under 60 characters) reads better on phones');
+  if (/[A-Z]{5,}/.test(subj.replace(/\{\{[A-Z_]+\}\}/g, ''))) out.push('avoid ALL CAPS in the subject');
+  if ((subj.match(/!/g) || []).length > 1) out.push('one exclamation mark at most in the subject');
+  const words = ['free!!', 'act now', 'buy now', 'limited time', 'guarantee', 'winner', '100%', '$$$', 'click here', 'urgent', 'risk-free', 'cash'];
+  const hit = words.filter(w => all.toLowerCase().includes(w)); if (hit.length) out.push('spammy words: ' + hit.join(', '));
+  const links = (all.match(/https?:\/\//g) || []).length + cur.blocks.filter(b => b.link).length;
+  if (links > 8) out.push('fewer links (8 or less)');
+  if (!cur.blocks.some(b => b.type === 'letter' && (b.text || '').length > 80)) out.push('a few real sentences in your letter help a lot');
+  if (!cur.preheader.trim()) out.push('add preview text');
+  return out;
+}
 function preview() {
+  const sc = spamCheck();
+  $('#spamck').innerHTML = sc.length ? `${NL.icon('bell')} <b>spam check:</b> ${sc.map(esc).join(' · ')}` : `${NL.icon('check')} <b>spam check:</b> looks inbox-friendly`;
+  $('#spamck').className = 'spamck ' + (sc.length ? 'warn' : 'ok');
   const html = frame({ inner: renderBlocks(cur.blocks, { siteUrl: SITE, issueRef: 'preview' }), preheader: cur.preheader, siteUrl: SITE,
     unsubUrl: '#', address: '[your postal address is added here automatically]' }).replaceAll('{{FIRST_NAME}}', 'Avery').replaceAll('{{first_name}}', 'Avery');
   $('#prev').srcdoc = html.replace('<head>', '<head><base target="_blank">');

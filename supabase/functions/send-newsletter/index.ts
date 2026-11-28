@@ -1,45 +1,22 @@
-// Sends an issue as a Resend BROADCAST (marketing email: free for up to 1,000 contacts,
-// and it doesn't use up the 100/day transactional quota that confirm/welcome emails need).
+// Sends an issue.
+//  MAIL_PROVIDER=gmail (default): one personal email per confirmed reader goes into the mail queue,
+//    and Mae's Apps Script relay sends them from her Gmail within the daily limit.
+//  MAIL_PROVIDER=resend: one Resend Broadcast to the newsletter segment (needs her own domain).
 // Only Mae (logged in on /admin) or the scheduler can call this.
 //  POST { issue_id, mode: 'test' }  -> one transactional copy to Mae only
 //  POST { issue_id, mode: 'now' }   -> sync the list, then one broadcast to the newsletter segment
 //  POST { mode: 'scheduled' } + header x-cron-secret -> sends every issue whose time has come
-import { cfg, db, json, preflight, resend, adminEmail, addToResend, removeFromResend, UUID_RE } from '../_shared/util.ts';
-import { renderBlocks, frame } from '../_shared/email.js';
-
-const build = (issue: any, unsubUrl: string) => frame({
-  inner: renderBlocks(issue.blocks || [], { siteUrl: cfg.site, issueRef: `issue-${String(issue.id).slice(0, 8)}` }),
-  preheader: issue.preheader, siteUrl: cfg.site, address: cfg.address, unsubUrl,
-});
-// Resend fills the reader's first name in for each person
-const forBroadcast = (s: string) => s.replace(/\{\{\s*first_name\s*\}\}/gi, '{{{contact.first_name|friend}}}');
-const plain = (s: string, name = 'friend') => s.replace(/\{\{\s*first_name\s*\}\}/gi, name);
-
-// make the Resend list match the database before every send:
-// confirmed readers in, everyone else (pending, unsubscribed, bounced) out
-async function syncList() {
-  const join = await db(`subscribers?status=eq.confirmed&resend_state=neq.subscribed&select=id,email,first_name&limit=1000`);
-  for (const s of join) await addToResend(s);
-  const leave = await db(`subscribers?status=neq.confirmed&resend_state=eq.subscribed&select=id,email&limit=1000`);
-  for (const s of leave) await removeFromResend(s);
-  return (await db(`subscribers?status=eq.confirmed&select=id&limit=100000`)).length;
-}
-
-// authors can edit their swap until the letter goes out: always send their latest details
-async function freshSwaps(issue: any) {
-  const blocks = issue.blocks || [];
-  for (const blk of blocks) {
-    if (blk.type !== 'swap' || !(blk.swapIds || []).length) continue;
-    const rows = await db(`swaps?id=in.(${blk.swapIds.join(',')})&status=neq.declined&select=id,author_name,book_title,trope,release_date,blurb,cover_url,where_to_buy`);
-    blk.items = blk.swapIds.map((id: string) => rows.find((r: any) => r.id === id)).filter(Boolean);
-  }
-  return { ...issue, blocks };
-}
+import { cfg, db, json, preflight, resend, adminEmail, sendMail, unsubHeaders, UUID_RE } from '../_shared/util.ts';
+import { build, forBroadcast, plain, syncList, freshSwaps, queueIssue } from '../_shared/issues.ts';
 
 async function sendIssue(issue: any) {
   const claimed = await db(`issues?id=eq.${issue.id}&status=in.(draft,scheduled)`, { method: 'PATCH',
     body: JSON.stringify({ status: 'sending', updated_at: new Date().toISOString() }) });
   if (!claimed.length) return { skipped: true };
+  if (cfg.mailProvider !== 'resend') {
+    try { issue = await freshSwaps(issue); return await queueIssue(issue); }   // stays 'sending' until the queue is empty
+    catch (e) { await db(`issues?id=eq.${issue.id}`, { method: 'PATCH', prefer: 'return=minimal', body: JSON.stringify({ status: issue.status }) }); throw e; }
+  }
   try {
     if (!cfg.segmentId) throw new Error('RESEND_SEGMENT_ID is not set');
     issue = await freshSwaps(issue);
@@ -85,7 +62,7 @@ Deno.serve(async (req) => {
 
     if (b.mode === 'test') {
       const html = plain(build(await freshSwaps(issue), `${cfg.site}/unsubscribe/`), 'Mae');
-      await resend('/emails', { from: cfg.from, to: [me], subject: '[test] ' + plain(issue.subject, 'Mae'), html });
+      await sendMail({ kind: 'test', to: me, subject: '[test] ' + plain(issue.subject, 'Mae'), html, headers: unsubHeaders() });
       await db('newsletter_sends', { method: 'POST', prefer: 'return=minimal',
         body: JSON.stringify({ issue_id: issue.id, subject: issue.subject, body_html: html, recipient_count: 1, is_test: true }) });
       return json({ ok: true, test_to: me });

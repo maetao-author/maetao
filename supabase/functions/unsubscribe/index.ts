@@ -18,7 +18,9 @@ Deno.serve(async (req) => {
     const rows = await db(`subscribers?unsubscribe_token=eq.${token}`, { method: 'PATCH',
       body: JSON.stringify({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString(), unsub_reason: 'link' }) });
     if (!rows.length) return json({ error: 'I couldn’t find that subscription.' }, 404);
-    await removeFromResend(rows[0]);
+    if (cfg.mailProvider === 'resend') await removeFromResend(rows[0]);
+    // anything still waiting in the Gmail queue for them is cancelled
+    await db(`mail_queue?subscriber_id=eq.${rows[0].id}&status=eq.queued&kind=eq.newsletter`, { method: 'PATCH', prefer: 'return=minimal', body: JSON.stringify({ status: 'skipped', error: 'unsubscribed' }) }).catch(() => {});
     return json({ ok: true });
   } catch (e) {
     console.error(e);

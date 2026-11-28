@@ -128,8 +128,9 @@ export function welcomeEmail({ siteUrl, magnetUrl, magnetName, firstName, unsubU
   const inner = card(`${sticker("you're in")}${h(`welcome${firstName ? ', ' + firstName : ''}!`)}
       <p style="margin:0 0 14px">I'm so glad you're here. As promised, here's ${esc(magnetName)}, a little scene that only newsletter readers get.</p>
       ${pill(magnetUrl, 'read it now')}`) +
-    card(`${sticker('what to expect', C.sageXL, '#4f5342')}
-      <p style="margin:12px 0 0">Two letters a month: book news, polls where you pick what I write next, answers to your questions, and books from my author friends. No spam, ever.</p>`, C.blush) +
+    card(`${sticker('one small favour', C.sageXL, '#4f5342')}
+      <p style="margin:12px 0 10px"><b>Hit reply and tell me your favourite trope.</b> I read every answer, and replying tells your inbox my letters are welcome, so they don't end up in spam or Promotions.</p>
+      <p style="margin:0">Two letters a month: book news, polls where you pick what I write next, answers to your questions, and books from my author friends. No spam, ever.</p>`, C.blush) +
     card(`${sticker('the secret shelf', C.pink)}${h('your key is waiting', '#fff4f1')}
       <div style="color:#d8c4c7"><p style="margin:0 0 14px">Deleted scenes, art and the playlist live on my website's secret shelf, and confirming just unlocked it.</p></div>
       ${pill(siteUrl + '/#bonus', 'open the shelf', C.rose)}`, C.cocoa, '#fbeee9');

@@ -1,6 +1,6 @@
 // POST { email, first_name?, source?, website? (honeypot) }
 // Saves the reader as "pending" and sends the double opt-in email.
-import { cfg, db, json, preflight, resend, EMAIL_RE } from '../_shared/util.ts';
+import { cfg, db, json, preflight, sendMail, EMAIL_RE } from '../_shared/util.ts';
 import { confirmEmail } from '../_shared/email.js';
 
 const RESEND_COOLDOWN_MS = 10 * 60 * 1000;
@@ -30,8 +30,8 @@ Deno.serve(async (req) => {
       return json({ ok: true });                                     // already sent one a moment ago
     }
 
-    await resend('/emails', {
-      from: cfg.from, to: [email], reply_to: cfg.replyTo || undefined,
+    await sendMail({
+      kind: 'confirm', to: email, subscriber_id: sub.id,
       subject: 'one tap to confirm',
       html: confirmEmail({ siteUrl: cfg.site, confirmUrl: `${cfg.site}/confirmed/?t=${sub.confirm_token}`,
         firstName: sub.first_name, address: cfg.address, magnetName: cfg.magnetName }),

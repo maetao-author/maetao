@@ -238,3 +238,7 @@ body{background-attachment:fixed}
 .passes .r{background:rgba(255,253,251,.85)}
 .passes .av{background:linear-gradient(165deg,#fff,var(--blush))}
 @media (max-width:700px){#passForm{width:100%}#passForm .inp{width:100%!important}}
+.spamck{border-radius:20px;padding:11px 14px;margin:0 0 14px;font-size:13.5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+.spamck.warn{background:linear-gradient(165deg,#fdf0f1,var(--blush));color:#6b3b44}
+.spamck.ok{background:linear-gradient(165deg,#f1f2ea,var(--sage-xl));color:#4f5342}
+.spamck .i{width:18px;height:18px;vertical-align:-4px;margin-right:4px}

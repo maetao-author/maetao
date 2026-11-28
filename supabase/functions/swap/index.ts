@@ -4,7 +4,7 @@
 //  POST { action: 'get', token }         -> the author's own entry (for the edit page)
 //  POST { action: 'update', token, row } -> author edits their entry (until the letter goes out)
 //  POST { action: 'delete', token }      -> author removes their entry (until the letter goes out)
-import { cfg, db, json, preflight, resend, EMAIL_RE, UUID_RE } from '../_shared/util.ts';
+import { cfg, db, json, preflight, sendMail, EMAIL_RE, UUID_RE } from '../_shared/util.ts';
 import { esc } from '../_shared/email.js';
 
 const FIELDS: Record<string, number> = { author_name: 80, email: 254, book_title: 120, where_to_buy: 400, trope: 120, genre: 60, heat: 30,
@@ -40,8 +40,8 @@ async function mailEditLink(s: any, approved: boolean) {
     <p><a href="${link}" style="display:inline-block;background:#d98f97;color:#fff;border-radius:999px;padding:12px 20px;font-weight:800;text-decoration:none">edit my swap</a></p>
     <p style="color:#9a8a8d;font-size:13px">Please feature <b>Call It a Let</b> in your letter the same month: ${esc(cfg.site)}</p>
     </div><p style="color:#9a8a8d;font-size:12px;text-align:center">${esc(cfg.address)}</p></div>`;
-  await resend('/emails', { from: cfg.from, to: [s.email], reply_to: cfg.replyTo || undefined,
-    subject: approved ? `your swap is in: ${s.book_title}` : `got your swap request: ${s.book_title}`, html });
+  await sendMail({ kind: 'swap', to: s.email, html,
+    subject: approved ? `your swap is in: ${s.book_title}` : `got your swap request: ${s.book_title}` });
 }
 
 Deno.serve(async (req) => {

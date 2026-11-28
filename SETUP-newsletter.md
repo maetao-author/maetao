@@ -4,7 +4,18 @@ Everything is free to start: **GitHub Pages** (website), **Supabase** (database 
 **Firebase** stays only for your community board, as it is today. The newsletter doesn't use it.
 Set aside about an hour. Do the steps in order.
 
-### How sending is split (so the free limits never stop a send)
+### Sending from your Gmail (current setup, $0)
+Your letters go out from **mtao.author@gmail.com** through a small Google Apps Script relay (`apps-script/`) that runs inside your Google account:
+- every email waits in a queue in your database; the relay sends up to `MAIL_DAILY_CAP` a day (default 90, under Apps Script's 100/day limit for gmail.com accounts) and picks up the rest the next day
+- it proves it's you with Google's own sign-in token, so no password is copied anywhere
+- confirm and welcome emails always jump the queue; your website nudges the relay so they arrive within seconds
+- **to avoid spam:** double opt-in, one personal email per reader (never BCC), plain-text + HTML versions, Gmail's one-click unsubscribe headers, a calm sending pace, a welcome email that asks readers to reply, and a spam check in your composer
+
+Setup: script.google.com → New project → paste `apps-script/Code.gs` and `appsscript.json` (Project Settings → show manifest) → Services → add **Gmail API** → Deploy → New deployment → Web app (execute as me, anyone) → copy the web app link into the `MAIL_RELAY_URL` secret → Run ▸ `setup` → **Allow**.
+
+When you buy a domain later, set `MAIL_PROVIDER=resend` and follow the Resend steps below.
+
+### How sending is split with Resend (later, once you have a domain)
 | Email | Sent as | Resend free limit |
 |---|---|---|
 | confirm-your-email, welcome + bonus chapter, swap edit links, your test sends | **transactional** (`/emails`) | 100 a day, 3,000 a month |

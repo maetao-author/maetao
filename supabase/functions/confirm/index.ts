@@ -1,6 +1,6 @@
 // POST { token } from the /confirmed page.
 // Marks the reader confirmed, sends the welcome email with the reader magnet (once), returns the magnet link.
-import { cfg, db, json, preflight, resend, UUID_RE, unsubLink, oneClickLink, addToResend } from '../_shared/util.ts';
+import { cfg, db, json, preflight, sendMail, UUID_RE, unsubLink, unsubHeaders, addToResend } from '../_shared/util.ts';
 import { welcomeEmail } from '../_shared/email.js';
 
 Deno.serve(async (req) => {
@@ -17,19 +17,19 @@ Deno.serve(async (req) => {
       await db(`subscribers?id=eq.${sub.id}&status=eq.pending`, { method: 'PATCH', prefer: 'return=minimal',
         body: JSON.stringify({ status: 'confirmed', confirmed_at: new Date().toISOString(), unsub_reason: null }) });
     }
-    if (sub.resend_state !== 'subscribed') await addToResend(sub).catch((e) => console.error('resend contact', e));
+    if (cfg.mailProvider === 'resend' && sub.resend_state !== 'subscribed') await addToResend(sub).catch((e) => console.error('resend contact', e));
     if (!sub.magnet_delivered) {
       // claim the delivery first so a double click can't send two welcome emails
       const claimed = await db(`subscribers?id=eq.${sub.id}&magnet_delivered=is.false`, { method: 'PATCH',
         body: JSON.stringify({ magnet_delivered: true }) });
       if (claimed.length) {
         try {
-          await resend('/emails', {
-            from: cfg.from, to: [sub.email], reply_to: cfg.replyTo || undefined,
+          await sendMail({
+            kind: 'welcome', to: sub.email, subscriber_id: sub.id,
             subject: `you're in! here's ${cfg.magnetName}`,
             html: welcomeEmail({ siteUrl: cfg.site, magnetUrl: cfg.magnetUrl, magnetName: cfg.magnetName,
               firstName: sub.first_name, unsubUrl: unsubLink(sub.unsubscribe_token), address: cfg.address }),
-            headers: { 'List-Unsubscribe': `<${oneClickLink(sub.unsubscribe_token)}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
+            headers: unsubHeaders(sub.unsubscribe_token),
           });
         } catch (e) {
           await db(`subscribers?id=eq.${sub.id}`, { method: 'PATCH', prefer: 'return=minimal', body: JSON.stringify({ magnet_delivered: false }) });
