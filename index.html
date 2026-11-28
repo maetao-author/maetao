@@ -1645,8 +1645,9 @@ function renderRest(){
   $('#bio').innerHTML = S.bio.map(p => `<p>${esc(p)}</p>`).join('');
   renderLoves();
   if (imgSrc(S.photo)) { $('#portrait').innerHTML = `<img src="${esc(imgSrc(S.photo))}" alt="${esc(S.name)}" loading="lazy">`; $('#ptag').hidden = false; }
-  $('#quotes').innerHTML = (S.quotes || []).map((q, i) => `<div class="card quote rv" style="${i % 2 ? 'background:var(--sage-xl)' : 'background:var(--blush)'}">“${esc(q.text)}”<span class="who">${esc(q.who)}</span></div>`).join('');
-  if (!(S.quotes || []).length) $('#reviews').style.display = 'none';
+  const realQuotes = (S.quotes || []).filter(q => q && q.text && !/^paste /i.test(q.text));   // placeholders stay hidden until real quotes are pasted in
+  $('#quotes').innerHTML = realQuotes.map((q, i) => `<div class="card quote rv" style="${i % 2 ? 'background:var(--sage-xl)' : 'background:var(--blush)'}">“${esc(q.text)}”<span class="who">${esc(q.who)}</span></div>`).join('');
+  if (!realQuotes.length) $('#reviews').style.display = 'none';
   $('#quotesFrom').textContent = S.quotesFrom ? 'from ' + S.quotesFrom + ' ♡' : '';
 
   const today = new Date().toISOString().slice(0, 10);
