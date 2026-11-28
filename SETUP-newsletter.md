@@ -42,7 +42,7 @@ Until step 6 is done, every page runs in **preview mode** with sample data, so y
 
 ## 1 · Supabase (database)
 1. supabase.com → New project (free). Pick the region closest to your readers.
-2. **SQL Editor** → paste all of `supabase/migrations/0001_newsletter.sql` → Run. Then do the same with `0002_broadcasts_and_self_serve_swaps.sql`.
+2. **SQL Editor** → run each file in `supabase/migrations/` in order (0001 → 0004). Already done for your project on Nov 28.
 3. In the SQL editor run: `insert into public.admins(email) values ('mtao.author@gmail.com');`
 4. **Authentication → Users → Add user**: `mtao.author@gmail.com` with a strong password, and tick *auto-confirm*.
 5. **Leave "Allow new users to sign up" ON**: your community board uses this same project for reader accounts. Your desk is still yours alone: the database only lets emails on the `admins` list read anything, so a reader's account sees nothing there.
