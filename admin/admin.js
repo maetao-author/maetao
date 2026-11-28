@@ -87,6 +87,10 @@ function showLogin() {
   $('#login').hidden = false;
   let mode = 'pw';
   $$('.tabsw button').forEach(b => b.onclick = () => { mode = b.dataset.m; $$('.tabsw button').forEach(x => x.classList.toggle('on', x === b)); $('#pwRow').hidden = mode !== 'pw'; });
+  $('#lgoogle').onclick = async () => {
+    const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+    if (error) NL.toast(error.message);
+  };
   $('#loginForm').onsubmit = async e => {
     e.preventDefault(); const btn = $('#lgo'); NL.busy(btn, true);
     try {

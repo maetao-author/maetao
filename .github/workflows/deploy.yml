@@ -9,44 +9,13 @@ name: deploy
 
 on:
   push:
-    branches: [main, newsletter-app]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
-  site:
-    if: github.ref == 'refs/heads/main'      # the website only goes live from main
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Safety check (no secret keys in the website)
-        run: |
-          if grep -rEn "re_[A-Za-z0-9]{20,}|service_role|sb_secret_" --include=*.html --include=*.js . | grep -v node_modules | grep -v "service_role key" | grep -v "SERVICE_ROLE_KEY" ; then
-            echo "A secret-looking key was found in the site files. Not deploying."; exit 1; fi
-      - name: Build the site folder
-        run: |
-          mkdir -p _site/supabase/functions/_shared
-          cp -r index.html email nl newsletter thanks confirmed unsubscribe swap admin _site/
-          [ -f CNAME ] && cp CNAME _site/ || true
-          cp supabase/functions/_shared/email.js _site/supabase/functions/_shared/
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
   functions:
     runs-on: ubuntu-latest
     env:
