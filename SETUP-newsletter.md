@@ -34,7 +34,7 @@ Until step 6 is done, every page runs in **preview mode** with sample data, so y
 2. **SQL Editor** → paste all of `supabase/migrations/0001_newsletter.sql` → Run. Then do the same with `0002_broadcasts_and_self_serve_swaps.sql`.
 3. In the SQL editor run: `insert into public.admins(email) values ('mtao.author@gmail.com');`
 4. **Authentication → Users → Add user**: `mtao.author@gmail.com` with a strong password, and tick *auto-confirm*.
-5. **Authentication → Sign In / Providers**: turn **off** "Allow new users to sign up". Only you can log in.
+5. **Leave "Allow new users to sign up" ON**: your community board uses this same project for reader accounts. Your desk is still yours alone: the database only lets emails on the `admins` list read anything, so a reader's account sees nothing there.
 6. **Authentication → URL Configuration**: Site URL = `https://YOURDOMAIN`, and add `https://YOURDOMAIN/admin/` to Redirect URLs (for the "email me a link" login).
 
 ## 2 · Resend (sending) + your domain

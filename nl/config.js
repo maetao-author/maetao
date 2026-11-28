@@ -3,9 +3,9 @@
    database rules allow (sign up, vote, ask a question, request a swap).
    NEVER paste the service_role key or the Resend API key here. Those live in Supabase secrets. */
 window.MAE_NL = {
-  supabaseUrl: "",          // e.g. "https://abcdxyz.supabase.co"   (Supabase → Project Settings → API)
-  anonKey: "",              // the "anon" / "publishable" key        (same page)
-  siteUrl: "",              // e.g. "https://maetao.com" (blank = this website)
+  supabaseUrl: "https://sfpllnkugewuzmxqdwzr.supabase.co",   // maetao-author's Project
+  anonKey: "sb_publishable_8bVe37AzF4s_beM7EDXcdA_xplabm14", // publishable key: safe in the browser (RLS protects the data)
+  siteUrl: "https://maetao-author.github.io/maetao",          // change to your own domain once you have one
 
   magnet: {
     name: "Stephen's first-date chapter",

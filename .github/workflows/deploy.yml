@@ -9,7 +9,7 @@ name: deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, newsletter-app]
   workflow_dispatch:
 
 permissions:
@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   site:
+    if: github.ref == 'refs/heads/main'      # the website only goes live from main
     runs-on: ubuntu-latest
     environment:
       name: github-pages

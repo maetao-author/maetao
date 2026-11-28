@@ -47,6 +47,7 @@ grant select, update, delete on public.subscribers to authenticated;
 drop policy if exists "public can sign up" on public.subscribers;
 create policy "public can sign up" on public.subscribers
   for insert to anon, authenticated with check (status = 'pending' and magnet_delivered = false);
+drop policy if exists "admin reads subscribers" on public.subscribers;
 create policy "admin reads subscribers"   on public.subscribers for select to authenticated using (public.is_admin());
 drop policy if exists "admin updates subscribers" on public.subscribers;
 create policy "admin updates subscribers" on public.subscribers for update to authenticated using (public.is_admin()) with check (public.is_admin());
